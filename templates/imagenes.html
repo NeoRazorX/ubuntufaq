@@ -1,0 +1,84 @@
+{% spaceless %}
+{% include "cabecera.html" %}
+
+<div class="preguntas">
+
+{% if imagenes %}
+{% for imagen in imagenes %}
+<div class="galeria">
+<table>
+<tr>
+    <td><a href="{{ imagen.url }}"><img src="{{ imagen.url }}" height="200" alt="{{ imagen.descripcion|truncatewords:5 }}" title="{{ imagen.descripcion|capfirst }}"/></a></td>
+    <td>
+    <div class="comentario">
+        {{ imagen.autor.email|avatar:40 }}
+        <a href="/story/{{ imagen.key }}"><img src="/img/comments.png" alt="comentarios"/></a>
+        {% if imagen.comentarios %}
+            {{ imagen.comentarios }}
+        {% endif %}
+        <br/>
+        {% if imagen.autor %}
+            <a href="/u/{{ imagen.autor.email|urlencode }}">{{ imagen.autor.nickname|cortamail }}</a> {{ imagen.puntos }}
+        {% else %}
+            an&oacute;nimo:
+        {% endif %}
+        <br/>
+        {{ imagen.creado|date:"d/m/Y H:i" }}
+        <br/>
+        {{ imagen.descripcion|capfirst|urlizetrunc:30 }}
+    </div>
+    </td>
+</tr>
+</table>
+</div>
+{% endfor %}
+{% else %}
+    <div class="mensaje">sin resultados.</div>
+{% endif %}
+
+<table>
+{% ifnotequal paginas 1 %}
+<tr>
+<td></td>
+<td colspan="2">
+    <ul class="paginacion">
+        <li>P&aacute;ginas:</li>
+    {% for pag in rango_paginas %}
+        {% ifequal pag pag_actual %}
+            <li id="actual"><a href="/images/{{pag}}">{{pag}}</a></li>
+        {% else %}
+            <li><a href="/images/{{pag}}">{{pag}}</a></li>
+        {% endifequal %}
+    {% endfor %}
+    </ul>
+</td>
+</tr>
+{% endifnotequal %}
+
+<tr>
+<td class="avatar"><br/><br/>{{ usuario.email|avatar:40 }}</td>
+<td valign="top">
+    <a name="nuevo-enlace"></a>
+    <div class="formulario">
+    <div class="titulo">Compartir imagen:</div>
+    <form name="enlace" action="/add_e" method="post">
+        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
+        <br/>
+        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
+        <br/>{{ captcha }}
+        <input type="button" name="enviar" value="enviar" onclick="enviar_enlace()"/>
+    </form>
+    </div>
+</td>
+<td valign="top">
+<br/>
+<b>Comparte:</b><br/>
+- Una foto, una imagen o una captura de pantalla, puedes usar el servicio <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.
+</td>
+</tr>
+</table>
+
+</div>
+
+{% include "pie.html" %}
+{% endspaceless %}

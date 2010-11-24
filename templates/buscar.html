@@ -1,0 +1,53 @@
+{% spaceless %}
+{% include "cabecera.html" %}
+
+<div class="preguntas">
+
+{% ifequal vista '404' %}
+<center>
+    {% ifequal cerror '503' %}
+        <img src="/img/nuclear-explosion.gif" alt="explosi&oacute;n"/>
+    {% endifequal %}
+    <h1>{{ error|urlize }}</h1>
+</center>
+{% endifequal %}
+
+<div id="cse" style="width: 100%;">Cargando...</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+  google.setOnLoadCallback(function() {
+    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.setAutoComplete(true);
+    customSearchControl.draw('cse', options);
+  }, true);
+</script>
+
+{% ifequal vista 'nueva' %}
+<div class="formulario">
+    <div class="titulo">Nueva pregunta:</div>
+    <ul>
+        <li>Comprueba que la pregunta que quieres hacer no haya sido publicada previamente.</li>
+        <li>Utiliza un <b>t&iacute;tulo</b> descriptivo.</li>
+        <li>Cuanto m&aacute;s detallada sea la <b>descripci&oacute;n</b> de la pregunta, m&aacute;s f&aacute;cil y r&aacute;pido te contestar&aacute;n. No olvides decir qu&eacute; <b>versi&oacute;n de Ubuntu</b> est&aacute;s usando.</li>
+        <li>Las <b>etiquetas</b> se usan la para facilitar las búsquedas, sep&aacute;ralas mediante comas.</li>
+        <li>Repasa la ortograf&iacute;a.</li>
+        <li>Se te notificar&aacute; por email la primera respuesta.</li>
+    </ul>
+    <form name="pregunta" action="/add_p" method="post">
+        <input id="titulo" type="text" name="titulo" size="50" maxlength="100" value="Titulo"/>
+        <textarea name="contenido" rows="6" cols="60">Descripcion</textarea>
+        <br/>
+        Etiquetas: <input type="text" name="tags" size="30" maxlength="100" value="ubuntu"/>
+        <br/>{{ captcha }}
+        <input type="button" name="enviar" value="enviar" onclick="enviar_pregunta()"/>
+    </form>
+</div>
+{% endifequal %}
+
+</div>
+
+{% include "pie.html" %}
+{% endspaceless %}

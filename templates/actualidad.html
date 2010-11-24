@@ -1,0 +1,96 @@
+{% spaceless %}
+{% include "cabecera.html" %}
+
+<div class="preguntas">
+<table>
+
+{% if enlaces %}
+    {% for enlace in enlaces %}
+    <tr>
+    <td class="avatar">{{ enlace.autor.email|avatar:40 }}</td>
+    <td>
+    <div class="info_respuesta">
+        {{ enlace.clicks }} clicks |
+        {{ enlace.creado|date:"d/m/Y H:i" }} |
+    {% if enlace.autor %}
+        <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
+        {{ enlace.puntos }}
+    {% else %}
+        an&oacute;nimo:
+    {% endif %}
+    </div>
+    <div class="respuesta">
+        {{ enlace.descripcion|capfirst }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a>
+    </div>
+    </td>
+    <td width="150" valign="bottom">
+    {% ifequal enlace.tipo_enlace 'imagen' %}
+        <a href="/images"><img src="/img/photo.png" alt="imagen"/></a>
+    {% endifequal %}
+    {% ifequal enlace.tipo_enlace 'youtube' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    {% ifequal enlace.tipo_enlace 'vimeo' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    {% ifequal enlace.tipo_enlace 'vhtml5' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    
+    {% if enlace.comentarios %}
+        <a href="/de/{{ enlace.key }}"><img src="/img/comments.png" alt="comentarios"/></a>
+        {{ enlace.comentarios }}
+    {% endif %}
+    </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <tr><td></td><td><div class="mensaje">sin resultados.</div></td></tr>
+{% endif %}
+
+{% ifnotequal paginas 1 %}
+<tr>
+<td></td>
+<td colspan="2">
+    <ul class="paginacion">
+        <li>P&aacute;ginas:</li>
+    {% for pag in rango_paginas %}
+        {% ifequal pag pag_actual %}
+            <li id="actual"><a href="/actualidad/{{pag}}">{{pag}}</a></li>
+        {% else %}
+            <li><a href="/actualidad/{{pag}}">{{pag}}</a></li>
+        {% endifequal %}
+    {% endfor %}
+    </ul>
+</td>
+</tr>
+{% endifnotequal %}
+
+<tr>
+<td class="avatar"><br/><br/>{{ usuario.email|avatar:40 }}</td>
+<td valign="top">
+    <a name="nuevo-enlace"></a>
+    <div class="formulario">
+    <div class="titulo">Compartir enlace:</div>
+    <form name="enlace" action="/add_e" method="post">
+        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
+        <br/>
+        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
+        <br/>{{ captcha }}
+        <input type="button" name="enviar" value="enviar" onclick="enviar_enlace()"/>
+    </form>
+    </div>
+</td>
+<td valign="top">
+<br/>
+<b>Comparte:</b><br/>
+- Una noticia, un art&iacute;culo o un blog.<br/>
+- Un v&iacute;deo de <a href="http://www.youtube.com" target="_Blank">youtube</a>, <a href="http://www.vimeo.com" target="_Blank">vimeo</a> o incluso v&iacute;deos en formato OGM o WEB.<br/>
+- Una imagen o una captura de pantalla, puedes usar el servicio <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.
+</td>
+</tr>
+</table>
+</div>
+
+{% include "pie.html" %}
+{% endspaceless %}

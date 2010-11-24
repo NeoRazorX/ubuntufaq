@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es" lang="es">
+<head>
+    <title>{{ titulo|truncatewords:10 }}</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="keywords" content="{{ tags }}" />
+    <meta name="description" content="{{ descripcion|addslashes|truncatewords:50 }}" />
+    <meta name="Robots" content="all" />
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/estilo.css" />
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss" />
+    <script type="text/javascript">
+        <!--
+        function enviar_pregunta()
+        {
+            var titulo = document.pregunta.titulo.value;
+            var contenido = document.pregunta.contenido.value;
+            var etiquetas = document.pregunta.tags.value;
+            var mensaje;
+            var continuar = false;
+            
+            if(titulo != '' && titulo != 'Titulo')
+            {
+                if(contenido != '' && contenido != 'Descripcion')
+                {
+                    if(etiquetas != '') { continuar = true; }
+                    else
+                    {
+                        mensaje = 'Debes modificar las etiquetas de la pregunta';
+                        document.pregunta.tags.focus();
+                        document.pregunta.tags.select();
+                    }
+                }
+                else
+                {
+                    mensaje = 'Debes modificar la descripción de la pregunta';
+                    document.pregunta.contenido.focus();
+                    document.pregunta.contenido.select();
+                }
+            }
+            else
+            {
+                mensaje = 'Debes modificar el título de la pregunta';
+                document.pregunta.titulo.focus();
+                document.pregunta.titulo.select();
+            }
+            
+            if(continuar) { document.pregunta.submit(); }
+            else { alert( mensaje ); }
+        }
+        
+        function enviar_respuesta()
+        {
+            var respuesta = document.respuesta.contenido.value;
+            
+            if(respuesta != '' && respuesta != 'Utiliza un lenguaje claro y conciso.') {
+                document.respuesta.submit();
+            }
+            else
+            {
+                alert('Debes modificar la respuesta');
+                document.respuesta.contenido.focus();
+                document.respuesta.contenido.select();
+            }
+        }
+        
+        function enviar_enlace()
+        {
+            var descripcion = document.enlace.descripcion.value;
+            var url = document.enlace.url.value;
+            var mensaje;
+            var continuar = false;
+            
+            if(descripcion != '' && descripcion != 'Descripcion (450 caracteres max.)' && descripcion.length <= 450)
+            {
+                if(url != '' && url != 'http://') { continuar = true; }
+                else
+                {
+                    mensaje = 'Debes modificar la URL';
+                    document.enlace.url.focus();
+                    document.enlace.url.select();
+                }
+            }
+            else
+            {
+                mensaje = 'Debes modificar la descripción del enlace, recuerda que hay un máximo de 450 caracteres. Actual=' + descripcion.length;
+                document.enlace.descripcion.focus();
+                document.enlace.descripcion.select();
+            }
+            
+            if(continuar) { document.enlace.submit(); }
+            else { alert( mensaje ); }
+        }
+        
+        function enviar_comentario()
+        {
+            var contenido = document.comentario.contenido.value;
+            var mensaje;
+            var continuar = false;
+            
+            if(contenido != '' && contenido != 'Deja un comentario, es gratis!') { continuar = true; }
+            else
+            {
+                mensaje = '¡Debes escribir algo!';
+                document.comentario.contenido.focus();
+                document.comentario.contenido.select();
+            }
+            
+            if(continuar) { document.comentario.submit(); }
+            else { alert( mensaje ); }
+        }
+        
+        function borrar_pregunta(id)
+        {
+            if( confirm('¿Realmente desea eliminar la pregunta?') )
+            {
+                window.location.href = '/del_p?id=' + id;
+            }
+        }
+        
+        function borrar_respuesta(id, r)
+        {
+            if( confirm('¿Realmente desea eliminar la respuesta?') )
+            {
+                window.location.href = '/del_r?id=' + id + '&r=' + r;
+            }
+        }
+        
+        function borrar_enlace(id)
+        {
+            if( confirm('¿Realmente desea eliminar el enlace?') )
+            {
+                window.location.href = '/del_e?id=' + id;
+            }
+        }
+        
+        function borrar_comentario(id, c)
+        {
+            if( confirm('¿Realmente desea eliminar el comentario?') )
+            {
+                window.location.href = '/del_c?id=' + id + '&c=' + c;
+            }
+        }
+        //-->
+    </script>
+</head>
+<body>
+<div class="cabecera"><a title="Respuestas r&aacute;pidas para tus dudas sobre Ubuntu" href="http://www.ubufaq.com">Ubuntu <s>FUCK</s> FAQ</a></div>
+<ul class="cabecera">
+{% ifequal vista 'inicio' %}
+    <li id="actual"><a href="/inicio">inicio</a></li>
+{% else %}
+    <li><a href="/inicio">inicio</a></li>
+{% endifequal %}
+{% ifequal vista 'actualidad' %}
+    <li id="actual"><a href="/actualidad">actualidad</a></li>
+{% else %}
+    <li><a href="/actualidad">actualidad</a></li>
+{% endifequal %}
+{% ifequal vista 'populares' %}
+    <li id="actual"><a href="/populares">populares</a></li>
+{% else %}
+    <li><a href="/populares">populares</a></li>
+{% endifequal %}
+{% ifequal vista 'sin-solucionar' %}
+    <li id="actual"><a href="/sin-solucionar">sin solucionar</a></li>
+{% else %}
+    <li><a href="/sin-solucionar">sin solucionar</a></li>
+{% endifequal %}
+{% ifequal vista 'imagenes' %}
+    <li id="actual"><a href="/images">im&aacute;genes</a></li>
+{% endifequal %}
+{% ifequal vista 'buscar' %}
+    <li id="actual"><a href="/buscar">buscar</a></li>
+{% else %}
+    <li><a href="/buscar">buscar</a></li>
+{% endifequal %}
+{% ifequal vista 'ayuda' %}
+    <li id="actual"><a href="/ayuda">ayuda</a></li>
+{% else %}
+    <li><a href="/ayuda">ayuda</a></li>
+{% endifequal %}
+
+{% if formulario %}
+    <li>|</li>
+    {% ifequal vista 'mi-perfil' %}
+    <li id="actual"><a href="{{ mi_perfil|urlencode }}">mi perfil</a></li>
+    {% else %}
+    <li><a href="{{ mi_perfil|urlencode }}">mi perfil</a></li>
+    {% endifequal %}
+    <li><a href="{{ url }}">{{ url_linktext }}</a></li>
+{% else %}
+    <li>|</li>
+    <li><a href="{{ url }}">{{ url_linktext }}</a></li>
+{% endif %}
+</ul>

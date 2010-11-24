@@ -1,0 +1,12 @@
+{% spaceless %}
+<?xml version="1.0" ?>
+<root>
+{% for enlace in enlaces %}
+    <item>
+        <link>http://www.ubufaq.com/story/{{ enlace.key }}</link>
+        <source>{{ enlace.url }}</source>
+        <pubDate>{{ enlace.fecha|date:"Y-m-d" }}</pubDate>
+    </item>
+{% endfor %}
+</root>
+{% endspaceless %}

@@ -1,0 +1,104 @@
+{% spaceless %}
+{% include "cabecera.html" %}
+
+<div class="preguntas">
+<table class="widgets">
+<tr>
+<td class="preguntas">
+
+{% ifequal vista 'inicio' %}
+<div class="mensaje">¿Tienes alg&uacute;n problema con Ubuntu? usa el formulario de <a href="/nueva">nueva pregunta</a>.</div>
+{% endifequal %}
+
+{% if preguntas %}
+    {% for pregunta in preguntas %}
+        <div class="pregunta">
+        <div class="titulo">
+            <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|capfirst }}</a>
+            <span>{{ pregunta.estado|estado_pregunta }}</span>
+        </div>
+        {{ pregunta.contenido|capfirst|truncatewords:30 }}
+        <br/>
+        <span>
+        <img src="/img/bocadillo.gif" alt="bocadillo"/>{{ pregunta.respuestas }} respuestas |
+        {{ pregunta.visitas }} visitas |
+        {{ pregunta.creado|date:"d/m/Y H:i" }} |
+        etiquetas: {{ pregunta.tags }} |
+    {% if pregunta.autor %}
+        escrito por <a href="/u/{{pregunta.autor.email|urlencode}}">{{ pregunta.autor.nickname|cortamail }}</a>
+        {{ pregunta.puntos }}
+    {% else %}
+        escrito por an&oacute;nimo
+    {% endif %}
+        </span>
+        </div>
+    {% endfor %}
+{% else %}
+    <div class="mensaje">Sin resultados.</div>
+{% endif %}
+
+{% ifnotequal paginas 1 %}
+    <ul class="paginacion">
+        <li>P&aacute;ginas:</li>
+    {% for pag in rango_paginas %}
+        {% ifequal pag pag_actual %}
+            <li id="actual"><a href="/{{vista}}/{{pag}}">{{pag}}</a></li>
+        {% else %}
+            <li><a href="/{{vista}}/{{pag}}">{{pag}}</a></li>
+        {% endifequal %}
+    {% endfor %}
+    </ul>
+{% endifnotequal %}
+
+{% if preguntas %}
+{% ifequal vista 'sin-solucionar' %}
+    <br/><center><a href="/ayuda#gatitos"><img src="/img/banner_gatitos.png" alt="gatitos"/></a></center>
+{% endifequal %}
+{% endif %}
+
+</td>
+<td class="widget">
+
+{% if enlaces %}
+    {% ifequal vista 'inicio' %}
+    <center>{{ vista|randomsg }}</center>
+    {% endifequal %}
+    
+    <div class="ultimas_respuestas">Actualidad:</div>
+    {% for enlace in enlaces %}
+    <div class="info_respuesta">
+        {{ enlace.creado|date:"d/m/Y H:i" }} |
+    {% if enlace.autor %}
+        <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
+        {{ enlace.puntos }}
+    {% else %}
+        an&oacute;nimo:
+    {% endif %}
+    </div>
+    <div class="respuesta">{{ enlace.descripcion|capfirst|truncatewords:20 }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
+    {% endfor %}
+{% endif %}
+
+{% if respuestas %}
+    <div class="ultimas_respuestas">&Uacute;ltimas respuestas:</div>
+    {% for respuesta in respuestas %}
+        <div class="info_respuesta">
+        <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{respuesta.fecha|date:"d/m/Y H:i"}}</a> -
+    {% if respuesta.autor %}
+        <a href="/u/{{respuesta.autor.email|urlencode}}">{{ respuesta.autor.nickname|cortamail }}</a>
+        {{ respuesta.puntos }}
+    {% else %}
+        an&oacute;nimo dice:
+    {% endif %}
+        </div>
+        <div class="respuesta">{{respuesta.contenido|capfirst|truncatewords:25|urlizetrunc:30}}</div>
+    {% endfor %}
+{% endif %}
+
+</td>
+</tr>
+</table>
+</div>
+
+{% include "pie.html" %}
+{% endspaceless %}

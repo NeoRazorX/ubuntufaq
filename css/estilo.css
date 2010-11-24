@@ -1,0 +1,344 @@
+body {
+    margin: 0px;
+    margin-bottom: 40px;
+    padding-left: 3%;
+    padding-right: 3%;
+    background-image: url(/img/body_bg.png);
+    background-repeat-x: initial;
+    background-repeat-y: initial;
+    background-attachment: initial;
+    background-position-x: initial;
+    background-position-y: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: white;
+    font-size: 14px;
+}
+
+a {
+    color: #DD4814;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+textarea {
+    width: 100%;
+    border: 1px solid black;
+}
+
+input {
+    border: 1px solid black;
+}
+
+input#titulo {
+    width: 100%;
+}
+
+img {
+    vertical-align: middle;
+    border-width: 0;
+}
+
+img#enlace {
+    border: 3px double #3C3C3C;
+    width: 80%;
+}
+
+div.cabecera {
+    background-color: #DD4814;
+    background-image: url(/img/header_bg.png);
+    background-repeat-x: initial;
+    background-repeat-y: initial;
+    background-attachment: initial;
+    background-position-x: initial;
+    background-position-y: initial;
+    background-origin: initial;
+    background-clip: initial;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    letter-spacing: 0.5em;
+    text-align: center;
+    border-left: 2px outset #3C3C3C;
+    border-right: 2px outset #3C3C3C;
+}
+
+div.cabecera a {
+    color: black;
+    font-weight: bolder;
+}
+
+ul.cabecera {
+    list-style: none;
+    height: 30px;
+    margin: 0px;
+    padding-left: 10px;
+    background-color: #3C3C3C;
+    border-left: 2px outset #3C3C3C;
+    border-right: 2px outset #3C3C3C;
+    font-size: 15px;
+}
+
+ul.cabecera li {
+    float: left;
+    padding-left: 3px;
+    padding-right: 3px;
+    margin-top: 5px;
+    margin-right: 5px;
+}
+
+ul.cabecera li#actual {
+    background-color: white;
+    border: 1px inset white;
+}
+
+ul.cabecera a {
+    color: white;
+}
+
+ul.cabecera li#actual a {
+    color: black;
+}
+
+div.preguntas {
+    background-color: white;
+    padding: 10px;
+    padding-bottom: 20px;
+    min-height: 400px;
+    border-left: 2px outset #3C3C3C;
+    border-right: 2px outset #3C3C3C;
+}
+
+table.widgets {
+    width: 100%;
+    margin: 0px;
+}
+
+table.widgets td.preguntas {
+    vertical-align: top;
+}
+
+table.widgets td.widget {
+    vertical-align: top;
+    width: 30%;
+}
+
+div.pregunta {
+    border: 1px dotted white;
+    margin: 5px;
+    padding: 5px;
+}
+
+div.pregunta:hover {
+    background-color: #EEEEEE;
+    border: 1px outset #E4E4E4;
+}
+
+div.pregunta span {
+    font-size: 12px;
+}
+
+div.formulario {
+    margin: 10px;
+    padding: 5px;
+}
+
+div.respuestas {
+    background-color: white;
+    padding-top: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 20px;
+    min-height: 400px;
+    border-left: 2px outset #3C3C3C;
+    border-right: 2px outset #3C3C3C;
+}
+
+div.info_respuesta {
+    font-size: 12px;
+    margin-top: 8px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 2px;
+    padding: 0px;
+}
+
+div.respuesta {
+    background-color: #F7F7F7;
+    border: 1px outset #E4E4E4;
+    margin-top: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 0px;
+    padding: 5px;
+}
+
+div.respuesta_d {
+    background-color: #feffc0;
+    border: 2px outset #feffc0;
+    margin-top: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 0px;
+    padding: 5px;
+}
+
+div.comentario {
+    background-color: #EFEFEF;
+    border: 2px outset #DEDEDE;
+    margin-top: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 0px;
+    padding: 5px;
+    font-size: 17px;
+}
+
+div.mensaje {
+    background-color: #feffc0;
+    border: 2px outset #e1e16e;
+    margin-top: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    padding: 5px;
+    font-size: 17px;
+}
+
+div.edicion_respuesta {
+    text-align: right;
+    font-size: 12px;
+    margin-top: 1px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 0px;
+    padding: 0px;
+}
+
+div.ultimas_respuestas {
+    background-color: #3C3C3C;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 0px;
+    padding: 5px;
+    color: white;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-align: center;
+    border: 1px outset #3C3C3C;
+}
+
+div.detalle_pregunta {
+    min-height: 100px;
+}
+
+div.detalle_pregunta span {
+    font-size: 12px;
+}
+
+div.titulo {
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 0.15em;
+    border-bottom: 1px solid #3C3C3C;
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+}
+
+div.avatar {
+    text-align: center;
+    font-size: 15px;
+    padding: 2px;
+    padding-bottom: 0px;
+    margin: 0px;
+}
+
+div.avatar img {
+    margin-bottom: 2px;
+}
+
+div.avatar a {
+    color: black;
+}
+
+td.avatar {
+    vertical-align: top;
+    padding-top: 14px;
+}
+
+ul.paginacion {
+    padding-left: 50px;
+    list-style: none;
+    height: 15px;
+    margin-top: 10px;
+}
+
+ul.paginacion li {
+    background-color: #3C3C3C;
+    border: 1px outset #3C3C3C;
+    color: white;
+    float: left;
+    margin-right: 15px;
+    padding-left: 5px;
+    padding-right: 5px;
+    
+}
+
+ul.paginacion li#actual {
+    background-color: #DD4814;
+    border: 1px outset #DD4814;
+}
+
+ul.paginacion li a {
+    color: white;
+}
+
+ul.social {
+    list-style: none;
+    height: 20px;
+    margin-top: 5px;
+    padding-left: 5px;
+}
+
+ul.social li {
+    float: left;
+    margin-right: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+div.galeria:hover {
+    background-color: #E7E7E7;
+}
+
+div.pie {
+    background-color: white;
+    text-align: center;
+    padding-top: 5px;
+    padding-right: 10px;
+    padding-bottom: 10px;
+    border-left: 2px outset #3C3C3C;
+    border-right: 2px outset #3C3C3C;
+    border-bottom: 2px outset #3C3C3C;
+    margin-bottom: 10px;
+}
+
+div.pie a {
+    color: black;
+    letter-spacing: 0.3em;
+    font-weight: normal;
+}
+
+div.pie_left {
+    float: left;
+}
+
+div.pie_left a {
+    color: black;
+    font-weight: normal;
+    font-size: 14px;
+}

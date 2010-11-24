@@ -1,0 +1,13 @@
+cron:
+
+- description: gestion de emails
+  url: /tasks/emails
+  schedule: every 1 hours
+
+- description: gestion de enlaces
+  url: /tasks/enlaces
+  schedule: every 30 minutes
+
+- description: calculo de karma
+  url: /tasks/karma
+  schedule: every 5 minutes

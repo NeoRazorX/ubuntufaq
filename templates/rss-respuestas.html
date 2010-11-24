@@ -1,0 +1,34 @@
+{% spaceless %}
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0">
+    <channel>
+        <title>UbuntuFAQ respuestas</title>
+        <description>Sitio web de preguntas y respuestas rapidas sobre ubuntu.</description>
+        <link>http://www.ubufaq.com</link>
+{% for respuesta in respuestas %}
+        <item>
+    {% if respuesta.autor %}
+            <title>{{ respuesta.fecha|date:"Y-m-d H:i" }} - {{ respuesta.autor.nickname|cortamail }} responde:</title>
+    {% else %}
+            <title>{{ respuesta.fecha|date:"Y-m-d H:i" }} - anonimo responde:</title>
+    {% endif %}
+            <link>http://www.ubufaq.com/question/{{ respuesta.id_pregunta }}#{{ respuesta.key }}</link>
+            <pubDate>{{ respuesta.fecha|date:"Y-m-d" }}</pubDate>
+            <description>{{ respuesta.contenido|capfirst|truncatewords:50 }}</description>
+        </item>
+{% endfor %}
+{% for coment in comentarios %}
+        <item>
+    {% if coment.autor %}
+            <title>{{ coment.fecha|date:"Y-m-d H:i" }} - {{ coment.autor.nickname|cortamail }} comenta:</title>
+    {% else %}
+            <title>{{ coment.fecha|date:"Y-m-d H:i" }} - anonimo comenta:</title>
+    {% endif %}
+            <link>http://www.ubufaq.com/story/{{ coment.id_enlace }}#{{ coment.key }}</link>
+            <pubDate>{{ coment.fecha|date:"Y-m-d" }}</pubDate>
+            <description>{{ coment.contenido|capfirst|truncatewords:50 }}</description>
+        </item>
+{% endfor %}
+    </channel>
+</rss>
+{% endspaceless %}
