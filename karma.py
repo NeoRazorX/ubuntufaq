@@ -81,7 +81,7 @@ class karma:
         else:
             seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE puntos = 0").fetch(25)
         
-        if len( seleccion ) > 9:
+        if len( seleccion ) > 1:
             # marcamos los anonimos y seleccionamos los autores
             autores = []
             for usu1 in seleccion:

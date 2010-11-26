@@ -238,29 +238,24 @@ class Perror(Pagina):
         path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
         self.response.out.write(template.render(path, template_values))
 
-application = webapp.WSGIApplication([('/', Indice),
+def main():
+    application = webapp.WSGIApplication([('/', Indice),
                                         ('/inicio', Indice),
                                         ('/populares', Populares),
-                                        ('/sin-contestar', Sin_contestar),
                                         ('/sin-solucionar', Sin_contestar),
                                         ('/actualidad', Actualidad),
-                                        ('/imagenes', Imagenes),
                                         ('/images', Imagenes),
                                         (r'/inicio/(.*)', Indice),
                                         (r'/populares/(.*)', Populares),
                                         (r'/sin-solucionar/(.*)', Sin_contestar),
                                         (r'/actualidad/(.*)', Actualidad),
                                         (r'/images/(.*)', Imagenes),
-                                        (r'/p/(.*)', Detalle_pregunta),
                                         (r'/question/(.*)', Detalle_pregunta),
-                                        (r'/e/(.*)', Redir_enlace),
-                                        (r'/de/(.*)', Detalle_enlace),
                                         (r'/story/(.*)', Detalle_enlace),
                                         (r'/u/(.*)', Detalle_usuario),
                                         ('/rss', Rss),
                                         ('/robots.txt', Robot),
                                         ('/rss-respuestas', Rss_respuestas),
-                                        ('/sitemap', Sitemap),
                                         ('/sitemap.xml', Sitemap),
                                         ('/pingbacks', Pingbacks),
                                         ('/ayuda', Ayuda),
@@ -281,8 +276,6 @@ application = webapp.WSGIApplication([('/', Indice),
                                         ('/.*', Perror),
                                     ],
                                     debug=True)
-
-def main():
     webapp.template.register_template_library('filtros_django')
     run_wsgi_app(application)
 
