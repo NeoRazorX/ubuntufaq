@@ -12,29 +12,34 @@ def cortamail(email):
     return str(email).split('@')[0]
 
 
+def menu_cabecera(vista, seleccion=''):
+    if vista == seleccion:
+        return 'id="menusel"'
+    else:
+        return ''
+
+
 def avatar(email, size=80):
     if email:
-        gravatar = '<img src="http://www.gravatar.com/avatar/' + hashlib.md5(str(email)).hexdigest() + '?s=' + str(size) + '" alt="avatar" />'
+        return '<img src="http://www.gravatar.com/avatar/' + hashlib.md5(str(email)).hexdigest() + '?s=' + str(size) + '" alt="avatar" />'
     elif size == 40:
-        gravatar = '<img src="/img/anonymous-40.gif" alt="anonymous" />'
+        return '<img src="/img/anonymous-40.gif" alt="anonymous" />'
     else:
-        gravatar = '<img src="/img/anonymous.gif" alt="anonymous" />'
-    return gravatar
+        return '<img src="/img/anonymous.gif" alt="anonymous" />'
+
 
 def karmsg(puntos):
-    mensaje = 'usuario poco participativo...'
-    
     if puntos > 1:
-        mensaje = '&iexcl;Ha salvado a ' + str(puntos) + ' <a href="/ayuda#gatitos">gatitos</a>!'
-    
-    return mensaje
+        return '&iexcl;Ha salvado a ' + str(puntos) + ' <a href="/ayuda#gatitos">gatitos</a>!'
+    else:
+        return 'Usuario poco participativo...'
 
 
 def puntos(puntos):
-    mensaje = ''
     if puntos > 1:
-        mensaje = '<a href="/ayuda#karma">' + str(puntos) + '</a>'
-    return mensaje
+        return '<a href="/ayuda#karma">' + str(puntos) + '</a>'
+    else:
+        return ''
 
 
 def estado_pregunta(estado):
@@ -94,6 +99,7 @@ def randomsg(numero):
 
 
 register.filter( cortamail )
+register.filter( menu_cabecera )
 register.filter( avatar )
 register.filter( karmsg )
 register.filter( puntos )

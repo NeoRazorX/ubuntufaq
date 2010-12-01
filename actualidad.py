@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-import cgi, os, math, logging
+import cgi, os, logging
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from recaptcha.client import captcha
 from datetime import datetime
@@ -37,7 +36,7 @@ class Enlazar(webapp.RequestHandler):
                     cResponse = captcha.submit(
                         challenge,
                         response,
-                        "recaptcha-private-key",
+                        RECAPTCHA_PRIVATE_KEY,
                         remoteip)
                     
                     if cResponse.is_valid:
@@ -54,34 +53,26 @@ class Enlazar(webapp.RequestHandler):
             self.redirect('/error/403')
 
 class Actualidad(Pagina):
-    def get(self, pagina=0):
+    def get(self, p=0):
         Pagina.get(self)
         
         enlaces_query = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC")
         
-        # calculamos todo lo necesario para paginar
-        paginas = int( math.ceil(enlaces_query.count() / 20.0) )
-        if paginas < 1:
-            paginas = 1
-        pag_actual = 0
-        if str(pagina).isdigit():
-            pag_actual = int( pagina )
-        
         # paginamos
-        enlaces = enlaces_query.fetch(20, int(20 * pag_actual) )
+        enlaces, paginas, p_actual = self.paginar(enlaces_query, 20, p)
         
         # el captcha
         if users.get_current_user():
             chtml = ''
         else:
             chtml = captcha.displayhtml(
-                public_key = "recaptcha-public-key",
+                public_key = RECAPTCHA_PUBLIC_KEY,
                 use_ssl = False,
                 error = None)
         
         template_values = {
             'titulo': 'Actualidad de Ubuntu FAQ',
-            'descripcion': 'Toda la actualidad en torno a Ubuntu Linux',
+            'descripcion': 'Noticias, blogs, videos, imagenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general',
             'tags': 'ubufaq, ubuntu faq, noticias ubuntu, actualidad ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -92,7 +83,7 @@ class Actualidad(Pagina):
             'captcha': chtml,
             'paginas': paginas,
             'rango_paginas': range(paginas),
-            'pag_actual': pag_actual,
+            'pag_actual': p_actual,
             'usuario': users.get_current_user()
             }
         
@@ -144,7 +135,7 @@ class Detalle_enlace(Pagina):
                 chtml = ''
             else:
                 chtml = captcha.displayhtml(
-                    public_key = "recaptcha-public-key",
+                    public_key = RECAPTCHA_PUBLIC_KEY,
                     use_ssl = False,
                     error = None)
             
@@ -240,7 +231,7 @@ class Comentar(webapp.RequestHandler):
             cResponse = captcha.submit(
                 challenge,
                 response,
-                "recaptcha-private-key",
+                RECAPTCHA_PRIVATE_KEY,
                 remoteip)
             
             if cResponse.is_valid:

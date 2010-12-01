@@ -1,13 +1,319 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="es" lang="es">
 <head>
-    <title>{{ titulo|truncatewords:10 }}</title>
+    <title>{{ titulo|truncatewords:15 }}</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="keywords" content="{{ tags }}" />
     <meta name="description" content="{{ descripcion|addslashes|truncatewords:50 }}" />
     <meta name="Robots" content="all" />
-    <link rel="stylesheet" type="text/css" media="screen" href="/css/estilo.css" />
+    <meta name="google-site-verification" content="iOvEYOOuoC2LJSxEWiDjlqENTzguoMg4LFLK_R4ZjTk" />
     <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss" />
+    <style type="text/css">
+    body {
+        background: #BABABA url(/img/fondo.png) repeat;
+        margin: 0px;
+        margin-bottom: 30px;
+        padding-left: 30px;
+        padding-right: 30px;
+        font-size: 13px;
+    }
+    
+    a {
+        color: #DD4814;
+        font-weight: bold;
+        text-decoration: none;
+    }
+    
+    a:hover {
+        text-decoration: underline;
+    }
+    
+    textarea {
+        width: 100%;
+        border: 1px solid black;
+    }
+    
+    input {
+        border: 1px solid black;
+    }
+    
+    input#titulo {
+        width: 100%;
+    }
+    
+    img {
+        vertical-align: middle;
+        border-width: 0;
+    }
+    
+    img#enlace {
+        border: 3px double #3C3C3C;
+        width: 80%;
+    }
+    
+    div.cabecera {
+        background: #DD4814 url(/img/cabecera.png) repeat;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 30px;
+        letter-spacing: 0.5em;
+        text-align: center;
+        border-top: 1px outset #3C3C3C;
+        border-left: 1px outset #3C3C3C;
+        border-right: 1px outset #3C3C3C;
+    }
+    
+    div.cabecera a {
+        color: black;
+    }
+    
+    div.menucabecera {
+        background-color: #3C3C3C;
+        border-left: 1px outset #3C3C3C;
+        border-right: 1px outset #3C3C3C;
+        font-size: 14px;
+        padding: 5px;
+    }
+    
+    div.menucabecera span {
+        margin: 3px;
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+    
+    div.menucabecera span#menusel {
+        background-color: white;
+        border: 1px inset white;
+    }
+    
+    div.menucabecera a {
+        color: white;
+    }
+    
+    div.menucabecera span#menusel a {
+        color: black;
+    }
+    
+    div.preguntas {
+        background-color: white;
+        padding: 10px;
+        padding-bottom: 20px;
+        min-height: 400px;
+        border-left: 1px outset #3C3C3C;
+        border-right: 1px outset #3C3C3C;
+    }
+    
+    table.widgets {
+        width: 100%;
+        margin: 0px;
+    }
+    
+    table.widgets td.preguntas {
+        vertical-align: top;
+    }
+    
+    table.widgets td.widget {
+        vertical-align: top;
+        width: 30%;
+    }
+    
+    div.pregunta {
+        border: 1px dotted white;
+        margin: 5px;
+        padding: 5px;
+    }
+    
+    div.pregunta:hover {
+        background-color: #EEEEEE;
+        border: 1px outset #E4E4E4;
+    }
+    
+    div.formulario {
+        margin: 10px;
+        padding: 5px;
+    }
+    
+    div.info_respuesta {
+        font-size: 12px;
+        margin-top: 8px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 2px;
+        padding: 0px;
+    }
+    
+    div.respuesta {
+        background-color: #F7F7F7;
+        border: 1px outset #E4E4E4;
+        margin-top: 0px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 0px;
+        padding: 5px;
+    }
+    
+    div.respuesta_d {
+        background-color: #feffc0;
+        border: 2px outset #feffc0;
+        margin-top: 0px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 0px;
+        padding: 5px;
+    }
+    
+    div.comentario {
+        background-color: #EFEFEF;
+        border: 2px outset #DEDEDE;
+        margin-top: 0px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 0px;
+        padding: 5px;
+        font-size: 17px;
+    }
+    
+    div.mensaje {
+        background-color: #feffc0;
+        border: 2px outset #e1e16e;
+        margin-top: 5px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 5px;
+        padding: 5px;
+        font-size: 15px;
+    }
+    
+    div.edicion_respuesta {
+        text-align: right;
+        font-size: 12px;
+        margin-top: 1px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 0px;
+        padding: 0px;
+    }
+    
+    div.ultimas_respuestas {
+        background-color: #3C3C3C;
+        margin-top: 10px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 0px;
+        padding: 5px;
+        color: white;
+        font-weight: bold;
+        letter-spacing: 3px;
+        text-align: center;
+        border: 1px outset #3C3C3C;
+    }
+    
+    div.detalle_pregunta {
+        min-height: 100px;
+    }
+    
+    div.detalle_pregunta span {
+        font-size: 12px;
+    }
+    
+    div.titulo {
+        font-weight: bold;
+        font-size: 15px;
+        letter-spacing: 0.12em;
+        border-bottom: 1px solid #3C3C3C;
+        margin-bottom: 3px;
+        padding-bottom: 3px;
+    }
+    
+    div.titulo span {
+        font-size: 14px;
+    }
+    
+    div.avatar {
+        text-align: center;
+        font-size: 15px;
+        padding: 2px;
+        padding-bottom: 0px;
+        margin: 0px;
+    }
+    
+    div.avatar img {
+        margin-bottom: 2px;
+    }
+    
+    div.avatar a {
+        color: black;
+    }
+    
+    td.avatar {
+        vertical-align: top;
+        padding-top: 14px;
+        width: 44px;
+        text-align: center;
+        vertical-align: top;
+    }
+    
+    ul.paginacion {
+        padding-left: 50px;
+        list-style: none;
+        height: 15px;
+        margin-top: 10px;
+    }
+    
+    ul.paginacion li {
+        background-color: #3C3C3C;
+        border: 1px outset #3C3C3C;
+        color: white;
+        float: left;
+        margin-right: 15px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    ul.paginacion li#actual {
+        background-color: #DD4814;
+        border: 1px outset #DD4814;
+    }
+    
+    ul.paginacion li a {
+        color: white;
+    }
+    
+    ul.social {
+        list-style: none;
+        height: 20px;
+        margin-top: 5px;
+        padding-left: 5px;
+    }
+    
+    ul.social li {
+        float: left;
+        margin-right: 5px;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+    
+    div.galeria:hover {
+        background-color: #E7E7E7;
+    }
+
+    div.pie {
+        background-color: white;
+        text-align: center;
+        padding-top: 5px;
+        padding-right: 10px;
+        padding-bottom: 10px;
+        border-left: 1px outset #3C3C3C;
+        border-right: 1px outset #3C3C3C;
+        border-bottom: 1px outset #3C3C3C;
+        margin-bottom: 10px;
+    }
+    
+    div.pie a {
+        color: black;
+        letter-spacing: 0.3em;
+        font-weight: normal;
+    }
+    </style>
     <script type="text/javascript">
         <!--
         function enviar_pregunta()
@@ -127,7 +433,7 @@
         
         function borrar_enlace(id)
         {
-            if( confirm('¿Realmente desea eliminar el enlace?') )
+            if( confirm('¿Realmente desea eliminar Linux el enlace?') )
             {
                 window.location.href = '/del_e?id=' + id;
             }
@@ -144,52 +450,26 @@
     </script>
 </head>
 <body>
-<div class="cabecera"><a title="Respuestas r&aacute;pidas para tus dudas sobre Ubuntu" href="http://www.ubufaq.com">Ubuntu <s>FUCK</s> FAQ</a></div>
-<ul class="cabecera">
-{% ifequal vista 'inicio' %}
-    <li id="actual"><a href="/inicio">inicio</a></li>
-{% else %}
-    <li><a href="/inicio">inicio</a></li>
-{% endifequal %}
-{% ifequal vista 'actualidad' %}
-    <li id="actual"><a href="/actualidad">actualidad</a></li>
-{% else %}
-    <li><a href="/actualidad">actualidad</a></li>
-{% endifequal %}
-{% ifequal vista 'populares' %}
-    <li id="actual"><a href="/populares">populares</a></li>
-{% else %}
-    <li><a href="/populares">populares</a></li>
-{% endifequal %}
-{% ifequal vista 'sin-solucionar' %}
-    <li id="actual"><a href="/sin-solucionar">sin solucionar</a></li>
-{% else %}
-    <li><a href="/sin-solucionar">sin solucionar</a></li>
-{% endifequal %}
-{% ifequal vista 'imagenes' %}
-    <li id="actual"><a href="/images">im&aacute;genes</a></li>
-{% endifequal %}
-{% ifequal vista 'buscar' %}
-    <li id="actual"><a href="/buscar">buscar</a></li>
-{% else %}
-    <li><a href="/buscar">buscar</a></li>
-{% endifequal %}
-{% ifequal vista 'ayuda' %}
-    <li id="actual"><a href="/ayuda">ayuda</a></li>
-{% else %}
-    <li><a href="/ayuda">ayuda</a></li>
-{% endifequal %}
+<div class="cabecera">
+    <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu Linux" href="http://www.ubufaq.com">Ubuntu <s>FUCK</s> FAQ</a>
+</div>
+<div class="menucabecera">
+    <span {{ vista|menu_cabecera:"inicio" }}><a href="/inicio">inicio</a></span>
+    <span {{ vista|menu_cabecera:"actualidad" }}><a href="/actualidad">actualidad</a></span>
+    <span {{ vista|menu_cabecera:"populares" }}><a href="/populares">populares</a></span>
+    <span {{ vista|menu_cabecera:"sin-solucionar" }}><a href="/sin-solucionar">sin solucionar</a></span>
+    <span {{ vista|menu_cabecera:"imagenes" }}><a href="/images">im&aacute;genes</a></span>
+    <span {{ vista|menu_cabecera:"buscar" }}><a href="/buscar">buscar</a></span>
+    <span {{ vista|menu_cabecera:"ayuda" }}><a href="/ayuda">ayuda</a></span>
+    <span>|</span>
 
 {% if formulario %}
-    <li>|</li>
     {% ifequal vista 'mi-perfil' %}
-    <li id="actual"><a href="{{ mi_perfil|urlencode }}">mi perfil</a></li>
+    <span id="menusel"><a href="{{ mi_perfil|urlencode }}">mi perfil</a></span>
     {% else %}
-    <li><a href="{{ mi_perfil|urlencode }}">mi perfil</a></li>
+    <span><a href="{{ mi_perfil|urlencode }}">mi perfil</a></span>
     {% endifequal %}
-    <li><a href="{{ url }}">{{ url_linktext }}</a></li>
-{% else %}
-    <li>|</li>
-    <li><a href="{{ url }}">{{ url_linktext }}</a></li>
 {% endif %}
-</ul>
+    
+    <span><a href="{{ url }}">{{ url_linktext }}</a></span>
+</div>

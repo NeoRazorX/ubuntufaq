@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-import cgi, os, math, logging
+import cgi, os, logging
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from recaptcha.client import captcha
 from datetime import datetime
@@ -18,13 +17,13 @@ class Nueva_pregunta(Pagina):
             chtml = ''
         else:
             chtml = captcha.displayhtml(
-                public_key = "recaptcha-public-key",
+                public_key = RECAPTCHA_PUBLIC_KEY,
                 use_ssl = False,
                 error = None)
         
         template_values = {
             'titulo': 'Ubuntu FAQ - nueva pregunta',
-            'descripcion': 'Formulario de creacion de preguntas',
+            'descripcion': 'Formulario de creacion de preguntas en torno a Ubuntu Linux',
             'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -59,7 +58,7 @@ class Preguntar(webapp.RequestHandler):
             cResponse = captcha.submit(
                 challenge,
                 response,
-                "recaptcha-private-key",
+                RECAPTCHA_PRIVATE_KEY,
                 remoteip)
             
             if cResponse.is_valid:
@@ -107,7 +106,7 @@ class Detalle_pregunta(Pagina):
                 chtml = ''
             else:
                 chtml = captcha.displayhtml(
-                    public_key = "recaptcha-public-key",
+                    public_key = RECAPTCHA_PUBLIC_KEY,
                     use_ssl = False,
                     error = None)
             
@@ -225,7 +224,7 @@ class Responder(webapp.RequestHandler):
             cResponse = captcha.submit(
                 challenge,
                 response,
-                "recaptcha-private-key",
+                RECAPTCHA_PRIVATE_KEY,
                 remoteip)
             
             if cResponse.is_valid:

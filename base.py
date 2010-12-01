@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+RECAPTCHA_PUBLIC_KEY = ''
+RECAPTCHA_PRIVATE_KEY = ''
+
+import math
 from google.appengine.ext import db, webapp
 from google.appengine.api import users
 
@@ -57,4 +61,18 @@ class Pagina(webapp.RequestHandler):
             self.url_linktext = 'entra con tu cuenta Google'
             self.formulario = False
             self.mi_perfil = '/'
+    
+    def paginar(self, query, limite, actual):
+        # calculamos todo lo necesario para paginar
+        paginas = int( math.ceil( query.count() / float(limite) ) )
+        if paginas < 1:
+            paginas = 1
+        
+        try:
+            p_actual = int(actual)
+        except:
+            p_actual = 0
+        
+        # paginamos
+        return query.fetch(limite, int(limite * p_actual) ), paginas, p_actual
 

@@ -1,12 +1,9 @@
 application: ubuntu-faq
-version: 28
+version: 32
 runtime: python
 api_version: 1
 
 handlers:
-- url: /css
-  static_dir: css
-
 - url: /img
   static_dir: img
 
@@ -25,6 +22,24 @@ handlers:
 - url: /tasks/karma
   script: karma.py
   login: admin
+
+- url: /sitemap
+  script: sitemap.py
+
+- url: /sitemap.xml
+  script: sitemap.py
+
+- url: /rss
+  script: rss.py
+
+- url: /rss-respuestas
+  script: rssr.py
+
+- url: /robots.txt
+  script: robots.py
+
+- url: /pingbacks
+  script: pingbacks.py
 
 - url: .*
   script: main.py

@@ -1,4 +1,3 @@
-{% spaceless %}
 {% include "cabecera.html" %}
 
 <div class="preguntas">
@@ -7,20 +6,19 @@
 <td class="preguntas">
 
 {% ifequal vista 'inicio' %}
-<div class="mensaje">¿Tienes alg&uacute;n problema con Ubuntu? usa el formulario de <a href="/nueva">nueva pregunta</a>.</div>
+<div class="mensaje">¿Tienes alg&uacute;n problema con Ubuntu? <a href="/buscar">busca</a> o usa el formulario de <a href="/nueva">nueva pregunta</a>.</div>
 {% endifequal %}
 
 {% if preguntas %}
     {% for pregunta in preguntas %}
-        <div class="pregunta">
+    <div class="pregunta">
         <div class="titulo">
             <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|capfirst }}</a>
             <span>{{ pregunta.estado|estado_pregunta }}</span>
         </div>
-        {{ pregunta.contenido|capfirst|truncatewords:30 }}
+        {{ pregunta.contenido|capfirst|truncatewords:25 }}
         <br/>
-        <span>
-        <img src="/img/bocadillo.gif" alt="bocadillo"/>{{ pregunta.respuestas }} respuestas |
+        <b>{{ pregunta.respuestas }} respuestas</b> |
         {{ pregunta.visitas }} visitas |
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
@@ -30,16 +28,15 @@
     {% else %}
         escrito por an&oacute;nimo
     {% endif %}
-        </span>
-        </div>
+    </div>
     {% endfor %}
 {% else %}
     <div class="mensaje">Sin resultados.</div>
 {% endif %}
 
 {% ifnotequal paginas 1 %}
-    <ul class="paginacion">
-        <li>P&aacute;ginas:</li>
+<ul class="paginacion">
+    <li>P&aacute;ginas:</li>
     {% for pag in rango_paginas %}
         {% ifequal pag pag_actual %}
             <li id="actual"><a href="/{{vista}}/{{pag}}">{{pag}}</a></li>
@@ -47,7 +44,7 @@
             <li><a href="/{{vista}}/{{pag}}">{{pag}}</a></li>
         {% endifequal %}
     {% endfor %}
-    </ul>
+</ul>
 {% endifnotequal %}
 
 {% if preguntas %}
@@ -68,6 +65,7 @@
     {% for enlace in enlaces %}
     <div class="info_respuesta">
         {{ enlace.creado|date:"d/m/Y H:i" }} |
+        {{ enlace.comentarios }} comentarios |
     {% if enlace.autor %}
         <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
         {{ enlace.puntos }}
@@ -75,7 +73,9 @@
         an&oacute;nimo:
     {% endif %}
     </div>
-    <div class="respuesta">{{ enlace.descripcion|capfirst|truncatewords:20 }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
+    <div class="respuesta">{{ enlace.descripcion|capfirst|truncatewords:20 }}
+    <br/>
+    <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
     {% endfor %}
 {% endif %}
 
@@ -101,4 +101,3 @@
 </div>
 
 {% include "pie.html" %}
-{% endspaceless %}

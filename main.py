@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cgi, os, math, logging, urllib
+import cgi, os, urllib
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -19,7 +19,7 @@ class Indice(Pagina):
         if vista == 'sin-solucionar':
             p_query = db.GqlQuery("SELECT * FROM Pregunta WHERE estado < 10 ORDER BY estado ASC")
             enlaces = None
-            respuestas = Respuesta.all().order('-fecha').fetch(20)
+            respuestas = Respuesta.all().order('-fecha').fetch(15)
         elif vista == 'populares':
             p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY visitas DESC")
             enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY clicks DESC").fetch(15)
@@ -30,36 +30,28 @@ class Indice(Pagina):
             respuestas = None
             vista = 'inicio'
         
-        # calculamos todo lo necesario para paginar
-        paginas = int( math.ceil(p_query.count() / 20.0) )
-        if paginas < 1:
-            paginas = 1
-        pag_actual = 0
-        if str( p ).isdigit():
-            pag_actual = int( p )
-        
         # paginamos
-        preguntas = p_query.fetch(20, int(20 * pag_actual) )
+        preguntas, paginas, p_actual = self.paginar(p_query, 20, p)
         
         template_values = {
             'titulo': 'Ubuntu FAQ - ' + vista,
-            'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu',
+            'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias',
             'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmin, lucid, maverick, natty',
             'preguntas': preguntas,
             'respuestas': respuestas,
             'enlaces': enlaces,
             'paginas': paginas,
             'rango_paginas': range(paginas),
-            'pag_actual': pag_actual,
+            'pag_actual': p_actual,
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
             'formulario' : self.formulario,
             'vista': vista
-            }
+        }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
-        self.response.out.write(template.render(path, template_values))
+        self.response.out.write( template.render(path, template_values) )
 
 class Populares(Indice):
     def get(self, p=0):
@@ -69,57 +61,13 @@ class Sin_contestar(Indice):
     def get(self, p=0):
         Indice.get(self, p, 'sin-solucionar')
 
-class Robot(webapp.RequestHandler):
-    def get(self):
-        self.response.headers['Content-Type'] = 'text/plain'
-        self.response.out.write("User-agent: *\nAllow: /\nDisallow: /img/\nDisallow: /u/\nSitemap: http://www.ubufaq.com/sitemap.xml")
-
-class Rss(webapp.RequestHandler):
-    def get(self):
-        template_values = {
-            'preguntas': db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(25),
-            'enlaces': db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(25)
-            }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/rss.html')
-        self.response.out.write(template.render(path, template_values))
-
-class Rss_respuestas(webapp.RequestHandler):
-    def get(self):
-        template_values = {
-            'respuestas': db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(15),
-            'comentarios': db.GqlQuery("SELECT * FROM Comentario ORDER BY fecha DESC").fetch(15)
-            }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/rss-respuestas.html')
-        self.response.out.write(template.render(path, template_values))
-
-class Pingbacks(webapp.RequestHandler):
-    def get(self):
-        template_values = {
-            'enlaces': db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(25)
-            }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/pingbacks.html')
-        self.response.out.write(template.render(path, template_values))
-
-class Sitemap(webapp.RequestHandler):
-    def get(self):
-        template_values = {
-            'preguntas': Pregunta.all(),
-            'enlaces': Enlace.all()
-            }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/sitemap.html')
-        self.response.out.write(template.render(path, template_values))
-
 class Ayuda(Pagina):
     def get(self):
         Pagina.get(self)
         
         template_values = {
             'titulo': 'Ayuda de Ubuntu FAQ',
-            'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu',
+            'descripcion': 'Seccion de ayuda de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu',
             'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, ayuda ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -165,7 +113,7 @@ class Detalle_usuario(Pagina):
             
             template_values = {
                 'titulo': 'Ubuntu FAQ - perfil de ' + str(usuario),
-                'descripcion': 'Resumen del historial de ' + str(usuario),
+                'descripcion': 'Resumen del historial del usuario ' + str(usuario) + ' en Ubuntu FAQ',
                 'preguntas': p,
                 'respuestas': r,
                 'enlaces': e,
@@ -192,7 +140,7 @@ class Buscar(Pagina):
         
         template_values = {
             'titulo': 'Buscador de Ubuntu FAQ',
-            'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu',
+            'descripcion': 'Buscador de Ubuntu FAQ, soluciones rapidas para tus problemas con Ubuntu',
             'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -250,14 +198,12 @@ def main():
                                         (r'/sin-solucionar/(.*)', Sin_contestar),
                                         (r'/actualidad/(.*)', Actualidad),
                                         (r'/images/(.*)', Imagenes),
+                                        (r'/p/(.*)', Detalle_pregunta),
                                         (r'/question/(.*)', Detalle_pregunta),
+                                        (r'/e/(.*)', Redir_enlace),
+                                        (r'/de/(.*)', Detalle_enlace),
                                         (r'/story/(.*)', Detalle_enlace),
                                         (r'/u/(.*)', Detalle_usuario),
-                                        ('/rss', Rss),
-                                        ('/robots.txt', Robot),
-                                        ('/rss-respuestas', Rss_respuestas),
-                                        ('/sitemap.xml', Sitemap),
-                                        ('/pingbacks', Pingbacks),
                                         ('/ayuda', Ayuda),
                                         ('/buscar', Buscar),
                                         ('/nueva', Nueva_pregunta),
@@ -281,3 +227,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

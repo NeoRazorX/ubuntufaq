@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cgi, os, math, logging
+import cgi, os, logging
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -10,28 +10,20 @@ from datetime import datetime
 from base import *
 
 class Imagenes(Pagina):
-    def get(self, pagina=0):
+    def get(self, p=0):
         Pagina.get(self)
         
         enlaces_query = db.GqlQuery("SELECT * FROM Enlace WHERE tipo_enlace = 'imagen' ORDER BY fecha DESC")
         
-        # calculamos todo lo necesario para paginar
-        paginas = int( math.ceil(enlaces_query.count() / 10.0) )
-        if paginas < 1:
-            paginas = 1
-        pag_actual = 0
-        if str(pagina).isdigit():
-            pag_actual = int( pagina )
-        
         # paginamos
-        imagenes = enlaces_query.fetch(10, int(10 * pag_actual) )
+        imagenes, paginas, p_actual = self.paginar(enlaces_query, 10, p)
         
         # el captcha
         if users.get_current_user():
             chtml = ''
         else:
             chtml = captcha.displayhtml(
-                public_key = "recaptcha-public-key",
+                public_key = RECAPTCHA_PUBLIC_KEY,
                 use_ssl = False,
                 error = None)
         
@@ -48,7 +40,7 @@ class Imagenes(Pagina):
             'captcha': chtml,
             'paginas': paginas,
             'rango_paginas': range(paginas),
-            'pag_actual': pag_actual,
+            'pag_actual': p_actual,
             'usuario': users.get_current_user()
             }
         
