@@ -4,14 +4,13 @@
 
 {% if imagenes %}
 {% for imagen in imagenes %}
-<div class="galeria">
 <table>
-<tr>
-    <td><a href="/e/{{ imagen.key }}"><img src="{{ imagen.url }}" height="200" alt="{{ imagen.descripcion|truncatewords:5 }}" title="{{ imagen.descripcion|capfirst }}"/></a></td>
+    <tr>
+    <td><a href="/e/{{ imagen.key }}"><img class="galeria" src="http://api.thumbalizr.com/?url={{ imagen.url|urlencode }}" alt="{{ imagen.descripcion|truncatewords:5 }}" title="{{ imagen.descripcion|capfirst }}"/></a></td>
     <td>
     <div class="comentario">
         {{ imagen.autor.email|avatar:40 }}
-        <a href="/story/{{ imagen.key }}"><img src="/img/comments.png" alt="comentarios"/></a>
+        <a href="/story/{{ imagen.key }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
         {% if imagen.comentarios %}
             {{ imagen.comentarios }}
         {% endif %}
@@ -22,14 +21,13 @@
             an&oacute;nimo
         {% endif %}
         <br/>
-        {{ imagen.creado|date:"d/m/Y H:i" }}
+        {{ imagen.creado|date:"d/m/Y H:i" }} | {{ imagen.clicks }} clicks
         <br/>
         {{ imagen.descripcion|capfirst|urlizetrunc:30 }}
     </div>
     </td>
-</tr>
+    </tr>
 </table>
-</div>
 {% endfor %}
 {% else %}
     <div class="mensaje">sin resultados.</div>

@@ -16,7 +16,7 @@ class Imagenes(Pagina):
         enlaces_query = db.GqlQuery("SELECT * FROM Enlace WHERE tipo_enlace = 'imagen' ORDER BY fecha DESC")
         
         # paginamos
-        imagenes, paginas, p_actual = self.paginar(enlaces_query, 10, p)
+        imagenes, paginas, p_actual = self.paginar(enlaces_query, 20, p)
         
         # el captcha
         if users.get_current_user():
@@ -29,7 +29,7 @@ class Imagenes(Pagina):
         
         template_values = {
             'titulo': 'Imagenes de Ubuntu FAQ',
-            'descripcion': 'Wallpapers, screenshots e imagenes de actualidad en torno a Ubuntu Linux',
+            'descripcion': 'Wallpapers, screenshots, fotos e imagenes de toda la actualidad en torno a Ubuntu Linux, comparte con nosotros las tuyas!',
             'tags': 'ubufaq, ubuntu faq, imagenes ubuntu, wallpapers ubuntu, screenshots ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,

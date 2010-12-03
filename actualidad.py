@@ -72,7 +72,7 @@ class Actualidad(Pagina):
         
         template_values = {
             'titulo': 'Actualidad de Ubuntu FAQ',
-            'descripcion': 'Noticias, blogs, videos, imagenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general',
+            'descripcion': 'Noticias, blogs, videos, imagenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general. Comparte con nosotros!',
             'tags': 'ubufaq, ubuntu faq, noticias ubuntu, actualidad ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,

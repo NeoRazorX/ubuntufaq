@@ -35,7 +35,7 @@ class Indice(Pagina):
         
         template_values = {
             'titulo': 'Ubuntu FAQ - ' + vista,
-            'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias',
+            'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias. Si tienes alguna duda compartela con nosotros!',
             'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmin, lucid, maverick, natty',
             'preguntas': preguntas,
             'respuestas': respuestas,

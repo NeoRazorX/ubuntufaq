@@ -8,7 +8,7 @@
 <td valign="top">
     <div class="avatar">{{ enlace.autor.email|avatar }}<br/>{{ enlace.puntos|puntos }}</div>
 </td>
-<td width="100%">
+<td width="100%" valign="top">
 <div class="info_respuesta_up">
     {{ enlace.clicks }} clicks |
     {{ enlace.creado|date:"d/m/Y H:i" }} |
@@ -47,27 +47,27 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 
 
 {% ifequal tipo_enlace 'youtube' %}
-    <center><object width="480" height="385"><param name="movie" value="http://www.youtube.com/v/{{ aux_enlace }}"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/{{ aux_enlace }}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="480" height="385"></embed></object></center>
+    <center><object width="480" height="385"><param name="movie" value="http://www.youtube.com/v/{{ aux_enlace }}"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/{{ aux_enlace }}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="480" height="385"></embed></object></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'vimeo' %}
-    <center><iframe src="http://player.vimeo.com/video/{{ aux_enlace }}" width="400" height="300" frameborder="0"></iframe></center>
+    <center><iframe src="http://player.vimeo.com/video/{{ aux_enlace }}" width="400" height="300" frameborder="0"></iframe></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'vhtml5' %}
-    <center><video src="{{ enlace.url }}" controls="controls">¡Tu navegador no soporta el tag de v&iacute;deo en html5!</video></center>
+    <center><video src="{{ enlace.url }}" controls="controls">¡Tu navegador no soporta el tag de v&iacute;deo en html5!</video></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'imagen' %}
-    <center><a href="{{ enlace.url }}"><img src="{{ enlace.url }}" id="enlace" alt="{{ enlace.descripcion }}"/></a></center>
+    <center><a href="{{ enlace.url }}"><img src="{{ enlace.url }}" id="enlace" alt="{{ enlace.descripcion }}" title="{{ enlace.descripcion }}"/></a></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'deb' %}
-    <center><a href="{{ enlace.url }}"><img src="/img/application-x-deb.png" alt="{{ enlace.descripcion }}"/></a></center>
+    <center><a href="{{ enlace.url }}"><img src="/img/application-x-deb.png" alt="{{ enlace.descripcion }}"/></a></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'package' %}
-    <center><a href="{{ enlace.url }}"><img src="/img/emblem-package.png" alt="{{ enlace.descripcion }}"/></a></center>
+    <center><a href="{{ enlace.url }}"><img src="/img/emblem-package.png" alt="{{ enlace.descripcion }}"/></a></center><br/>
 {% endifequal %}
 {% endif %}
 

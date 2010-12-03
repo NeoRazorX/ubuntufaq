@@ -69,7 +69,7 @@
     <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
     <div class="info_respuesta_down">
         {{ enlace.creado|date:"d/m/Y H:i" }} |
-        {{ enlace.comentarios }} comentarios |
+        {{ enlace.comentarios }} coment |
     {% if enlace.autor %}
         <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
         {{ enlace.puntos }}
