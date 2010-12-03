@@ -9,7 +9,7 @@
     <div class="avatar">{{ enlace.autor.email|avatar }}<br/>{{ enlace.puntos|puntos }}</div>
 </td>
 <td width="100%">
-<div class="info_respuesta">
+<div class="info_respuesta_up">
     {{ enlace.clicks }} clicks |
     {{ enlace.creado|date:"d/m/Y H:i" }} |
 {% if enlace.autor %}
@@ -77,28 +77,29 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <tr>
     <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
     <td width="100%" valign="top">
-    <div class="info_respuesta">
+    <div class="respuesta">
+        <a name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
+        {{ coment.contenido|capfirst|linebreaksbr|urlize }}
+    </div>
+    <div class="info_respuesta_down">
         <a name="{{ coment.key }}"></a>{{ coment.fecha|date:"d/m/Y H:i" }} |
     {% if coment.autor %}
         <a href="/u/{{ coment.autor.email|urlencode }}">{{ coment.autor.nickname|cortamail }}</a>
         {{ coment.puntos }}
     {% else %}
-        an&oacute;nimo dice:
+        an&oacute;nimo
     {% endif %}
-    </div>
-    <div class="respuesta">
-    <a name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-    {{ coment.contenido|capfirst|linebreaksbr|urlize }}</div>
     
     {% if administrador %}
-        <div class="edicion_respuesta"><a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a></div>
+        | <a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a>
     {% endif %}
+    </div>
     </td>
 </tr>
 {% endfor %}
 
 <tr>
-<td class="avatar">{{ usuario.email|avatar:40 }}</td>
+<td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
 <td width="100%">
     <div class="formulario">
     <form name="comentario" action="/add_c" method="post">

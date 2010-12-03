@@ -3,7 +3,7 @@
 <div class="preguntas">
 
 {% if modificar %}
-    <div class="detalle_pregunta">
+    <div>
         <div class="titulo">Editar pregunta:</div>
         <form name="pregunta" action="/mod_p" method="post">
         <input type="hidden" name="id" value="{{ pregunta.key }}"/>
@@ -20,7 +20,7 @@
 <td width="100%">
     <form name="pregunta" action="/mod_ep" method="post">
     <input type="hidden" name="id" value="{{ pregunta.key }}"/>
-    <div class="detalle_pregunta">
+    <div class="pregunta">
     <div class="titulo">
         <a href="/question/{{pregunta.key}}">{{ pregunta.titulo|capfirst }}</a>
         <span>
@@ -71,7 +71,7 @@
     {{ pregunta.contenido|capfirst|linebreaksbr|urlizetrunc:35 }}
     <br/>
     <span>
-        <img src="/img/bocadillo.gif"/>{{ pregunta.respuestas }} respuestas |
+        {{ pregunta.respuestas }} respuestas |
         {{ pregunta.visitas }} visitas |
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
@@ -88,6 +88,7 @@
             | <a href="#" onclick="borrar_pregunta('{{pregunta.key}}')">borrar</a>
         {% endif %}
     </span>
+    </div>
     <ul class="social">
         <li><div class="identica" style="padding: 3px; padding-bottom: 2px;background-color: white;
 border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://identi.ca//index.php?action=bookmarklet',l=d.location,e=encodeURIComponent,g=f+'&status_textarea=%E2%80%9C'+((e(s))?e(s):e(document.title))+'%E2%80%9D%20%E2%80%94%20'+l.href;function%20a(){if(!w.open(g,'t','toolbar=0,resizable=0,scrollbars=1,status=1,width=450,height=200')){l.href=g;}}a();})()"><img src="/img/identica.png" alt="identica"/></a></div></li>
@@ -96,7 +97,6 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script></li>
         <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="neorazorx" data-lang="es">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script></li>
     </ul>
-    </div>
     </form>
 </td>
 <td valign="top">
@@ -111,16 +111,6 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <tr>
 <td class="avatar">{{ respuesta.autor.email|avatar:40 }}</td>
 <td width="100%" valign="top">
-    <div class="info_respuesta">
-        <a name="{{respuesta.key}}"></a>{{ respuesta.fecha|date:"d/m/Y H:i" }} |
-    {% if respuesta.autor %}
-        <a href="/u/{{respuesta.autor.email|urlencode}}">{{ respuesta.autor.nickname|cortamail }}</a>
-        {{ respuesta.puntos }}
-    {% else %}
-        an&oacute;nimo dice:
-    {% endif %}
-    </div>
-    
     {% if respuesta.destacada %}
     <div class="respuesta_d">
     {% else %}
@@ -129,27 +119,32 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <a name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
     {{ respuesta.contenido|capfirst|linebreaksbr|urlize }}</div>
     
+    <div class="info_respuesta_down">
+        <a name="{{respuesta.key}}"></a>{{ respuesta.fecha|date:"d/m/Y H:i" }} |
+    {% if respuesta.autor %}
+        <a href="/u/{{respuesta.autor.email|urlencode}}">{{ respuesta.autor.nickname|cortamail }}</a>
+        {{ respuesta.puntos }}
+    {% else %}
+        an&oacute;nimo
+    {% endif %}
     {% if editar %}
-        <div class="edicion_respuesta">
-        
         {% if respuesta.destacada %}
-            <a href="/dest_r?id={{pregunta.key}}&r={{respuesta.key}}"><s>destacar</s></a>
+            | <a href="/dest_r?id={{pregunta.key}}&r={{respuesta.key}}"><s>destacar</s></a>
         {% else %}
-            <a href="/dest_r?id={{pregunta.key}}&r={{respuesta.key}}">destacar</a>
+            | <a href="/dest_r?id={{pregunta.key}}&r={{respuesta.key}}">destacar</a>
         {% endif %}
         
         {% if administrador %}
             | <a href="#" onclick="borrar_respuesta('{{pregunta.key}}', '{{respuesta.key}}')">borrar</a>
         {% endif %}
-        
-        </div>
     {% endif %}
+    </div>
 </td>
 </tr>
 {% endfor %}
 
 <tr>
-<td class="avatar">{{ usuario.email|avatar:40 }}</td>
+<td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
 <td width="100%">
     <div class="formulario">
     <form name="respuesta" action="/add_r" method="post">

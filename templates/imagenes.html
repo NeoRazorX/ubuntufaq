@@ -7,7 +7,7 @@
 <div class="galeria">
 <table>
 <tr>
-    <td><a href="{{ imagen.url }}"><img src="{{ imagen.url }}" height="200" alt="{{ imagen.descripcion|truncatewords:5 }}" title="{{ imagen.descripcion|capfirst }}"/></a></td>
+    <td><a href="/e/{{ imagen.key }}"><img src="{{ imagen.url }}" height="200" alt="{{ imagen.descripcion|truncatewords:5 }}" title="{{ imagen.descripcion|capfirst }}"/></a></td>
     <td>
     <div class="comentario">
         {{ imagen.autor.email|avatar:40 }}
@@ -19,7 +19,7 @@
         {% if imagen.autor %}
             <a href="/u/{{ imagen.autor.email|urlencode }}">{{ imagen.autor.nickname|cortamail }}</a> {{ imagen.puntos }}
         {% else %}
-            an&oacute;nimo:
+            an&oacute;nimo
         {% endif %}
         <br/>
         {{ imagen.creado|date:"d/m/Y H:i" }}
@@ -40,16 +40,16 @@
 <tr>
 <td></td>
 <td colspan="2">
-    <ul class="paginacion">
-        <li>P&aacute;ginas:</li>
+    <div class="paginacion">
+        <span>P&aacute;ginas:</span>
     {% for pag in rango_paginas %}
         {% ifequal pag pag_actual %}
-            <li id="actual"><a href="/images/{{pag}}">{{pag}}</a></li>
+            <span id="actual"><a href="/images/{{pag}}">{{pag}}</a></span>
         {% else %}
-            <li><a href="/images/{{pag}}">{{pag}}</a></li>
+            <span><a href="/images/{{pag}}">{{pag}}</a></span>
         {% endifequal %}
     {% endfor %}
-    </ul>
+    </div>
 </td>
 </tr>
 {% endifnotequal %}

@@ -221,7 +221,7 @@ def main():
                                         (r'/error/(.*)', Perror),
                                         ('/.*', Perror),
                                     ],
-                                    debug=True)
+                                    debug=False)
     webapp.template.register_template_library('filtros_django')
     run_wsgi_app(application)
 

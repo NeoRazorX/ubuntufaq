@@ -23,7 +23,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <ul>
     <li>&Uacute;ltimas preguntas:</li>
     {% for pregunta in preguntas %}
-        <div class="info_respuesta">
+        <div class="info_respuesta_up">
             {{ pregunta.fecha|date:"d/m/Y H:i" }}
             | {{ pregunta.respuestas }} respuestas
         </div>
@@ -40,7 +40,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <ul>
     <li>&Uacute;ltimas respuestas:</li>
     {% for respuesta in respuestas %}
-        <div class="info_respuesta">
+        <div class="info_respuesta_up">
             <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{ respuesta.fecha|date:"d/m/Y H:i" }}</a>
         </div>
         {% if respuesta.destacada %}
@@ -60,7 +60,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <ul>
     <li>&Uacute;ltimos enlaces:</li>
     {% for enlace in enlaces %}
-    <div class="info_respuesta">
+    <div class="info_respuesta_up">
         {{ enlace.fecha|date:"d/m/Y H:i" }}
         | {{ enlace.comentarios }} comentarios
     </div>
@@ -75,7 +75,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <ul>
     <li>&Uacute;ltimos comentarios:</li>
     {% for coment in comentarios %}
-    <div class="info_respuesta">
+    <div class="info_respuesta_up">
         <a href="/story/{{ coment.id_enlace }}#{{ coment.key }}">{{ coment.fecha|date:"d/m/Y H:i" }}</a>:
     </div>
     <div class="respuesta">{{ coment.contenido|capfirst }}</div>

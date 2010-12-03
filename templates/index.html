@@ -18,7 +18,8 @@
         </div>
         {{ pregunta.contenido|capfirst|truncatewords:25 }}
         <br/>
-        <b>{{ pregunta.respuestas }} respuestas</b> |
+        <span>
+        {{ pregunta.respuestas }} respuestas |
         {{ pregunta.visitas }} visitas |
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
@@ -28,6 +29,7 @@
     {% else %}
         escrito por an&oacute;nimo
     {% endif %}
+        </span>
     </div>
     {% endfor %}
 {% else %}
@@ -35,16 +37,16 @@
 {% endif %}
 
 {% ifnotequal paginas 1 %}
-<ul class="paginacion">
-    <li>P&aacute;ginas:</li>
+<div class="paginacion">
+    <span>P&aacute;ginas:</span>
     {% for pag in rango_paginas %}
         {% ifequal pag pag_actual %}
-            <li id="actual"><a href="/{{vista}}/{{pag}}">{{pag}}</a></li>
+            <span id="actual"><a href="/{{vista}}/{{pag}}">{{pag}}</a></span>
         {% else %}
-            <li><a href="/{{vista}}/{{pag}}">{{pag}}</a></li>
+            <span><a href="/{{vista}}/{{pag}}">{{pag}}</a></span>
         {% endifequal %}
     {% endfor %}
-</ul>
+</div>
 {% endifnotequal %}
 
 {% if preguntas %}
@@ -63,35 +65,34 @@
     
     <div class="ultimas_respuestas">Actualidad:</div>
     {% for enlace in enlaces %}
-    <div class="info_respuesta">
+    <div class="respuesta">{{ enlace.descripcion|capfirst|truncatewords:20 }}<br/>
+    <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
+    <div class="info_respuesta_down">
         {{ enlace.creado|date:"d/m/Y H:i" }} |
         {{ enlace.comentarios }} comentarios |
     {% if enlace.autor %}
         <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
         {{ enlace.puntos }}
     {% else %}
-        an&oacute;nimo:
+        an&oacute;nimo
     {% endif %}
     </div>
-    <div class="respuesta">{{ enlace.descripcion|capfirst|truncatewords:20 }}
-    <br/>
-    <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
     {% endfor %}
 {% endif %}
 
 {% if respuestas %}
     <div class="ultimas_respuestas">&Uacute;ltimas respuestas:</div>
     {% for respuesta in respuestas %}
-        <div class="info_respuesta">
+        <div class="respuesta">{{respuesta.contenido|capfirst|truncatewords:25|urlizetrunc:30}}</div>
+        <div class="info_respuesta_down">
         <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{respuesta.fecha|date:"d/m/Y H:i"}}</a> -
     {% if respuesta.autor %}
         <a href="/u/{{respuesta.autor.email|urlencode}}">{{ respuesta.autor.nickname|cortamail }}</a>
         {{ respuesta.puntos }}
     {% else %}
-        an&oacute;nimo dice:
+        an&oacute;nimo
     {% endif %}
         </div>
-        <div class="respuesta">{{respuesta.contenido|capfirst|truncatewords:25|urlizetrunc:30}}</div>
     {% endfor %}
 {% endif %}
 

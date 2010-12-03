@@ -8,21 +8,21 @@
     <tr>
     <td class="avatar">{{ enlace.autor.email|avatar:40 }}</td>
     <td>
-    <div class="info_respuesta">
+    <div class="respuesta">
+        {{ enlace.descripcion|capfirst }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a>
+    </div>
+    <div class="info_respuesta_down">
         {{ enlace.clicks }} clicks |
         {{ enlace.creado|date:"d/m/Y H:i" }} |
     {% if enlace.autor %}
         <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
         {{ enlace.puntos }}
     {% else %}
-        an&oacute;nimo:
+        an&oacute;nimo
     {% endif %}
     </div>
-    <div class="respuesta">
-        {{ enlace.descripcion|capfirst }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a>
-    </div>
     </td>
-    <td width="150" valign="bottom">
+    <td width="150" valign="top">
     {% ifequal enlace.tipo_enlace 'imagen' %}
         <a href="/images"><img src="/img/photo.png" alt="imagen"/></a>
     {% endifequal %}
@@ -51,16 +51,16 @@
 <tr>
 <td></td>
 <td colspan="2">
-    <ul class="paginacion">
-        <li>P&aacute;ginas:</li>
+    <div class="paginacion">
+        <span>P&aacute;ginas:</span>
     {% for pag in rango_paginas %}
         {% ifequal pag pag_actual %}
-            <li id="actual"><a href="/actualidad/{{pag}}">{{pag}}</a></li>
+            <span id="actual"><a href="/actualidad/{{pag}}">{{pag}}</a></span>
         {% else %}
-            <li><a href="/actualidad/{{pag}}">{{pag}}</a></li>
+            <span><a href="/actualidad/{{pag}}">{{pag}}</a></span>
         {% endifequal %}
     {% endfor %}
-    </ul>
+    </div>
 </td>
 </tr>
 {% endifnotequal %}

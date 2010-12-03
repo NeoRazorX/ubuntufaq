@@ -29,8 +29,8 @@ class Imagenes(Pagina):
         
         template_values = {
             'titulo': 'Imagenes de Ubuntu FAQ',
-            'descripcion': 'Todas las imagenes de actualidad en torno a Ubuntu Linux',
-            'tags': 'ubufaq, ubuntu faq, imagenes ubuntu, wallpapers ubuntu, linux, lucid, maverick, natty',
+            'descripcion': 'Wallpapers, screenshots e imagenes de actualidad en torno a Ubuntu Linux',
+            'tags': 'ubufaq, ubuntu faq, imagenes ubuntu, wallpapers ubuntu, screenshots ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
