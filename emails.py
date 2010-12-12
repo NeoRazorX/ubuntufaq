@@ -22,7 +22,7 @@ class emails:
         subject = "Han contestado a tu pregunta en Ubuntu FAQ"
         valores = {
             't': p.titulo,
-            'l': "http://www.ubufaq.com/p/" + str(p.key())
+            'l': "http://www.ubufaq.com/question/" + str(p.key())
             }
         
         body = """El motivo de este mensaje es informarte que han contestado a tu pregunta: "%(t)s".\nPuedes ver la respuesta en el siguiente enlace -> %(l)s\n\nAtentamente,\nEl Cron de Ubuntu FAQ.""" % valores

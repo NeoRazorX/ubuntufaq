@@ -2,6 +2,7 @@
 
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
+WORDPRESS_PRIVATE_EMAIL = ''
 
 import math
 from google.appengine.ext import db, webapp
@@ -51,6 +52,12 @@ class Comentario(db.Model):
 # clase base
 class Pagina(webapp.RequestHandler):
     def get(self):
+        # comprobamo que no hayan accedido a la web por appspot
+        if self.request.uri[7:29] == 'ubuntu-faq.appspot.com':
+            self.error_dominio = True
+        else:
+            self.error_dominio = False
+        
         if users.get_current_user():
             self.url = users.create_logout_url( self.request.uri )
             self.url_linktext = 'salir'

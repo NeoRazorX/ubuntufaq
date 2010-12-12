@@ -47,7 +47,8 @@ class Indice(Pagina):
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
             'formulario' : self.formulario,
-            'vista': vista
+            'vista': vista,
+            'error_dominio': self.error_dominio
         }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
@@ -73,7 +74,8 @@ class Ayuda(Pagina):
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
             'formulario': self.formulario,
-            'vista': 'ayuda'
+            'vista': 'ayuda',
+            'error_dominio': self.error_dominio
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/ayuda.html')
@@ -126,7 +128,8 @@ class Detalle_usuario(Pagina):
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
                 'formulario' : self.formulario,
-                'vista': vista
+                'vista': vista,
+                'error_dominio': self.error_dominio
                 }
             
             path = os.path.join(os.path.dirname(__file__), 'templates/usuario.html')
@@ -146,7 +149,8 @@ class Buscar(Pagina):
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
             'formulario': self.formulario,
-            'vista': 'buscar'
+            'vista': 'buscar',
+            'error_dominio': self.error_dominio
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
@@ -180,7 +184,8 @@ class Perror(Pagina):
             'formulario': self.formulario,
             'vista': '404',
             'error': merror.get(cerror, 'Error desconocido'),
-            'cerror': cerror
+            'cerror': cerror,
+            'error_dominio': self.error_dominio
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
@@ -198,10 +203,10 @@ def main():
                                         (r'/sin-solucionar/(.*)', Sin_contestar),
                                         (r'/actualidad/(.*)', Actualidad),
                                         (r'/images/(.*)', Imagenes),
-                                        (r'/p/(.*)', Detalle_pregunta),
+                                        (r'/p/(.*)', Redir_pregunta),
                                         (r'/question/(.*)', Detalle_pregunta),
-                                        (r'/e/(.*)', Redir_enlace),
-                                        (r'/de/(.*)', Detalle_enlace),
+                                        (r'/e/(.*)', Acceder_enlace),
+                                        (r'/de/(.*)', Redir_enlace),
                                         (r'/story/(.*)', Detalle_enlace),
                                         (r'/u/(.*)', Detalle_usuario),
                                         ('/ayuda', Ayuda),
@@ -213,7 +218,9 @@ def main():
                                         ('/add_c', Comentar),
                                         ('/dest_r', Destacar_respuesta),
                                         ('/mod_p', Modificar_pregunta),
-                                        ('/mod_ep', Mod_estado_pregunta),
+                                        ('/mod_r', Modificar_respuesta),
+                                        ('/mod_e', Modificar_enlace),
+                                        ('/mod_c', Modificar_comentario),
                                         ('/del_r', Borrar_respuesta),
                                         ('/del_p', Borrar_pregunta),
                                         ('/del_e', Borrar_enlace),
@@ -221,7 +228,7 @@ def main():
                                         (r'/error/(.*)', Perror),
                                         ('/.*', Perror),
                                     ],
-                                    debug=False)
+                                    debug=True)
     webapp.template.register_template_library('filtros_django')
     run_wsgi_app(application)
 

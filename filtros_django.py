@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import hashlib, random
+import hashlib, random, urllib
 from google.appengine.ext import webapp
 from datetime import datetime
 
@@ -50,6 +50,8 @@ def estado_pregunta(estado):
     elif estado == 1:
         retorno = 'incompleta'
     elif estado == 2:
+        retorno = 'abierta'
+    elif estado == 3:
         retorno = 'parcialmente solucionada'
     elif estado == 10:
         retorno = 'solucionada'
@@ -63,39 +65,44 @@ def estado_pregunta(estado):
     return retorno
 
 
-def randomsg(numero):
-    eleccion = random.randint(0, 6)
+def randomsg(enlaces):
+    eleccion = random.randint(0, 11)
     
     if eleccion == 0:
         enlace = '/actualidad#nuevo-enlace'
-        imagen = 'tux-want-you'
+        imagen = '/img/tux-want-you.png'
         mensaje = 'Tux dice que compartas con nosotros enlaces de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, un blog, etc.'
     elif eleccion == 1:
         enlace = '/actualidad#nuevo-enlace'
-        imagen = 'ubufuck'
+        imagen = '/img/ubufuck.png'
         mensaje = 'Comparte con nosotros enlaces de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, un blog, etc.'
     elif eleccion == 2:
         enlace = '/actualidad#nuevo-enlace'
-        imagen = 'ubufuck2'
+        imagen = '/img/ubufuck2.png'
         mensaje = 'Comparte con nosotros enlaces de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, un blog, etc.'
     elif eleccion == 3:
         enlace = 'http://www.ubufaq.com'
-        imagen = 'ubufaq'
+        imagen = '/img/ubufaq.png'
         mensaje = 'Recuerda la direcci&oacute;n: ubufaq.com'
     elif eleccion == 4:
         enlace = 'http://www.ubufaq.com'
-        imagen = 'ubufaq2'
+        imagen = '/img/ubufaq2.png'
         mensaje = 'Recuerda la direcci&oacute;n: ubufaq.com'
     elif eleccion == 5:
-        enlace = '/images'
-        imagen = 'galeria'
-        mensaje = 'Nueva galer&iacute;a de im&aacute;genes (beta)'
-    else:
         enlace = '/actualidad#nuevo-enlace'
-        imagen = 'traje-anonymous'
+        imagen = '/img/traje-anonymous.png'
         mensaje = 'Anonymous tambi&eacute;n comparte enlaces de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, un blog, etc.'
+    else:
+        enlace = '/images'
+        mensaje = 'Nueva galer&iacute;a de im&aacute;genes (beta)'
+        imagen = ''
+        for enl in enlaces:
+            if enl.tipo_enlace == 'imagen' and imagen == '' and random.randint(0, 2) == 0:
+                imagen = 'http://api.thumbalizr.com/?url=' + urllib.quote( str(enl.url) )
+        if imagen == '':
+            imagen = '/img/ubufuck2.png'
     
-    return '<a href="' + enlace + '"><img src="/img/' + imagen + '.png" alt="' + imagen + '" title="' + mensaje + '"/></a>'
+    return '<a href="' + enlace + '"><img src="' + imagen + '" alt="' + imagen + '" title="' + mensaje + '"/></a>'
 
 
 register.filter( cortamail )

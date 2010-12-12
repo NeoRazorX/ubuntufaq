@@ -10,7 +10,7 @@
     <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss" />
     <style type="text/css">
     body {
-        background: white;
+        background-color: white;
         font-size: 13px;
         margin: 0px;
         margin-left: 30px;
@@ -28,16 +28,23 @@
     }
     
     textarea {
-        width: 100%;
-        border: 1px solid black;
+        width: 99%;
+        border: 1px solid #191919;
     }
     
     input {
-        border: 1px solid black;
+        border: 1px solid #191919;
+    }
+    
+    input.boton {
+        background-color: #191919;
+        color: white;
+        font-weight: bold;
+        border: 2px outset #696969;
     }
     
     input#titulo {
-        width: 100%;
+        width: 99%;
     }
     
     img {
@@ -45,13 +52,8 @@
         border-width: 0;
     }
     
-    img#enlace {
-        border: 3px double #191919;
-        width: 80%;
-    }
-    
     img.galeria {
-        border: 1px outset #191919;
+        border: 3px double #191919;
     }
     
     div.cabecera {
@@ -61,8 +63,8 @@
         letter-spacing: 0.5em;
         padding-left: 10px;
         padding-bottom: 5px;
-        border-left: 1px outset #191919;
-        border-right: 1px outset #191919;
+        border-left: 1px solid #191919;
+        border-right: 1px solid #191919;
     }
     
     div.cabecera span {
@@ -76,9 +78,9 @@
         color: silver;
         font-size: 14px;
         padding: 5px;
-        border-left: 1px outset #191919;
-        border-right: 1px outset #191919;
-        border-bottom: 1px outset #191919;
+        border-left: 1px solid #191919;
+        border-right: 1px solid #191919;
+        border-bottom: 1px solid #191919;
         border-bottom-left-radius: 10px 10px;
         border-bottom-right-radius: 10px 10px;
         -moz-border-radius-bottomleft: 10px 10px;
@@ -98,6 +100,16 @@
     
     div.menucabecera a {
         color: white;
+    }
+    
+    div.dominio {
+        background-color: #FFD5AD;
+        border-top: 1px solid #EEB27A;
+        border-bottom: 1px solid #EEB27A;
+        margin: 5px;
+        padding: 5px;
+        font-size: 15px;
+        text-align: center;
     }
     
     div.preguntas {
@@ -173,7 +185,7 @@
     
     div.respuesta_d {
         background-color: #feffc0;
-        border: 2px outset #feffc0;
+        border: 1px solid #e1e16e;
         margin-top: 0px;
         margin-left: 10px;
         margin-right: 10px;
@@ -231,8 +243,9 @@
     
     div.titulo span {
         font-size: 14px;
+        letter-spacing: normal;
         padding-left: 10px;
-        color: black;
+        color: #191919;
     }
     
     div.avatar {
@@ -248,7 +261,7 @@
     }
     
     div.avatar a {
-        color: black;
+        color: #191919;
     }
     
     td.avatar {
@@ -308,9 +321,9 @@
         color: silver;
         padding-top: 5px;
         padding-bottom: 10px;
-        border-left: 1px outset #191919;
-        border-right: 1px outset #191919;
-        border-top: 1px outset #191919;
+        border-left: 1px solid #191919;
+        border-right: 1px solid #191919;
+        border-top: 1px solid #191919;
         border-top-left-radius: 10px 10px;
         border-top-right-radius: 10px 10px;
         -moz-border-radius-topleft: 10px 10px;
@@ -460,7 +473,7 @@
 </head>
 <body>
 <div class="cabecera">
-    <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu Linux" href="http://www.ubufaq.com">Ubuntu <s>FUCK</s> FAQ</a>
+    <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu Linux" href="/">Ubuntu <s>FUCK</s> FAQ</a>
     <br/><span>Actualidad, blogs, wallpapers y soluciones r&aacute;pidas para tus problemas con Ubuntu Linux</span>
 </div>
 <div class="menucabecera">
@@ -483,3 +496,7 @@
     
     <span><a href="{{ url }}">{{ url_linktext }}</a></span>
 </div>
+
+{% if error_dominio %}
+<div class="dominio">Por favor, usa el dominio <a href="http://www.ubufaq.com">ubufaq.com</a> para acceder a esta web.</div>
+{% endif %}

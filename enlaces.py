@@ -2,9 +2,20 @@
 
 import logging
 from google.appengine.ext import db
+from google.appengine.api import mail, urlfetch
 from base import *
 
 class enlaces:
+    def acortar_url(self, url):
+        try:
+            result = urlfetch.fetch("http://is.gd/api.php?longurl=" + url)
+            if result.status_code == 200:
+                return result.content
+            else:
+                return url
+        except:
+            return url
+    
     def comprobar(self, enlace):
         tipo_enlace = 'texto'
         
@@ -24,6 +35,21 @@ class enlaces:
         if enlace.tipo_enlace != tipo_enlace:
             enlace.tipo_enlace = tipo_enlace
             enlace.put()
+        
+        # enviamos un mail a wordpress
+        if WORDPRESS_PRIVATE_EMAIL != '':
+            if len(enlace.descripcion) < 50:
+                subject = body = enlace.descripcion
+            else:
+                subject = body = enlace.descripcion[:50] + '...'
+            
+            body += ' - Fuente: ' + self.acortar_url('http://www.ubufaq.com/e/' + str(enlace.key()) )
+            body += ', m&aacute;s en Ubuntu FAQ: ' + self.acortar_url('http://www.ubufaq.com/story/' + str(enlace.key()) )
+            
+            try:
+                mail.send_mail("contacto@ubufaq.com", WORDPRESS_PRIVATE_EMAIL, subject, body)
+            except:
+                logging.error('Error al enviar el email a wordpress para el enlace: ' + str(enlace.key()))
     
     def __init__(self):
         enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE tipo_enlace = :1", None).fetch(25)

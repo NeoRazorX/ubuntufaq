@@ -11,21 +11,7 @@
         <textarea name="contenido" rows="6" cols="60">{{ pregunta.contenido|capfirst }}</textarea>
         <br/>
         Etiquetas: <input type="text" name="tags" size="30" maxlength="100" value="{{ pregunta.tags }}"/>
-        <input type="submit" value="modificar">
-        </form>
-    </div>
-{% else %}
-<table>
-<tr>
-<td width="100%">
-    <form name="pregunta" action="/mod_ep" method="post">
-    <input type="hidden" name="id" value="{{ pregunta.key }}"/>
-    <div class="pregunta">
-    <div class="titulo">
-        <a href="/question/{{pregunta.key}}">{{ pregunta.titulo|capfirst }}</a>
-        <span>
-    {% if editar %}
-        <select name="estado">
+        Estado de la pregunta: <select name="estado">
         {% ifequal pregunta.estado 0 %}
             <option value="0" selected="selected">nueva</option>
         {% else %}
@@ -37,9 +23,14 @@
             <option value="1">incompleta</option>
         {% endifequal %}
         {% ifequal pregunta.estado 2 %}
-            <option value="2" selected="selected">parcialmente solucionada</option>
+            <option value="2" selected="selected">abierta</option>
         {% else %}
-            <option value="2">parcialmente solucionada</option>
+            <option value="2">abierta</option>
+        {% endifequal %}
+        {% ifequal pregunta.estado 3 %}
+            <option value="3" selected="selected">parcialmente solucionada</option>
+        {% else %}
+            <option value="3">parcialmente solucionada</option>
         {% endifequal %}
         {% ifequal pregunta.estado 10 %}
             <option value="10" selected="selected">solucionada</option>
@@ -62,11 +53,20 @@
             <option value="13">erronea</option>
         {% endifequal %}
         </select>
-        <input type="submit" value="guardar"/>
-    {% else %}
-        {{ pregunta.estado|estado_pregunta }}
-    {% endif %}
-        </span>
+        <input type="submit" class="boton" value="modificar">
+        </form>
+    </div>
+    <br/>
+{% else %}
+<table>
+<tr>
+<td width="100%">
+    <form name="pregunta" action="/mod_ep" method="post">
+    <input type="hidden" name="id" value="{{ pregunta.key }}"/>
+    <div class="pregunta">
+    <div class="titulo">
+        <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|capfirst }}</a>
+        <span>{{ pregunta.estado|estado_pregunta }}</span>
     </div>
     {{ pregunta.contenido|capfirst|linebreaksbr|urlizetrunc:35 }}
     <br/>
@@ -76,16 +76,16 @@
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
     {% if pregunta.autor %}
-        escrito por <a href="/u/{{pregunta.autor.email|urlencode}}">{{ pregunta.autor.nickname|cortamail }}</a>
+        escrito por <a href="/u/{{ pregunta.autor.email|urlencode }}">{{ pregunta.autor.nickname|cortamail }}</a>
         {{ pregunta.puntos }}
     {% else %}
         escrito por an&oacute;nimo
     {% endif %}
         {% if editar %}
-            | <a href="/question/{{pregunta.key}}?modificar=ok">modificar</a>
+            | <a href="/question/{{ pregunta.key }}?modificar=ok">modificar</a>
         {% endif %}
         {% if administrador %}
-            | <a href="#" onclick="borrar_pregunta('{{pregunta.key}}')">borrar</a>
+            | <a href="#" onclick="borrar_pregunta('{{ pregunta.key }}')">borrar</a>
         {% endif %}
     </span>
     </div>
@@ -106,6 +106,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 </table>
 {% endif %}
 
+
 <table>
 {% for respuesta in respuestas %}
 <tr>
@@ -116,8 +117,25 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     {% else %}
     <div class="respuesta">
     {% endif %}
-    <a name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-    {{ respuesta.contenido|capfirst|linebreaksbr|urlize }}</div>
+    
+    {% if modificar %}
+    {% if administrador %}
+        <form name="respuesta{{ forloop.counter }}" action="/mod_r" method="post">
+        <input type="hidden" name="id_pregunta" value="{{ pregunta.key }}"/>
+        <input type="hidden" name="id_respuesta" value="{{ respuesta.key }}"/>
+        <textarea name="contenido" rows="6" cols="60">{{ respuesta.contenido }}</textarea>
+        <input type="submit" class="boton" value="modificar">
+        </form>
+    {% else %}
+        <a name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
+        {{ respuesta.contenido|capfirst|linebreaksbr|urlize }}
+    {% endif %}
+    {% else %}
+        <a name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
+        {{ respuesta.contenido|capfirst|linebreaksbr|urlize }}
+    {% endif %}
+    
+    </div>
     
     <div class="info_respuesta_down">
         <a name="{{respuesta.key}}"></a>{{ respuesta.fecha|date:"d/m/Y H:i" }} |
@@ -151,7 +169,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <input type="hidden" name="id_pregunta" value="{{ pregunta.key }}"/>
     <textarea name="contenido" rows="6" cols="60">Utiliza un lenguaje claro y conciso.</textarea>
     <br/>{{ captcha }}
-    <input type="button" value="responder" onclick="enviar_respuesta()"/>
+    <input type="button" class="boton" value="responder" onclick="enviar_respuesta()"/>
     </form>
     </div>
 </td>

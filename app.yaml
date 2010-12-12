@@ -1,7 +1,9 @@
 application: ubuntu-faq
-version: 32
+version: 33
 runtime: python
 api_version: 1
+
+default_expiration: "3d"
 
 handlers:
 - url: /img

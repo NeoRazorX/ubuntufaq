@@ -71,9 +71,9 @@ class pingback:
                 destino = nodo.getElementsByTagName('source')[0].childNodes[0].data
                 fecha = nodo.getElementsByTagName('pubDate')[0].childNodes[0].data
                 
-                if sys.argv[1] != '' and fecha == sys.argv[1]:
+                if len( sys.argv ) < 2:
                     self.do_ping(origen, destino)
-                elif sys.argv[1] == '' and destino[:24] != 'http://www.muylinux.com/':
+                elif sys.argv[1] != '' and fecha == sys.argv[1]:
                     self.do_ping(origen, destino)
         else:
             print 'Error al leer los pingbacks'

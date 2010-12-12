@@ -3,6 +3,20 @@
 <div class="preguntas">
 
 {% if enlace %}
+{% if modificar %}
+    <div>
+        <div class="titulo">Editar enlace:</div>
+        <form name="enlace" action="/mod_e" method="post">
+        <input type="hidden" name="id" value="{{ enlace.key }}"/>
+        <input id="titulo" type="text" name="url" size="50" maxlength="100" value="{{ enlace.url }}"/>
+        <textarea name="descripcion" rows="6" cols="60">{{ enlace.descripcion }}</textarea>
+        <br/>
+        Tipo enlace: <input type="text" name="tipo_enlace" size="30" maxlength="100" value="{{ enlace.tipo_enlace }}"/>
+        <input type="submit" class="boton" value="modificar">
+        </form>
+    </div>
+    <br/>
+{% else %}
 <table>
 <tr>
 <td valign="top">
@@ -19,6 +33,7 @@
     escrito por: an&oacute;nimo
 {% endif %}
 {% if administrador %}
+    | <a href="/story/{{ enlace.key }}?modificar=ok">modificar</a>
     | <a href="#" onclick="borrar_enlace('{{ enlace.key }}')">borrar</a>
 {% endif %}
 </div>
@@ -47,7 +62,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 
 
 {% ifequal tipo_enlace 'youtube' %}
-    <center><object width="480" height="385"><param name="movie" value="http://www.youtube.com/v/{{ aux_enlace }}"></param><param name="allowFullScreen" value="true"></param><param name="allowscriptaccess" value="always"></param><embed src="http://www.youtube.com/v/{{ aux_enlace }}" type="application/x-shockwave-flash" allowscriptaccess="always" allowfullscreen="true" width="480" height="385"></embed></object></center><br/>
+    <center><iframe title="YouTube video player" class="youtube-player" type="text/html" width="480" height="390" src="http://www.youtube.com/embed/{{ aux_enlace }}" frameborder="0"></iframe></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'vimeo' %}
@@ -59,7 +74,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% endifequal %}
 
 {% ifequal tipo_enlace 'imagen' %}
-    <center><a href="{{ enlace.url }}"><img src="{{ enlace.url }}" id="enlace" alt="{{ enlace.descripcion }}" title="{{ enlace.descripcion }}"/></a></center><br/>
+    <center><a href="{{ enlace.url }}"><img class="galeria" src="http://api.thumbalizr.com/?url={{ enlace.url|urlencode }}" alt="{{ enlace.descripcion }}" title="{{ enlace.descripcion }}"/></a></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'deb' %}
@@ -70,6 +85,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <center><a href="{{ enlace.url }}"><img src="/img/emblem-package.png" alt="{{ enlace.descripcion }}"/></a></center><br/>
 {% endifequal %}
 {% endif %}
+{% endif %}
 
 
 <table>
@@ -78,8 +94,17 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
     <td width="100%" valign="top">
     <div class="respuesta">
+    {% if modificar %}
+        <form name="comentario{{ forloop.counter }}" action="/mod_c" method="post">
+        <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
+        <input type="hidden" name="id_comentario" value="{{ coment.key }}"/>
+        <textarea name="contenido" rows="6" cols="60">{{ coment.contenido }}</textarea>
+        <input type="submit" class="boton" value="modificar">
+        </form>
+    {% else %}
         <a name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
         {{ coment.contenido|capfirst|linebreaksbr|urlize }}
+    {% endif %}
     </div>
     <div class="info_respuesta_down">
         <a name="{{ coment.key }}"></a>{{ coment.fecha|date:"d/m/Y H:i" }} |
@@ -98,6 +123,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 </tr>
 {% endfor %}
 
+
 <tr>
 <td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
 <td width="100%">
@@ -106,7 +132,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
     <textarea name="contenido" rows="6" cols="60">Deja un comentario, es gratis!</textarea>
     <br/>{{ captcha }}
-    <input type="button" value="comentar" onclick="enviar_comentario()"/>
+    <input type="button" class="boton" value="comentar" onclick="enviar_comentario()"/>
     </form>
     </div>
 </td>

@@ -22,7 +22,7 @@
     {% endif %}
     </div>
     </td>
-    <td width="150" valign="top">
+    <td width="250" valign="top">
     {% ifequal enlace.tipo_enlace 'imagen' %}
         <a href="/images"><img src="/img/photo.png" alt="imagen"/></a>
     {% endifequal %}
@@ -76,7 +76,7 @@
         <br/>
         <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
         <br/>{{ captcha }}
-        <input type="button" name="enviar" value="enviar" onclick="enviar_enlace()"/>
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
     </form>
     </div>
 </td>

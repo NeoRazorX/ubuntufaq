@@ -84,11 +84,19 @@ class Actualidad(Pagina):
             'paginas': paginas,
             'rango_paginas': range(paginas),
             'pag_actual': p_actual,
-            'usuario': users.get_current_user()
+            'usuario': users.get_current_user(),
+            'error_dominio': self.error_dominio
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/actualidad.html')
         self.response.out.write(template.render(path, template_values))
+
+class Redir_enlace(webapp.RequestHandler):
+    def get(self, id_enlace=None):
+        if id_enlace:
+            self.redirect('/story/' + id_enlace)
+        else:
+            self.redirect('/error/404')
 
 class Detalle_enlace(Pagina):
     def get(self, id_enlace=None):
@@ -139,9 +147,16 @@ class Detalle_enlace(Pagina):
                     use_ssl = False,
                     error = None)
             
+            if self.request.get('modificar') and users.is_current_user_admin():
+                modificar = True
+            else:
+                modificar = False
+            
+            descripcion = 'Discusion sobre: ' + e.descripcion + ' | enlace a ' + tipo_enlace + ', ' + str(e.comentarios) + ' comentarios.'
+            
             template_values = {
-                'titulo': 'UbuntuFAQ - ' + e.descripcion,
-                'descripcion': 'Discusion sobre: ' + e.descripcion,
+                'titulo': e.descripcion + ' - Ubuntu FAQ',
+                'descripcion': descripcion,
                 'tags': 'ubufaq, ubuntu faq, noticias ubuntu, actualidad ubuntu, linux, lucid, maverick, natty',
                 'url': self.url,
                 'url_linktext': self.url_linktext,
@@ -153,7 +168,9 @@ class Detalle_enlace(Pagina):
                 'comentarios': c,
                 'captcha': chtml,
                 'administrador': users.is_current_user_admin(),
-                'usuario': users.get_current_user()
+                'modificar': modificar,
+                'usuario': users.get_current_user(),
+                'error_dominio': self.error_dominio
                 }
             
             path = os.path.join(os.path.dirname(__file__), 'templates/enlace.html')
@@ -161,7 +178,7 @@ class Detalle_enlace(Pagina):
         else:
             self.redirect('/error/404')
 
-class Redir_enlace(webapp.RequestHandler):
+class Acceder_enlace(webapp.RequestHandler):
     def get(self, id_enlace=None):
         try:
             e = Enlace.get( id_enlace )
@@ -180,6 +197,30 @@ class Redir_enlace(webapp.RequestHandler):
             self.redirect( e.url )
         else:
             self.redirect('/error/404')
+
+class Modificar_enlace(webapp.RequestHandler):
+    def post(self):
+        try:
+            e = Enlace.get( self.request.get('id') )
+        except:
+            e = None
+        
+        if e and self.request.get('url') and self.request.get('descripcion') and self.request.get('tipo_enlace'):
+            if users.is_current_user_admin():
+                try:
+                    e.url = cgi.escape( self.request.get('url') )
+                    e.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
+                    if self.request.get('tipo_enlace') != '' and self.request.get('tipo_enlace') != 'None':
+                        e.tipo_enlace = cgi.escape( self.request.get('tipo_enlace') )
+                    e.put()
+                    logging.warning('Se ha modificado el enlace con id: ' + self.request.get('id'))
+                    self.redirect('/story/' + str( e.key() ))
+                except:
+                    self.redirect('/error/503')
+            else:
+                self.redirect('/error/403')
+        else:
+            self.redirect('/error/403')
 
 class Borrar_enlace(webapp.RequestHandler):
     def get(self):
@@ -243,6 +284,28 @@ class Comentar(webapp.RequestHandler):
                     self.redirect('/error/503')
             else:
                 self.redirect('/error/403c')
+        else:
+            self.redirect('/error/403')
+
+class Modificar_comentario(webapp.RequestHandler):
+    def post(self):
+        try:
+            e = Enlace.get( self.request.get('id_enlace') )
+            c = Comentario.get( self.request.get('id_comentario') )
+        except:
+            e = c = None
+        
+        if e and c and self.request.get('contenido'):
+            if users.is_current_user_admin():
+                try:
+                    c.contenido = cgi.escape( self.request.get('contenido') )
+                    c.put()
+                    logging.warning('Se ha modificado el comentario con id: ' + self.request.get('id_comentario'))
+                    self.redirect('/story/' + self.request.get('id_enlace'))
+                except:
+                    self.redirect('/error/503')
+            else:
+                self.redirect('/error/403')
         else:
             self.redirect('/error/403')
 

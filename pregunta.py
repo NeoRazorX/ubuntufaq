@@ -30,7 +30,8 @@ class Nueva_pregunta(Pagina):
             'mi_perfil': self.mi_perfil,
             'formulario': self.formulario,
             'vista': 'nueva',
-            'captcha': chtml
+            'captcha': chtml,
+            'error_dominio': self.error_dominio
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
@@ -72,6 +73,13 @@ class Preguntar(webapp.RequestHandler):
         else:
             self.redirect('/error/403')
 
+class Redir_pregunta(Pagina):
+    def get(self, id_p=None):
+        if id_p:
+            self.redirect('/question/' + id_p)
+        else:
+            self.redirect('/error/404')
+
 class Detalle_pregunta(Pagina):
     def get(self, id_p=None):
         Pagina.get(self)
@@ -111,7 +119,7 @@ class Detalle_pregunta(Pagina):
                     error = None)
             
             template_values = {
-                'titulo': p.titulo,
+                'titulo': p.titulo + ' - Ubuntu FAQ',
                 'descripcion': p.contenido,
                 'pregunta': p,
                 'tags': 'problema ubuntu, ' + p.tags,
@@ -124,7 +132,8 @@ class Detalle_pregunta(Pagina):
                 'editar': editar,
                 'modificar': modificar,
                 'captcha': chtml,
-                'usuario': users.get_current_user()
+                'usuario': users.get_current_user(),
+                'error_dominio': self.error_dominio
                 }
             
             path = os.path.join(os.path.dirname(__file__), 'templates/pregunta.html')
@@ -140,33 +149,12 @@ class Modificar_pregunta(webapp.RequestHandler):
         except:
             p = None
         
-        if p and self.request.get('titulo') and self.request.get('contenido') and self.request.get('tags'):
+        if p and self.request.get('titulo') and self.request.get('contenido') and self.request.get('tags') and self.request.get('estado'):
             if (users.get_current_user() == p.autor) or users.is_current_user_admin():
                 try:
                     p.titulo = cgi.escape( self.request.get('titulo') )
                     p.contenido = cgi.escape( self.request.get('contenido') )
                     p.tags = cgi.escape( self.request.get('tags') )
-                    p.put()
-                    logging.warning("Se ha modificado la pregunta con id: " + self.request.get('id'))
-                    self.redirect('/question/' + self.request.get('id'))
-                except:
-                    self.redirect('/error/503')
-            else:
-                self.redirect('/error/403')
-        else:
-            self.redirect('/error/403')
-
-# solo el autor de la preguna o un administrador puede modificarla
-class Mod_estado_pregunta(webapp.RequestHandler):
-    def post(self):
-        try:
-            p = Pregunta.get( self.request.get('id') )
-        except:
-            p = None
-        
-        if p and self.request.get('estado'):
-            if (users.get_current_user() == p.autor) or users.is_current_user_admin():
-                try:
                     p.estado = int( self.request.get('estado') )
                     p.put()
                     logging.warning("Se ha modificado la pregunta con id: " + self.request.get('id'))
@@ -264,12 +252,34 @@ class Destacar_respuesta(webapp.RequestHandler):
         except:
             p = r = None
         
-        if p and r and self.request.get('id') and self.request.get('r'):
+        if p and r:
             if (users.get_current_user() == p.autor) or users.is_current_user_admin():
                 try:
                     r.destacada = not(r.destacada)
                     r.put()
                     self.redirect('/question/' + self.request.get('id'))
+                except:
+                    self.redirect('/error/503')
+            else:
+                self.redirect('/error/403')
+        else:
+            self.redirect('/error/403')
+
+# solo el autor de la preguna o un administrador puede destacar una respuesta
+class Modificar_respuesta(webapp.RequestHandler):
+    def post(self):
+        try:
+            p = Pregunta.get( self.request.get('id_pregunta') )
+            r = Respuesta.get( self.request.get('id_respuesta') )
+        except:
+            p = r = None
+        
+        if p and r:
+            if users.is_current_user_admin():
+                try:
+                    r.contenido = cgi.escape( self.request.get('contenido') )
+                    r.put()
+                    self.redirect('/question/' + self.request.get('id_pregunta'))
                 except:
                     self.redirect('/error/503')
             else:

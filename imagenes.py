@@ -41,7 +41,8 @@ class Imagenes(Pagina):
             'paginas': paginas,
             'rango_paginas': range(paginas),
             'pag_actual': p_actual,
-            'usuario': users.get_current_user()
+            'usuario': users.get_current_user(),
+            'error_dominio': self.error_dominio
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/imagenes.html')
