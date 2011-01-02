@@ -27,11 +27,12 @@
     {{ enlace.clicks }} clicks |
     {{ enlace.creado|date:"d/m/Y H:i" }} |
 {% if enlace.autor %}
-    escrito por: <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
+    <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
     {{ enlace.puntos }}
 {% else %}
-    escrito por: an&oacute;nimo
+    an&oacute;nimo
 {% endif %}
+    | {{ enlace.os|muestra_os }}
 {% if administrador %}
     | <a href="/story/{{ enlace.key }}?modificar=ok">modificar</a>
     | <a href="#" onclick="borrar_enlace('{{ enlace.key }}')">borrar</a>
@@ -41,7 +42,7 @@
 {% ifequal tipo_enlace 'texto' %}
 <div class="comentario">
     <a href="/story/{{ enlace.key }}">#0</a>
-    {{ enlace.descripcion|capfirst|urlizetrunc:30 }} - <a href="{{ enlace.url }}">{{ enlace.url|slice:"7:37" }}</a>
+    {{ enlace.descripcion|capfirst|urlizetrunc:30 }} - <a href="{{ enlace.url }}">{{ enlace.url|slice:":37" }}</a>
 </div>
 {% else %}
 <div class="comentario">
@@ -74,7 +75,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% endifequal %}
 
 {% ifequal tipo_enlace 'imagen' %}
-    <center><a href="{{ enlace.url }}"><img class="galeria" src="http://api.thumbalizr.com/?url={{ enlace.url|urlencode }}" alt="{{ enlace.descripcion }}" title="{{ enlace.descripcion }}"/></a></center><br/>
+    <center><a href="{{ enlace.url }}">{{ enlace.url|miniatura }}</a></center><br/>
 {% endifequal %}
 
 {% ifequal tipo_enlace 'deb' %}
@@ -114,6 +115,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     {% else %}
         an&oacute;nimo
     {% endif %}
+        | {{ coment.os|muestra_os }}
     
     {% if administrador %}
         | <a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a>

@@ -12,18 +12,19 @@ class Enlazar(webapp.RequestHandler):
     def post(self):
         if self.request.get('url') and self.request.get('descripcion'):
             # comprobamos que no se haya introducido anteriormente el enlace
-            url = cgi.escape( self.request.get('url') )
+            url = self.request.get('url')
             enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE url = :1", url).fetch(1)
             if enlaces:
                 self.redirect('/story/' + str( enlaces[0].key() ))
             else:
                 enl = Enlace()
                 enl.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
+                enl.url = url
+                enl.os = self.request.environ['HTTP_USER_AGENT']
                 
                 if users.get_current_user():
                     try:
                         enl.autor = users.get_current_user()
-                        enl.url = url
                         enl.put()
                         self.redirect('/story/' + str( enl.key() ))
                     except:
@@ -41,7 +42,6 @@ class Enlazar(webapp.RequestHandler):
                     
                     if cResponse.is_valid:
                         try:
-                            enl.url = url
                             enl.put()
                             self.redirect('/story/' + str( enl.key() ))
                         except:
@@ -208,10 +208,12 @@ class Modificar_enlace(webapp.RequestHandler):
         if e and self.request.get('url') and self.request.get('descripcion') and self.request.get('tipo_enlace'):
             if users.is_current_user_admin():
                 try:
-                    e.url = cgi.escape( self.request.get('url') )
+                    e.url = self.request.get('url')
                     e.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
-                    if self.request.get('tipo_enlace') != '' and self.request.get('tipo_enlace') != 'None':
-                        e.tipo_enlace = cgi.escape( self.request.get('tipo_enlace') )
+                    if self.request.get('tipo_enlace') in ['youtube', 'vimeo', 'vhtml5', 'imagen', 'deb', 'package', 'texto']:
+                        e.tipo_enlace = self.request.get('tipo_enlace')
+                    else:
+                        e.tipo_enlace = None
                     e.put()
                     logging.warning('Se ha modificado el enlace con id: ' + self.request.get('id'))
                     self.redirect('/story/' + str( e.key() ))
@@ -256,6 +258,7 @@ class Comentar(webapp.RequestHandler):
         c = Comentario()
         c.contenido = cgi.escape( self.request.get('contenido') )
         c.id_enlace = self.request.get('id_enlace')
+        c.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('contenido') and self.request.get('id_enlace'):
             c.autor = users.get_current_user()

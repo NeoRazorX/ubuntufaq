@@ -43,6 +43,7 @@ class Preguntar(webapp.RequestHandler):
         p.titulo = cgi.escape( self.request.get('titulo') )
         p.contenido = cgi.escape( self.request.get('contenido') )
         p.tags = cgi.escape( self.request.get('tags') )
+        p.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
             p.autor = users.get_current_user()
@@ -198,6 +199,7 @@ class Responder(webapp.RequestHandler):
         r = Respuesta()
         r.contenido = cgi.escape( self.request.get('contenido') )
         r.id_pregunta = self.request.get('id_pregunta')
+        r.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('id_pregunta') and self.request.get('contenido'):
             r.autor = users.get_current_user()

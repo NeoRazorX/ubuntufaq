@@ -7,12 +7,13 @@ from base import *
 
 class karma:
     def paginar(self, consulta):
+        total = consulta.count()
         if consulta.count() > 10:
-            eleccion = random.randint(0, consulta.count() - 1)
+            eleccion = random.randint(0, total - 1)
         else:
             eleccion = 0
         
-        return consulta.fetch( 10, eleccion )
+        return consulta.fetch( 10, eleccion ), total
     
     def calcular(self, autor):
         if autor:
@@ -24,13 +25,16 @@ class karma:
                 q_respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1", autor)
                 q_enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1", autor)
                 q_comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1", autor)
-                preguntas = self.paginar( q_preguntas )
-                respuestas = self.paginar( q_respuestas )
-                enlaces = self.paginar( q_enlaces )
-                comentarios = self.paginar( q_comentarios )
                 
-                # calculamos el karma
-                puntos = 1 + q_respuestas.count() + q_enlaces.count() + q_comentarios.count()
+                # paginamos a la vez que calculamos el karma
+                caca = 0
+                preguntas, caca = self.paginar( q_preguntas )
+                respuestas, caca = self.paginar( q_respuestas )
+                puntos = 1 + caca
+                enlaces, caca = self.paginar( q_enlaces )
+                puntos += caca
+                comentarios, caca = self.paginar( q_comentarios )
+                puntos += caca
             except:
                 logging.error("Imposible obtener los registros del usuario " + str(autor))
                 preguntas = None
@@ -81,7 +85,7 @@ class karma:
         else:
             seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE puntos = 0").fetch(25)
         
-        if len( seleccion ) > 1:
+        if len( seleccion ) > 0:
             # marcamos los anonimos y seleccionamos los autores
             autores = []
             for usu1 in seleccion:

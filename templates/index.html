@@ -24,10 +24,10 @@
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
     {% if pregunta.autor %}
-        escrito por <a href="/u/{{pregunta.autor.email|urlencode}}">{{ pregunta.autor.nickname|cortamail }}</a>
+        <a href="/u/{{pregunta.autor.email|urlencode}}">{{ pregunta.autor.nickname|cortamail }}</a>
         {{ pregunta.puntos }}
     {% else %}
-        escrito por an&oacute;nimo
+        an&oacute;nimo
     {% endif %}
         </span>
     </div>
@@ -66,7 +66,7 @@
     <div class="ultimas_respuestas">Actualidad:</div>
     {% for enlace in enlaces %}
     <div class="respuesta">{{ enlace.descripcion|capfirst|truncatewords:20 }}<br/>
-    <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
+    <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:":37" }}</a></div>
     <div class="info_respuesta_down">
         {{ enlace.creado|date:"d/m/Y H:i" }} |
         {{ enlace.comentarios }} coment |

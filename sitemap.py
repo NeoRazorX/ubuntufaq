@@ -3,8 +3,8 @@
 from google.appengine.ext import db
 from base import *
 
-preguntas = Pregunta.all()
-enlaces = Enlace.all()
+preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(100)
+enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(100)
 
 print 'Content-Type: text/xml'
 print ''

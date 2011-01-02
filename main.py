@@ -104,14 +104,12 @@ class Detalle_usuario(Pagina):
                 vista = ''
             
             karma = 0
-            if p:
-                karma = p[0].puntos
-            elif r:
-                karma = r[0].puntos
-            elif e:
-                karma = e[0].puntos
+            if r:
+                for col in r:
+                    karma = max(col.puntos, karma)
             elif c:
-                karma = c[0].puntos
+                for col in c:
+                    karma = max(col.puntos, karma)
             
             template_values = {
                 'titulo': 'Ubuntu FAQ - perfil de ' + str(usuario),

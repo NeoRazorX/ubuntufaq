@@ -3,6 +3,13 @@
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 WORDPRESS_PRIVATE_EMAIL = ''
+RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
+            'http://neorazorx.blogspot.com/feeds/posts/default',
+            'http://ubuntulife.wordpress.com/feed/',
+            'http://www.linuxjuegos.com/wp-rss2.php',
+            'http://feeds.feedburner.com/fayerwayer',
+            'http://www.muylinux.com/feed/',
+            'http://www.genbeta.com/index.xml']
 
 import math
 from google.appengine.ext import db, webapp
@@ -21,6 +28,7 @@ class Pregunta(db.Model):
     enviar_email = db.BooleanProperty(default=False)
     estado = db.IntegerProperty(default=0)
     puntos = db.IntegerProperty(default=0)
+    os = db.StringProperty(default="desconocido")
 
 class Respuesta(db.Model):
     autor = db.UserProperty()
@@ -29,6 +37,7 @@ class Respuesta(db.Model):
     fecha = db.DateTimeProperty(auto_now_add=True)
     destacada = db.BooleanProperty(default=False)
     puntos = db.IntegerProperty(default=0)
+    os = db.StringProperty(default="desconocido")
 
 class Enlace(db.Model):
     autor = db.UserProperty()
@@ -41,6 +50,7 @@ class Enlace(db.Model):
     ultima_ip = db.StringProperty(default="0.0.0.0")
     comentarios = db.IntegerProperty(default=0)
     puntos = db.IntegerProperty(default=0)
+    os = db.StringProperty(default="desconocido")
 
 class Comentario(db.Model):
     autor = db.UserProperty()
@@ -48,6 +58,7 @@ class Comentario(db.Model):
     contenido = db.TextProperty()
     fecha = db.DateTimeProperty(auto_now_add=True)
     puntos = db.IntegerProperty(default=0)
+    os = db.StringProperty(default="desconocido")
 
 # clase base
 class Pagina(webapp.RequestHandler):
@@ -74,6 +85,8 @@ class Pagina(webapp.RequestHandler):
         paginas = int( math.ceil( query.count() / float(limite) ) )
         if paginas < 1:
             paginas = 1
+        elif paginas > 10:
+            paginas = 10
         
         try:
             p_actual = int(actual)

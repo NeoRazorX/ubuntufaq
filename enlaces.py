@@ -18,6 +18,8 @@ class enlaces:
     
     def comprobar(self, enlace):
         tipo_enlace = 'texto'
+        url_corta = self.acortar_url('http://www.ubufaq.com/e/' + str(enlace.key()) )
+        # no asignar la url_corta a enlace.url, porque esto hace que el script rss-scanner publique duplicados
         
         if enlace.url[:23] == 'http://www.youtube.com/':
             tipo_enlace = 'youtube'
@@ -41,10 +43,14 @@ class enlaces:
             if len(enlace.descripcion) < 50:
                 subject = body = enlace.descripcion
             else:
-                subject = body = enlace.descripcion[:50] + '...'
+                subject = enlace.descripcion[:50] + '...'
+                body = enlace.descripcion
             
-            body += ' - Fuente: ' + self.acortar_url('http://www.ubufaq.com/e/' + str(enlace.key()) )
-            body += ', m&aacute;s en Ubuntu FAQ: ' + self.acortar_url('http://www.ubufaq.com/story/' + str(enlace.key()) )
+            if tipo_enlace == 'texto':
+                body += ' - Fuente: ' + url_corta
+                body += ' m&aacute;s en Ubuntu FAQ: ' + self.acortar_url('http://www.ubufaq.com/story/' + str(enlace.key()) )
+            else:
+                body += ' - ' + self.acortar_url('http://www.ubufaq.com/story/' + str(enlace.key()) )
             
             try:
                 mail.send_mail("contacto@ubufaq.com", WORDPRESS_PRIVATE_EMAIL, subject, body)

@@ -52,6 +52,11 @@
         {% else %}
             <option value="13">erronea</option>
         {% endifequal %}
+        {% ifequal pregunta.estado 14 %}
+            <option value="14" selected="selected">antigua</option>
+        {% else %}
+            <option value="14">antigua</option>
+        {% endifequal %}
         </select>
         <input type="submit" class="boton" value="modificar">
         </form>
@@ -76,11 +81,12 @@
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
     {% if pregunta.autor %}
-        escrito por <a href="/u/{{ pregunta.autor.email|urlencode }}">{{ pregunta.autor.nickname|cortamail }}</a>
+        <a href="/u/{{ pregunta.autor.email|urlencode }}">{{ pregunta.autor.nickname|cortamail }}</a>
         {{ pregunta.puntos }}
     {% else %}
-        escrito por an&oacute;nimo
+        an&oacute;nimo
     {% endif %}
+        | {{ pregunta.os|muestra_os }}
         {% if editar %}
             | <a href="/question/{{ pregunta.key }}?modificar=ok">modificar</a>
         {% endif %}
@@ -145,6 +151,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     {% else %}
         an&oacute;nimo
     {% endif %}
+        | {{ respuesta.os|muestra_os }}
     {% if editar %}
         {% if respuesta.destacada %}
             | <a href="/dest_r?id={{pregunta.key}}&r={{respuesta.key}}"><s>destacar</s></a>

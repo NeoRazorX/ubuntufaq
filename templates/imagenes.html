@@ -6,7 +6,7 @@
 {% for imagen in imagenes %}
 <table>
     <tr>
-    <td><a href="/e/{{ imagen.key }}"><img class="galeria" src="http://api.thumbalizr.com/?url={{ imagen.url|urlencode }}" alt="{{ imagen.descripcion|truncatewords:5 }}" title="{{ imagen.descripcion|capfirst }}"/></a></td>
+    <td><a href="/e/{{ imagen.key }}">{{ imagen.url|miniatura }}</a></td>
     <td>
     <div class="comentario">
         {{ imagen.autor.email|avatar:40 }}

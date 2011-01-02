@@ -2,6 +2,30 @@
 
 <div class="preguntas">
 <table>
+<tr>
+<td class="avatar"><br/><br/>{{ usuario.email|avatar:40 }}</td>
+<td valign="top">
+    <a name="nuevo-enlace"></a>
+    <div class="formulario">
+    <div class="titulo">Compartir enlace:</div>
+    <form name="enlace" action="/add_e" method="post">
+        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
+        <br/>
+        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
+        <br/>{{ captcha }}
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
+    </form>
+    </div>
+</td>
+<td valign="top">
+<br/>
+<b>Comparte:</b><br/>
+- Una noticia, un art&iacute;culo o un blog.<br/>
+- Un v&iacute;deo de <a href="http://www.youtube.com" target="_Blank">youtube</a>, <a href="http://www.vimeo.com" target="_Blank">vimeo</a> o incluso v&iacute;deos en formato OGM o WEB.<br/>
+- Una imagen o una captura de pantalla, puedes usar el servicio <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.
+</td>
+</tr>
+
 
 {% if enlaces %}
     {% for enlace in enlaces %}
@@ -9,7 +33,8 @@
     <td class="avatar">{{ enlace.autor.email|avatar:40 }}</td>
     <td>
     <div class="respuesta">
-        {{ enlace.descripcion|capfirst }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a>
+        {{ enlace.descripcion|capfirst|urlize }}
+        - <a href="/e/{{ enlace.key }}">{{ enlace.url|slice:":37" }}</a>
     </div>
     <div class="info_respuesta_down">
         {{ enlace.clicks }} clicks |
@@ -37,8 +62,10 @@
     {% endifequal %}
     
     {% if enlace.comentarios %}
-        <a href="/de/{{ enlace.key }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
+        <a href="/story/{{ enlace.key }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
         {{ enlace.comentarios }}
+    {% else %}
+        <a href="/story/{{ enlace.key }}"><img src="/img/comment.png" alt="comentarios" title="deja un comentario"/></a>
     {% endif %}
     </td>
     </tr>
@@ -65,29 +92,6 @@
 </tr>
 {% endifnotequal %}
 
-<tr>
-<td class="avatar"><br/><br/>{{ usuario.email|avatar:40 }}</td>
-<td valign="top">
-    <a name="nuevo-enlace"></a>
-    <div class="formulario">
-    <div class="titulo">Compartir enlace:</div>
-    <form name="enlace" action="/add_e" method="post">
-        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
-        <br/>
-        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
-        <br/>{{ captcha }}
-        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
-    </form>
-    </div>
-</td>
-<td valign="top">
-<br/>
-<b>Comparte:</b><br/>
-- Una noticia, un art&iacute;culo o un blog.<br/>
-- Un v&iacute;deo de <a href="http://www.youtube.com" target="_Blank">youtube</a>, <a href="http://www.vimeo.com" target="_Blank">vimeo</a> o incluso v&iacute;deos en formato OGM o WEB.<br/>
-- Una imagen o una captura de pantalla, puedes usar el servicio <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.
-</td>
-</tr>
 </table>
 </div>
 

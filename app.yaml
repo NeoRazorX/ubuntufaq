@@ -1,9 +1,9 @@
 application: ubuntu-faq
-version: 33
+version: 36
 runtime: python
 api_version: 1
 
-default_expiration: "3d"
+default_expiration: "5d"
 
 handlers:
 - url: /img
@@ -23,6 +23,14 @@ handlers:
 
 - url: /tasks/karma
   script: karma.py
+  login: admin
+
+- url: /tasks/rss-scanner
+  script: rss-scanner.py
+  login: admin
+
+- url: /tasks/steam
+  script: steam.py
   login: admin
 
 - url: /sitemap
