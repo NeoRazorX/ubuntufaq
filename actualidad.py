@@ -99,6 +99,16 @@ class Redir_enlace(webapp.RequestHandler):
             self.redirect('/error/404')
 
 class Detalle_enlace(Pagina):
+    def find_tags(self, descripcion):
+        retorno = ''
+        etiquetas = ['ubuntu', 'linux', 'canonical', 'unity', 'gnome', 'kde', 'x.org', 'wayland', 'compiz', 'firefox', 'wine',
+                        'lucid', 'maverick', 'natty', 'nvidia', 'ati', 'intel', 'amd', 'steam', 'chrome', 'kms', 'systemd',
+                        'blog', 'kernel', 'fedora', 'suse', 'debian', 'dock', 'valve', 'gcc', 'gnu', 'linus']
+        for tag in etiquetas:
+            if descripcion.lower().find(tag) != -1:
+                retorno += ', ' + tag
+        return retorno
+    
     def get(self, id_enlace=None):
         Pagina.get(self)
         
@@ -157,7 +167,7 @@ class Detalle_enlace(Pagina):
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
                 'descripcion': descripcion,
-                'tags': 'ubufaq, ubuntu faq, noticias ubuntu, actualidad ubuntu, linux, lucid, maverick, natty',
+                'tags': 'ubufaq, ubuntu faq' + self.find_tags(e.descripcion),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
@@ -221,6 +231,20 @@ class Modificar_enlace(webapp.RequestHandler):
                     self.redirect('/error/503')
             else:
                 self.redirect('/error/403')
+        else:
+            self.redirect('/error/403')
+
+class Hundir_enlace(webapp.RequestHandler):
+    def get(self):
+        if users.is_current_user_admin() and self.request.get('id'):
+            try:
+                e = Enlace.get( self.request.get('id') )
+                e.fecha = datetime.min
+                e.put()
+                logging.warning('Se ha hundido el enlace con id: ' + self.request.get('id'))
+                self.redirect('/actualidad')
+            except:
+                self.redirect('/error/503')
         else:
             self.redirect('/error/403')
 

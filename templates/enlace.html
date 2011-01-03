@@ -35,6 +35,7 @@
     | {{ enlace.os|muestra_os }}
 {% if administrador %}
     | <a href="/story/{{ enlace.key }}?modificar=ok">modificar</a>
+    | <a href="#" onclick="hundir_enlace('{{ enlace.key }}')">hundir</a>
     | <a href="#" onclick="borrar_enlace('{{ enlace.key }}')">borrar</a>
 {% endif %}
 </div>

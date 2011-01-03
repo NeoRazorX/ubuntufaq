@@ -219,6 +219,7 @@ def main():
                                         ('/mod_r', Modificar_respuesta),
                                         ('/mod_e', Modificar_enlace),
                                         ('/mod_c', Modificar_comentario),
+                                        ('/hun_e', Hundir_enlace),
                                         ('/del_r', Borrar_respuesta),
                                         ('/del_p', Borrar_pregunta),
                                         ('/del_e', Borrar_enlace),

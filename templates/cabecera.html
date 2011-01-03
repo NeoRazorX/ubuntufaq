@@ -437,6 +437,14 @@
             else { alert( mensaje ); }
         }
         
+        function hundir_enlace(id)
+        {
+            if( confirm('¿Realmente desea hundir el enlace?') )
+            {
+                window.location.href = '/hun_e?id=' + id;
+            }
+        }
+        
         function borrar_pregunta(id)
         {
             if( confirm('¿Realmente desea eliminar la pregunta?') )
@@ -455,7 +463,7 @@
         
         function borrar_enlace(id)
         {
-            if( confirm('¿Realmente desea eliminar Linux el enlace?') )
+            if( confirm('¿Realmente desea eliminar el enlace?') )
             {
                 window.location.href = '/del_e?id=' + id;
             }
