@@ -18,4 +18,4 @@ cron:
 
 - description: chequeo de steam para Linux
   url: /tasks/steam
-  schedule: every 8 hours
+  schedule: every 6 hours

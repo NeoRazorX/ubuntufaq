@@ -74,11 +74,12 @@ class steam:
             logging.error("Imposible desactivar el enlace!!!")
     
     def __init__(self):
-        if self.comprobar_url_steam():
-            if self.enviar_mails( self.recolectar_usuarios( STEAM_ENLACE_KEY ) ):
-                self.desactivar_enlace( STEAM_ENLACE_KEY )
-        else:
-            logging.info('Steam para Linux todavia no esta disponible...')
+        if STEAM_ENLACE_KEY != '':
+            if self.comprobar_url_steam():
+                if self.enviar_mails( self.recolectar_usuarios( STEAM_ENLACE_KEY ) ):
+                    self.desactivar_enlace( STEAM_ENLACE_KEY )
+            else:
+                logging.info('Steam para Linux todavia no esta disponible...')
 
 if __name__ == "__main__":
     steam()

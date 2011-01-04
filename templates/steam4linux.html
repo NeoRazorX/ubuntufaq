@@ -3,7 +3,7 @@
 <head>
     <title>Steam for Linux checking script</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="keywords" content="steam, steam4linux, steam linux, ubuntu, games, valve" />
+    <meta name="keywords" content="steam, steam4linux, steam linux, steam wine, ubuntu, games, valve" />
     <meta name="description" content="This is a steam linux checking script. When its ready the script will email to everyone who has made a comment." />
     <meta name="Robots" content="all" />
     <meta http-equiv="refresh" content="300" />
@@ -341,7 +341,7 @@
     <a href="/steam4linux">Steam 4 linux</a>
 </div>
 <div class="menucabecera">
-    <span>This is a Steam Linux checking script. When it's ready the script will email to everyone who has made a comment.</span>
+    <span>This is a Steam for Linux checking script. When it's ready the script will email to everyone who has made a comment.</span>
 </div>
 
 <div class="preguntas">
@@ -352,9 +352,9 @@
 </td>
 <td width="100%" valign="top">
 <div class="info_respuesta_up">
-    {{ enlace.creado|date:"d/m/Y H:i" }} |
     {{ enlace.clicks }} clicks |
-    {{ enlace.comentarios }} comments
+    {{ enlace.comentarios }} comments |
+    <a href="http://store.steampowered.com/public/client/steam_client_linux">Steam Linux URL</a> checking every 6 hours
 </div>
 
 {% ifequal enlace.url 'http://store.steampowered.com' %}
@@ -364,6 +364,10 @@
 {% else %}
 <div class="comentario">
     Steam for Linux is not ready yet... check this site for updates, or leave a comment if you want to be notified when it's ready.
+    <br/>
+    Click <a href="http://appdb.winehq.org/objectManager.php?sClass=version&iId=19444">here</a> if you want to run Steam over wine.
+    <br/>
+    Why? <a href="http://red-sheep.de/games/steam4linux.xhtml">Ques­tions which are asked over and over</a>.
 </div>
 {% endifequal %}
 
@@ -386,20 +390,17 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 
 <table>
 <tr>
-{% if usuario %}
     <td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
     <td width="100%">
     <div class="formulario">
     <form name="comentario" action="/steam4linux" method="post">
+    <b>Email</b>: <input type="text" name="email" value="" size="30" maxlength="99" />
     <textarea name="contenido" rows="6" cols="60">Make a comment!</textarea>
-    <br/>
+    <br/>{{ captcha }}
     <input type="submit" class="boton" value="comment"/>
     </form>
     </div>
     </td>
-{% else %}
-    <td colspan='2'><div class='mensaje'>Yo need to <a href='{{ url_login }}'>login with your google account</a> to make a comment.</div></td>
-{% endif %}
 </tr>
 {% for coment in comentarios %}
 <tr>
@@ -424,6 +425,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <div class="pie">
     <a href="mailto:contacto@ubufaq.com">Contact</a> |
     <a href="http://github.com/NeoRazorX/ubuntufaq">Source code</a> |
+    <a href="/">Ubuntu FAQ</a> |
     <a href="http://www.ubuntu.com">Ubuntu</a> |
     <a href="http://www.steampowered.com">Steam</a>
 </div>

@@ -5,6 +5,7 @@ from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
 from google.appengine.api import memcache
 from google.appengine.ext.webapp.util import run_wsgi_app
+from recaptcha.client import captcha
 from datetime import datetime
 from base import *
 
@@ -20,16 +21,26 @@ class steam4linux(webapp.RequestHandler):
             return comentarios
     
     def get(self):
-        template_values = {
-            'enlace': Enlace.get( STEAM_ENLACE_KEY ),
-            'comentarios': self.get_comentarios(),
-            'usuario': users.get_current_user(),
-            'url_login': users.create_login_url( self.request.uri ),
-            'error': self.request.get('error')
-        }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/steam4linux.html')
-        self.response.out.write( template.render(path, template_values) )
+        if STEAM_ENLACE_KEY != '':
+            #captcha
+            chtml = captcha.displayhtml(
+                public_key = RECAPTCHA_PUBLIC_KEY,
+                use_ssl = False,
+                error = None)
+            
+            template_values = {
+                'enlace': Enlace.get( STEAM_ENLACE_KEY ),
+                'comentarios': self.get_comentarios(),
+                'usuario': users.get_current_user(),
+                'url_login': users.create_login_url( self.request.uri ),
+                'error': self.request.get('error'),
+                'captcha': chtml
+            }
+            
+            path = os.path.join(os.path.dirname(__file__), 'templates/steam4linux.html')
+            self.response.out.write( template.render(path, template_values) )
+        else:
+            self.redirect('/')
     
     def actualizar_enlace(self, id_enlace):
         e = Enlace.get( id_enlace )
@@ -38,13 +49,23 @@ class steam4linux(webapp.RequestHandler):
         e.put()
     
     def post(self):
-        if users.get_current_user() and self.request.get('contenido'):
+        challenge = self.request.get('recaptcha_challenge_field')
+        response  = self.request.get('recaptcha_response_field')
+        remoteip  = self.request.remote_addr
+        cResponse = captcha.submit(
+            challenge,
+            response,
+            RECAPTCHA_PRIVATE_KEY,
+            remoteip)
+        
+        if cResponse.is_valid and self.request.get('contenido'):
             c = Comentario()
             c.contenido = cgi.escape( self.request.get('contenido') )
             c.id_enlace = STEAM_ENLACE_KEY
             c.os = self.request.environ['HTTP_USER_AGENT']
-            c.autor = users.get_current_user()
             try:
+                if self.request.get('email'):
+                    c.autor = users.User( self.request.get('email') )
                 c.put()
                 self.actualizar_enlace( STEAM_ENLACE_KEY )
                 self.redirect('/steam4linux')
