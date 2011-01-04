@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import logging
 from google.appengine.ext import db
 from google.appengine.api import memcache
 from base import *

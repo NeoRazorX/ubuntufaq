@@ -21,6 +21,12 @@ indexes:
   - name: id_enlace
   - name: fecha
 
+- kind: Comentario
+  properties:
+  - name: id_enlace
+  - name: fecha
+    direction: desc
+
 - kind: Enlace
   properties:
   - name: autor

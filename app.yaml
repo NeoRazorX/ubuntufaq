@@ -51,5 +51,8 @@ handlers:
 - url: /pingbacks
   script: pingbacks.py
 
+- url: /steam4linux
+  script: steam4linux.py
+
 - url: .*
   script: main.py

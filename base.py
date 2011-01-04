@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+DEBUG_FLAG = True
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 WORDPRESS_PRIVATE_EMAIL = ''
+STEAM_ENLACE_KEY = ''
 RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
             'http://neorazorx.blogspot.com/feeds/posts/default',
             'http://ubuntulife.wordpress.com/feed/',

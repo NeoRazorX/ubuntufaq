@@ -25,7 +25,7 @@ class steam:
         except:
             enlace = comentarios = None
         
-        if enlace.url == 'http://www.ubufaq.com/story/' + id_enlace:
+        if enlace.url != 'http://store.steampowered.com':
             if comentarios.count() > 0:
                 # seleccionamos los autores
                 autores = []
@@ -75,8 +75,8 @@ class steam:
     
     def __init__(self):
         if self.comprobar_url_steam():
-            if self.enviar_mails( self.recolectar_usuarios('agp1YnVudHUtZmFxcg4LEgZFbmxhY2UYyvYkDA') ):
-                self.desactivar_enlace('agp1YnVudHUtZmFxcg4LEgZFbmxhY2UYyvYkDA')
+            if self.enviar_mails( self.recolectar_usuarios( STEAM_ENLACE_KEY ) ):
+                self.desactivar_enlace( STEAM_ENLACE_KEY )
         else:
             logging.info('Steam para Linux todavia no esta disponible...')
 
