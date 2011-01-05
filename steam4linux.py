@@ -10,6 +10,19 @@ from datetime import datetime
 from base import *
 
 class steam4linux(webapp.RequestHandler):
+    def get_enlace(self):
+        e = Enlace.get( STEAM_ENLACE_KEY )
+        
+        # actualizamos los clicks, no pasa nada si no podemos
+        if e.ultima_ip != self.request.remote_addr:
+            e.ultima_ip = self.request.remote_addr
+            e.clicks += 1
+            try:
+                e.put()
+            except:
+                pass
+        return e
+    
     def get_comentarios(self):
         comentarios = memcache.get('steam4linux_comentarios')
         if comentarios is not None:
@@ -29,7 +42,7 @@ class steam4linux(webapp.RequestHandler):
                 error = None)
             
             template_values = {
-                'enlace': Enlace.get( STEAM_ENLACE_KEY ),
+                'enlace': self.get_enlace(),
                 'comentarios': self.get_comentarios(),
                 'usuario': users.get_current_user(),
                 'url_login': users.create_login_url( self.request.uri ),
