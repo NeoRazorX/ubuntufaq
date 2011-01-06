@@ -3,8 +3,8 @@
 import os, logging, cgi
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
-from google.appengine.api import memcache
 from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api import users, memcache
 from recaptcha.client import captcha
 from datetime import datetime
 from base import *
@@ -24,12 +24,12 @@ class steam4linux(webapp.RequestHandler):
         return e
     
     def get_comentarios(self):
-        comentarios = memcache.get('steam4linux_comentarios')
+        comentarios = memcache.get('steam4linux')
         if comentarios is not None:
             return comentarios
         else:
             comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha DESC", STEAM_ENLACE_KEY).fetch(50)
-            if not memcache.add('steam4linux_comentarios', comentarios, 10):
+            if not memcache.add('steam4linux', comentarios):
                 logging.error("Fallo al rellenar memcache con los comentarios de steam4linux")
             return comentarios
     
@@ -80,6 +80,8 @@ class steam4linux(webapp.RequestHandler):
                 if self.request.get('email'):
                     c.autor = users.User( self.request.get('email') )
                 c.put()
+                memcache.delete( STEAM_ENLACE_KEY )
+                memcache.delete('steam4linux')
                 self.actualizar_enlace( STEAM_ENLACE_KEY )
                 self.redirect('/steam4linux')
             except:

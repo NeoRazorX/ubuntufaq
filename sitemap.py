@@ -13,7 +13,7 @@ class sitemap:
             return preguntas
         else:
             preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(100)
-            if not memcache.add('sitemap_preguntas', preguntas):
+            if not memcache.add('sitemap_preguntas', preguntas, 6000):
                 logging.error("Fallo al rellenar memcache con las preguntas del sitemap")
             return preguntas
     
@@ -23,7 +23,7 @@ class sitemap:
             return enlaces
         else:
             enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(100)
-            if not memcache.add('sitemap_enlaces', enlaces):
+            if not memcache.add('sitemap_enlaces', enlaces, 6000):
                 logging.error("Fallo al rellenar memcache con los enlaces del sitemap")
             return enlaces
     
@@ -42,7 +42,6 @@ class sitemap:
         print '<url><loc>http://www.ubufaq.com/images</loc><lastmod>' + datetime.today().strftime("%Y-%m-%d") + '</lastmod><changefreq>always</changefreq><priority>0.6</priority></url>'
         print '<url><loc>http://www.ubufaq.com/ayuda</loc><lastmod>' + datetime.today().strftime("%Y-%m-%d") + '</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>'
         print '<url><loc>http://www.ubufaq.com/steam4linux</loc><lastmod>' + datetime.today().strftime("%Y-%m-%d") + '</lastmod><changefreq>always</changefreq><priority>0.8</priority></url>'
-        
         
         
         for p in preguntas:

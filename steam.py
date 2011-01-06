@@ -2,26 +2,25 @@
 
 import logging
 from google.appengine.ext import db
-from google.appengine.api import mail, urlfetch
+from google.appengine.api import mail, urlfetch, users, memcache
 from base import *
 
 class steam:
-    def comprobar_url_steam(self):
+    # returns the status code of the http request
+    def check_steam_url(self):
         try:
             result = urlfetch.fetch('http://store.steampowered.com/public/client/steam_client_linux')
-            if result.status_code == 200:
-                return True
-            else:
-                return False
+            return result.status_code
         except:
-            return False
+            return 404
     
-    # devuelve un array con los usuario que hayan comentado el enlace
-    def recolectar_usuarios(self, id_enlace):
+    # return an array with all unique non-anonymous users
+    # only if link is active -> enlace.url != 'http://store.steampowered.com'
+    def collect_users(self):
         autores = []
         try:
-            enlace = Enlace.get( id_enlace )
-            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", id_enlace)
+            enlace = Enlace.get( STEAM_ENLACE_KEY )
+            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", STEAM_ENLACE_KEY)
         except:
             enlace = comentarios = None
         
@@ -35,13 +34,13 @@ class steam:
                     elif usu1.autor not in autores:
                         autores.append( usu1.autor )
             else:
-                logging.warning("No se ha encontrado ningun usuario al que avisar")
+                logging.warning("Empty user list!")
         else:
-            logging.warning("La url no coincide - ya no es necesario este script?")
+            logging.warning("URL do not match!")
         return autores
     
-    # envia un email a los usuarios especificados
-    def enviar_mails(self, usuarios):
+    # send an email to everyone in the usuarios array
+    def send_emails(self, usuarios):
         retorno = False
         if len( usuarios ) > 0:
             mensaje = mail.EmailMessage()
@@ -53,33 +52,51 @@ class steam:
                 else:
                     lista += ', ' + usu.email()
             mensaje.bcc = lista
-            mensaje.subject = "Steam para Linux ya disponible!"
-            mensaje.body = "El motivo de este mensaje es informarte que Steam para Linux ya esta disponible http://store.steampowered.com\n\nAtentamente,\nEl Cron de Ubuntu FAQ."
+            mensaje.subject = "Steam for Linux ready!!!"
+            mensaje.body = "Yoy can check Steam for Linux now: http://store.steampowered.com http://www.ubufaq.com/steam4linux\n\nWith love,\nUbuntu FAQ's cron."
             try:
                 mensaje.send()
                 retorno = True
             except:
-                logging.error('Error al enviar el email!!!')
+                logging.error('Cant send email!!!')
         else:
-            logging.error('Lista de usuarios vacia!!!')
+            logging.error('Empty user list!!!')
         return retorno
     
-    # actualizamos el enlace para no volver a avisar
-    def desactivar_enlace(self, id_enlace):
+    # disable link so collect_users returns an empty array
+    def disable_link(self):
         try:
-            enlace = Enlace.get( id_enlace )
+            enlace = Enlace.get( STEAM_ENLACE_KEY )
             enlace.url = "http://store.steampowered.com"
             enlace.put()
         except:
-            logging.error("Imposible desactivar el enlace!!!")
+            logging.error("Unable to disable link!!!")
+    
+    def make_a_comment(self, comment):
+        c = Comentario()
+        c.contenido = comment
+        c.id_enlace = STEAM_ENLACE_KEY
+        c.os = 'steam.py'
+        
+        try:
+            c.put()
+            memcache.delete( STEAM_ENLACE_KEY )
+            memcache.delete('steam4linux')
+        except:
+            logging.error('Cant save comment: ' + comment)
     
     def __init__(self):
         if STEAM_ENLACE_KEY != '':
-            if self.comprobar_url_steam():
-                if self.enviar_mails( self.recolectar_usuarios( STEAM_ENLACE_KEY ) ):
-                    self.desactivar_enlace( STEAM_ENLACE_KEY )
+            code = self.check_steam_url()
+            if code == 200:
+                if self.send_emails( self.collect_users() ):
+                    self.disable_link()
+                    self.make_a_comment('STEAM FOR LINUX READY!!!')
             else:
-                logging.info('Steam para Linux todavia no esta disponible...')
+                logging.info('Steam for Linux not ready yet...')
+                self.make_a_comment('Steam for Linux not ready yet... code: ' + str(code))
+        else:
+            logging.info('STEAM_ENLACE_KEY is empty!')
 
 if __name__ == "__main__":
     steam()

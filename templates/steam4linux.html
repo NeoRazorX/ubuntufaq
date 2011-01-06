@@ -406,11 +406,11 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <tr>
     <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
     <td width="100%" valign="top">
-    <div class="respuesta">{{ coment.contenido|capfirst|linebreaksbr|urlize }}</div>
+    <div class="respuesta">{{ coment.contenido|linebreaksbr|urlize }}</div>
     <div class="info_respuesta_down">
         <a name="{{ coment.key }}"></a>{{ coment.fecha|date:"d/m/Y H:i" }} |
     {% if coment.autor %}
-        <b>{{ coment.autor.nickname|cortamail }}</b> {{ coment.puntos }}
+        <b>{{ coment.autor.nickname|cortamail }}</b>
     {% else %}
         anonymous
     {% endif %}

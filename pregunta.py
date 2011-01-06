@@ -3,12 +3,13 @@
 import cgi, os, logging
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
-from google.appengine.api import users
+from google.appengine.api import users, memcache
 from recaptcha.client import captcha
 from datetime import datetime
 from base import *
 
 class Nueva_pregunta(Pagina):
+    # formulario de creacion de pregunta
     def get(self):
         Pagina.get(self)
         
@@ -36,8 +37,8 @@ class Nueva_pregunta(Pagina):
         
         path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
         self.response.out.write(template.render(path, template_values))
-
-class Preguntar(webapp.RequestHandler):
+    
+    # crea la pregunta
     def post(self):
         p = Pregunta()
         p.titulo = cgi.escape( self.request.get('titulo') )
@@ -82,6 +83,17 @@ class Redir_pregunta(Pagina):
             self.redirect('/error/404')
 
 class Detalle_pregunta(Pagina):
+    def get_respuestas(self, id_enlace):
+        respuestas = memcache.get( str(id_enlace) )
+        if respuestas is not None:
+            return respuestas
+        else:
+            respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1 ORDER BY fecha ASC", str(id_enlace)).fetch(100)
+            if not memcache.add(str(id_enlace), respuestas):
+                logging.error("Fallo al rellenar memcache con las respuestas de " + str(id_enlace))
+            return respuestas
+    
+    # muestra la pregunta
     def get(self, id_p=None):
         Pagina.get(self)
         
@@ -100,7 +112,7 @@ class Detalle_pregunta(Pagina):
                 except:
                     pass
             
-            r = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1 ORDER BY fecha ASC", str(p.key())).fetch(100)
+            r = self.get_respuestas( id_p )
             editar = False
             modificar = False
             
@@ -141,15 +153,15 @@ class Detalle_pregunta(Pagina):
             self.response.out.write(template.render(path, template_values))
         else:
             self.redirect('/error/404')
-
-# solo el autor de la preguna o un administrador puede modificarla
-class Modificar_pregunta(webapp.RequestHandler):
+    
+    # modifica la pregunta
     def post(self):
         try:
             p = Pregunta.get( self.request.get('id') )
         except:
             p = None
         
+        # solo el autor de la preguna o un administrador puede modificarla
         if p and self.request.get('titulo') and self.request.get('contenido') and self.request.get('tags') and self.request.get('estado'):
             if (users.get_current_user() == p.autor) or users.is_current_user_admin():
                 try:
@@ -174,6 +186,7 @@ class Borrar_pregunta(webapp.RequestHandler):
             try:
                 r = Respuesta.all().filter('id_pregunta =', self.request.get('id'))
                 db.delete(r)
+                memcache.delete( self.request.get('id') )
             except:
                 continuar = False
             
@@ -228,6 +241,7 @@ class Responder(webapp.RequestHandler):
             fallo = 1
         
         if fallo == 0:
+            memcache.delete( self.request.get('id_pregunta') )
             p = Pregunta.get( self.request.get('id_pregunta') )
             p.respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1", self.request.get('id_pregunta')).count()
             p.fecha = datetime.now()
@@ -259,6 +273,7 @@ class Destacar_respuesta(webapp.RequestHandler):
                 try:
                     r.destacada = not(r.destacada)
                     r.put()
+                    memcache.delete( self.request.get('id') )
                     self.redirect('/question/' + self.request.get('id'))
                 except:
                     self.redirect('/error/503')
@@ -281,6 +296,7 @@ class Modificar_respuesta(webapp.RequestHandler):
                 try:
                     r.contenido = cgi.escape( self.request.get('contenido') )
                     r.put()
+                    memcache.delete( self.request.get('id_pregunta') )
                     self.redirect('/question/' + self.request.get('id_pregunta'))
                 except:
                     self.redirect('/error/503')
@@ -296,6 +312,7 @@ class Borrar_respuesta(webapp.RequestHandler):
             try:
                 r = Respuesta.get( self.request.get('r') )
                 r.delete()
+                memcache.delete( self.request.get('id') )
             except:
                 continuar = False
             

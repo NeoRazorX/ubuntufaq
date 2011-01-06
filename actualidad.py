@@ -3,12 +3,52 @@
 import cgi, os, logging
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
-from google.appengine.api import users
+from google.appengine.api import users, memcache
 from recaptcha.client import captcha
 from datetime import datetime
 from base import *
 
-class Enlazar(webapp.RequestHandler):
+class Actualidad(Pagina):
+    # muestra los ultimos enlaces
+    def get(self, p=0):
+        Pagina.get(self)
+        
+        enlaces_query = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC")
+        
+        # paginamos
+        enlaces, paginas, p_actual = self.paginar(enlaces_query, 20, p)
+        
+        # el captcha
+        if users.get_current_user():
+            chtml = ''
+        else:
+            chtml = captcha.displayhtml(
+                public_key = RECAPTCHA_PUBLIC_KEY,
+                use_ssl = False,
+                error = None)
+        
+        template_values = {
+            'titulo': 'Actualidad de Ubuntu FAQ',
+            'descripcion': 'Noticias, blogs, videos, imagenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general. Comparte con nosotros!',
+            'tags': 'ubufaq, ubuntu faq, noticias ubuntu, actualidad ubuntu, linux, lucid, maverick, natty',
+            'url': self.url,
+            'url_linktext': self.url_linktext,
+            'mi_perfil': self.mi_perfil,
+            'formulario': self.formulario,
+            'vista': 'actualidad',
+            'enlaces': enlaces,
+            'captcha': chtml,
+            'paginas': paginas,
+            'rango_paginas': range(paginas),
+            'pag_actual': p_actual,
+            'usuario': users.get_current_user(),
+            'error_dominio': self.error_dominio
+            }
+        
+        path = os.path.join(os.path.dirname(__file__), 'templates/actualidad.html')
+        self.response.out.write(template.render(path, template_values))
+    
+    # crea un nuevo enlace
     def post(self):
         if self.request.get('url') and self.request.get('descripcion'):
             # comprobamos que no se haya introducido anteriormente el enlace
@@ -52,45 +92,6 @@ class Enlazar(webapp.RequestHandler):
         else:
             self.redirect('/error/403')
 
-class Actualidad(Pagina):
-    def get(self, p=0):
-        Pagina.get(self)
-        
-        enlaces_query = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC")
-        
-        # paginamos
-        enlaces, paginas, p_actual = self.paginar(enlaces_query, 20, p)
-        
-        # el captcha
-        if users.get_current_user():
-            chtml = ''
-        else:
-            chtml = captcha.displayhtml(
-                public_key = RECAPTCHA_PUBLIC_KEY,
-                use_ssl = False,
-                error = None)
-        
-        template_values = {
-            'titulo': 'Actualidad de Ubuntu FAQ',
-            'descripcion': 'Noticias, blogs, videos, imagenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general. Comparte con nosotros!',
-            'tags': 'ubufaq, ubuntu faq, noticias ubuntu, actualidad ubuntu, linux, lucid, maverick, natty',
-            'url': self.url,
-            'url_linktext': self.url_linktext,
-            'mi_perfil': self.mi_perfil,
-            'formulario': self.formulario,
-            'vista': 'actualidad',
-            'enlaces': enlaces,
-            'captcha': chtml,
-            'paginas': paginas,
-            'rango_paginas': range(paginas),
-            'pag_actual': p_actual,
-            'usuario': users.get_current_user(),
-            'error_dominio': self.error_dominio
-            }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/actualidad.html')
-        self.response.out.write(template.render(path, template_values))
-
 class Redir_enlace(webapp.RequestHandler):
     def get(self, id_enlace=None):
         if id_enlace:
@@ -99,6 +100,16 @@ class Redir_enlace(webapp.RequestHandler):
             self.redirect('/error/404')
 
 class Detalle_enlace(Pagina):
+    def get_comentarios(self, id_enlace):
+        comentarios = memcache.get( str(id_enlace) )
+        if comentarios is not None:
+            return comentarios
+        else:
+            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", str( id_enlace )).fetch(100)
+            if not memcache.add(str(id_enlace), comentarios):
+                logging.error("Fallo al rellenar memcache con los comentarios de " + str(id_enlace))
+            return comentarios
+    
     def find_tags(self, descripcion):
         retorno = ''
         etiquetas = ['ubuntu', 'linux', 'canonical', 'unity', 'gnome', 'kde', 'x.org', 'wayland', 'compiz', 'firefox', 'wine',
@@ -109,6 +120,7 @@ class Detalle_enlace(Pagina):
                 retorno += ', ' + tag
         return retorno
     
+    # muestra el enlace
     def get(self, id_enlace=None):
         Pagina.get(self)
         
@@ -146,7 +158,7 @@ class Detalle_enlace(Pagina):
                 tipo_enlace = 'package'
             
             # obtenemos los comentarios
-            c = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", str( e.key() )).fetch(100)
+            c = self.get_comentarios( id_enlace )
             
             # el captcha
             if users.get_current_user():
@@ -187,28 +199,8 @@ class Detalle_enlace(Pagina):
             self.response.out.write(template.render(path, template_values))
         else:
             self.redirect('/error/404')
-
-class Acceder_enlace(webapp.RequestHandler):
-    def get(self, id_enlace=None):
-        try:
-            e = Enlace.get( id_enlace )
-        except:
-            e = None
-        
-        if e:
-            # actualizamos los clicks, no pasa nada si no podemos
-            if e.ultima_ip != self.request.remote_addr:
-                e.ultima_ip = self.request.remote_addr
-                e.clicks += 1
-                try:
-                    e.put()
-                except:
-                    pass
-            self.redirect( e.url )
-        else:
-            self.redirect('/error/404')
-
-class Modificar_enlace(webapp.RequestHandler):
+    
+    # modifica el enlace
     def post(self):
         try:
             e = Enlace.get( self.request.get('id') )
@@ -234,6 +226,26 @@ class Modificar_enlace(webapp.RequestHandler):
         else:
             self.redirect('/error/403')
 
+class Acceder_enlace(webapp.RequestHandler):
+    def get(self, id_enlace=None):
+        try:
+            e = Enlace.get( id_enlace )
+        except:
+            e = None
+        
+        if e:
+            # actualizamos los clicks, no pasa nada si no podemos
+            if e.ultima_ip != self.request.remote_addr:
+                e.ultima_ip = self.request.remote_addr
+                e.clicks += 1
+                try:
+                    e.put()
+                except:
+                    pass
+            self.redirect( e.url )
+        else:
+            self.redirect('/error/404')
+
 class Hundir_enlace(webapp.RequestHandler):
     def get(self):
         if users.is_current_user_admin() and self.request.get('id'):
@@ -255,6 +267,7 @@ class Borrar_enlace(webapp.RequestHandler):
             try:
                 c = Comentario.all().filter('id_enlace =', self.request.get('id'))
                 db.delete(c)
+                memcache.delete( self.request.get('id') )
             except:
                 continuar = False
             
@@ -288,6 +301,7 @@ class Comentar(webapp.RequestHandler):
             c.autor = users.get_current_user()
             try:
                 c.put()
+                memcache.delete( self.request.get('id_enlace') )
                 self.actualizar_enlace( self.request.get('id_enlace') )
                 self.redirect('/story/' + self.request.get('id_enlace'))
             except:
@@ -305,6 +319,7 @@ class Comentar(webapp.RequestHandler):
             if cResponse.is_valid:
                 try:
                     c.put()
+                    memcache.delete( self.request.get('id_enlace') )
                     self.actualizar_enlace( self.request.get('id_enlace') )
                     self.redirect('/story/' + self.request.get('id_enlace'))
                 except:
@@ -327,6 +342,7 @@ class Modificar_comentario(webapp.RequestHandler):
                 try:
                     c.contenido = cgi.escape( self.request.get('contenido') )
                     c.put()
+                    memcache.delete( self.request.get('id_enlace') )
                     logging.warning('Se ha modificado el comentario con id: ' + self.request.get('id_comentario'))
                     self.redirect('/story/' + self.request.get('id_enlace'))
                 except:
@@ -347,6 +363,7 @@ class Borrar_comentario(webapp.RequestHandler):
             try:
                 c = Comentario.get( self.request.get('c') )
                 c.delete()
+                memcache.delete( self.request.get('id') )
                 self.actualizar_enlace( self.request.get('id') )
                 logging.warning('Se ha borrado el comentario con id: ' + self.request.get('c'))
                 self.redirect('/story/' + self.request.get('id'))
