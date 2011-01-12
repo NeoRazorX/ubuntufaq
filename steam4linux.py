@@ -26,11 +26,14 @@ class steam4linux(webapp.RequestHandler):
     def get_comentarios(self):
         comentarios = memcache.get('steam4linux')
         if comentarios is not None:
+            logging.info('Leyendo de memcache para: steam4linux')
             return comentarios
         else:
-            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha DESC", STEAM_ENLACE_KEY).fetch(50)
+            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha DESC", STEAM_ENLACE_KEY).fetch(100)
             if not memcache.add('steam4linux', comentarios):
-                logging.error("Fallo al rellenar memcache con los comentarios de steam4linux")
+                logging.error("Fallo almacenando en memcache: steam4linux")
+            else:
+                logging.info('Almacenando en memcache: steam4linux')
             return comentarios
     
     def get(self):

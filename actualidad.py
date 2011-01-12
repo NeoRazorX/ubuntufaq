@@ -100,22 +100,22 @@ class Redir_enlace(webapp.RequestHandler):
             self.redirect('/error/404')
 
 class Detalle_enlace(Pagina):
-    def get_comentarios(self, id_enlace):
+    def get_comentarios(self, id_enlace, numero=100):
         comentarios = memcache.get( str(id_enlace) )
         if comentarios is not None:
+            logging.info('Leyendo de memcache para: ' + str(id_enlace))
             return comentarios
         else:
-            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", str( id_enlace )).fetch(100)
+            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", str( id_enlace )).fetch(numero)
             if not memcache.add(str(id_enlace), comentarios):
-                logging.error("Fallo al rellenar memcache con los comentarios de " + str(id_enlace))
+                logging.error("Fallo almacenando en memcache: " + str(id_enlace))
+            else:
+                logging.info('Almacenando en memcache: ' + str(id_enlace))
             return comentarios
     
     def find_tags(self, descripcion):
         retorno = ''
-        etiquetas = ['ubuntu', 'linux', 'canonical', 'unity', 'gnome', 'kde', 'x.org', 'wayland', 'compiz', 'firefox', 'wine',
-                        'lucid', 'maverick', 'natty', 'nvidia', 'ati', 'intel', 'amd', 'steam', 'chrome', 'kms', 'systemd',
-                        'blog', 'kernel', 'fedora', 'suse', 'debian', 'dock', 'valve', 'gcc', 'gnu', 'linus']
-        for tag in etiquetas:
+        for tag in KEYWORD_LIST:
             if descripcion.lower().find(tag) != -1:
                 retorno += ', ' + tag
         return retorno
@@ -158,7 +158,7 @@ class Detalle_enlace(Pagina):
                 tipo_enlace = 'package'
             
             # obtenemos los comentarios
-            c = self.get_comentarios( id_enlace )
+            c = self.get_comentarios( id_enlace, e.comentarios )
             
             # el captcha
             if users.get_current_user():

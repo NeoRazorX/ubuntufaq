@@ -83,14 +83,17 @@ class Redir_pregunta(Pagina):
             self.redirect('/error/404')
 
 class Detalle_pregunta(Pagina):
-    def get_respuestas(self, id_enlace):
+    def get_respuestas(self, id_enlace, numero=100):
         respuestas = memcache.get( str(id_enlace) )
         if respuestas is not None:
+            logging.info('Leyendo de memcache para: ' + str(id_enlace))
             return respuestas
         else:
-            respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1 ORDER BY fecha ASC", str(id_enlace)).fetch(100)
+            respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1 ORDER BY fecha ASC", str(id_enlace)).fetch(numero)
             if not memcache.add(str(id_enlace), respuestas):
-                logging.error("Fallo al rellenar memcache con las respuestas de " + str(id_enlace))
+                logging.error("Fallo almacenando en memcache: " + str(id_enlace))
+            else:
+                logging.info('Almacenando en memcache: ' + str(id_enlace))
             return respuestas
     
     # muestra la pregunta
@@ -112,7 +115,7 @@ class Detalle_pregunta(Pagina):
                 except:
                     pass
             
-            r = self.get_respuestas( id_p )
+            r = self.get_respuestas( id_p, p.respuestas )
             editar = False
             modificar = False
             

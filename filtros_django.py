@@ -85,12 +85,12 @@ def muestra_os(os):
         return '<span title="' + os + '">Linux</span>'
     elif os.lower().find('windows') != -1:
         return '<span title="' + os + '">Windows</span>'
-    elif os.lower().find('iphone') != -1:
-        return '<span title="' + os + '">iPhone</span>'
-    elif os.lower().find('ipad') != -1:
-        return '<span title="' + os + '">iPad</span>'
     elif os.lower().find('ipod') != -1:
         return '<span title="' + os + '">iPod</span>'
+    elif os.lower().find('ipad') != -1:
+        return '<span title="' + os + '">iPad</span>'
+    elif os.lower().find('iphone') != -1:
+        return '<span title="' + os + '">iPhone</span>'
     elif os.lower().find('mac') != -1:
         return '<span title="' + os + '">Mac</span>'
     else:

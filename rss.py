@@ -13,7 +13,7 @@ class rss:
             return preguntas
         else:
             preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(100)
-            if not memcache.add('sitemap_preguntas', preguntas, 6000):
+            if not memcache.add('sitemap_preguntas', preguntas, 3600):
                 logging.error("Fallo al rellenar memcache con las preguntas del sitemap")
             return preguntas
     
@@ -23,7 +23,7 @@ class rss:
             return enlaces
         else:
             enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(100)
-            if not memcache.add('sitemap_enlaces', enlaces, 6000):
+            if not memcache.add('sitemap_enlaces', enlaces, 3600):
                 logging.error("Fallo al rellenar memcache con los enlaces del sitemap")
             return enlaces
     
@@ -35,7 +35,7 @@ class rss:
         
         path = os.path.join(os.path.dirname(__file__), 'templates/rss.html')
         
-        print 'Content-Type: text/xml'
+        print 'Content-Type: text/xml; charset=utf-8'
         print ''
         print template.render(path, template_values)
 

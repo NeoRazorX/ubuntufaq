@@ -12,6 +12,8 @@ class rsscanner:
             self.leer( RSS_LIST[0] )
         elif len( RSS_LIST ) > 1:
             self.leer( RSS_LIST[ random.randint(0, len( RSS_LIST ) - 1) ] )
+        else:
+            logging.info('Lista de RSSs vacia!')
     
     def leer(self, rss):
         continuar = False
@@ -33,14 +35,8 @@ class rsscanner:
         feed = feedparser.parse( contenido )
         numero = 0
         for entrada in feed.entries:
-            enlace = entrada.link
-            titulo = entrada.title
-            descripcion = entrada.description
-            if self.publicar(enlace, titulo, descripcion):
-                logging.info("Enlace publicado: " + enlace)
-            else:
-                logging.info("Enlace descartado: " + enlace)
-            if numero < 9:
+            self.publicar(entrada.link, entrada.title, entrada.description)
+            if numero < 4:
                 numero += 1
             else:
                 break
@@ -50,32 +46,41 @@ class rsscanner:
             # comprobamos que no se haya introducido anteriormente el enlace
             enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE url = :1", link).fetch(1)
             if enlaces:
-                return False
+                logging.info("Enlace duplicado: " + link)
             else:
-                nuevo = Enlace()
-                nuevo.url = link
-                nuevo.os = 'rss-scanner.py'
                 auxiliar = title + ': ' + self.elimina_html( description.replace("\n", ' ') )
-                if len( auxiliar ) < 489:
-                    nuevo.descripcion = auxiliar
+                puntos = self.puntuar_entrada(auxiliar)
+                if puntos > 1:
+                    nuevo = Enlace()
+                    nuevo.url = link
+                    nuevo.os = 'rss-scanner.py'
+                    if len( auxiliar ) < 489:
+                        nuevo.descripcion = auxiliar
+                    else:
+                        nuevo.descripcion = auxiliar[:490] + '...'
+                    try:
+                        nuevo.put()
+                        logging.info(str(puntos) + " puntos -> enlace publicado: " + link)
+                    except:
+                        logging.error('Imposible publicar enlace!')
                 else:
-                    nuevo.descripcion = auxiliar[:490] + '...'
-                if self.filtrar_entrada(auxiliar):
-                    nuevo.put()
-                    return True
-                else:
-                    return False
+                    logging.info(str(puntos) + " puntos -> enlace descartado: " + link)
         else:
             logging.warning("Nada que publicar!")
             return False
     
-    def filtrar_entrada(self, texto):
-        etiquetas = ['ubuntu', 'linux', 'canonical', 'unity', 'gnome', 'kde', 'x.org', 'wayland', 'compiz', 'firefox', 'wine']
-        retorno = False
-        for tag in etiquetas:
-            if texto.lower().find(tag) != -1:
-                retorno = True
-        return retorno
+    def puntuar_entrada(self, texto):
+        puntos = 0
+        for tag in KEYWORD_LIST:
+            aux = texto.lower().find(tag)
+            if aux > -1:
+                if aux < 99:
+                    puntos += 3
+                elif aux < 249:
+                    puntos += 2
+                else:
+                    puntos += 1
+        return puntos
     
     def elimina_html(self, data):
         p = re.compile(r'<.*?>')

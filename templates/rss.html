@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>UbuntuFAQ</title>
         <description>Sitio web de preguntas y respuestas rapidas sobre ubuntu.</description>
@@ -8,7 +8,8 @@
         <item>
             <title>{{ enlace.descripcion|capfirst|truncatewords:10 }}</title>
             <link>http://www.ubufaq.com/story/{{ enlace.key }}</link>
-            <pubDate>{{ enlace.creado|date:"Y-m-d" }}</pubDate>
+            <guid>http://www.ubufaq.com/story/{{ enlace.key }}</guid>
+            <pubDate>{{ enlace.creado|date:"r" }}</pubDate>
             <description>
                 {{ enlace.descripcion|capfirst }}
                 &lt;br/&gt;&lt;br/&gt;
@@ -20,7 +21,8 @@
         <item>
             <title>{{ pregunta.titulo }}</title>
             <link>http://www.ubufaq.com/question/{{ pregunta.key }}</link>
-            <pubDate>{{ pregunta.creado|date:"Y-m-d" }}</pubDate>
+            <guid>http://www.ubufaq.com/question/{{ pregunta.key }}</guid>
+            <pubDate>{{ pregunta.creado|date:"r" }}</pubDate>
             <description>
                 {{ pregunta.contenido|capfirst|truncatewords:50 }}
                 &lt;br/&gt;&lt;br/&gt;

@@ -24,8 +24,9 @@
 </td>
 <td width="100%" valign="top">
 <div class="info_respuesta_up">
-    {{ enlace.clicks }} clicks |
     {{ enlace.creado|date:"d/m/Y H:i" }} |
+    {{ enlace.clicks }} clicks |
+    {{ enlace.comentarios }} comentarios |
 {% if enlace.autor %}
     <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
     {{ enlace.puntos }}
@@ -105,7 +106,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
         </form>
     {% else %}
         <a name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-        {{ coment.contenido|capfirst|linebreaksbr|urlize }}
+        {{ coment.contenido|linebreaksbr|urlize }}
     {% endif %}
     </div>
     <div class="info_respuesta_down">

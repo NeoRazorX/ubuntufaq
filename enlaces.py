@@ -36,7 +36,10 @@ class enlaces:
         
         if enlace.tipo_enlace != tipo_enlace:
             enlace.tipo_enlace = tipo_enlace
-            enlace.put()
+            try:
+                enlace.put()
+            except:
+                logging.error('Imposible modificar en enlace!')
         
         # enviamos un mail a wordpress
         if WORDPRESS_PRIVATE_EMAIL != '':

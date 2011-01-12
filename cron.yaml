@@ -6,7 +6,7 @@ cron:
 
 - description: RSS scanner
   url: /tasks/rss-scanner
-  schedule: every 20 minutes
+  schedule: every 30 minutes
 
 - description: gestion de enlaces
   url: /tasks/enlaces
@@ -18,4 +18,4 @@ cron:
 
 - description: chequeo de steam para Linux
   url: /tasks/steam
-  schedule: every 6 hours
+  schedule: every 8 hours

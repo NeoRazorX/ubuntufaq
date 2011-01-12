@@ -6,12 +6,16 @@ RECAPTCHA_PRIVATE_KEY = ''
 WORDPRESS_PRIVATE_EMAIL = ''
 STEAM_ENLACE_KEY = ''
 RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
-            'http://neorazorx.blogspot.com/feeds/posts/default',
-            'http://ubuntulife.wordpress.com/feed/',
-            'http://www.linuxjuegos.com/wp-rss2.php',
-            'http://feeds.feedburner.com/fayerwayer',
-            'http://www.muylinux.com/feed/',
-            'http://www.genbeta.com/index.xml']
+    'http://neorazorx.blogspot.com/feeds/posts/default',
+    'http://ubuntulife.wordpress.com/feed/',
+    'http://www.linuxjuegos.com/wp-rss2.php',
+    'http://feeds.feedburner.com/fayerwayer',
+    'http://www.muylinux.com/feed/',
+    'http://www.genbeta.com/index.xml']
+KEYWORD_LIST = ['ubuntu', 'linux', 'canonical', 'unity', 'gnome', 'kde', 'x.org', 'android',
+    'wayland', 'compiz', 'wine', 'ppa', 'lucid', 'maverick', 'natty', 'unix',
+    'chrome os', 'kms', 'systemd', 'kernel', 'fedora', 'suse', 'debian', 'gcc',
+    'gnu', 'linus', 'gallium3d', 'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs']
 
 import math
 from google.appengine.ext import db, webapp

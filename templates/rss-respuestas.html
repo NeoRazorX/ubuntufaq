@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <title>UbuntuFAQ respuestas</title>
         <description>Sitio web de preguntas y respuestas rapidas sobre ubuntu.</description>
@@ -12,7 +12,8 @@
             <title>{{ respuesta.fecha|date:"Y-m-d H:i" }} - anonimo responde:</title>
     {% endif %}
             <link>http://www.ubufaq.com/question/{{ respuesta.id_pregunta }}#{{ respuesta.key }}</link>
-            <pubDate>{{ respuesta.fecha|date:"Y-m-d" }}</pubDate>
+            <guid>http://www.ubufaq.com/question/{{ respuesta.id_pregunta }}#{{ respuesta.key }}</guid>
+            <pubDate>{{ respuesta.fecha|date:"r" }}</pubDate>
             <description>{{ respuesta.contenido|capfirst|truncatewords:50 }}</description>
         </item>
 {% endfor %}
@@ -24,7 +25,8 @@
             <title>{{ coment.fecha|date:"Y-m-d H:i" }} - anonimo comenta:</title>
     {% endif %}
             <link>http://www.ubufaq.com/story/{{ coment.id_enlace }}#{{ coment.key }}</link>
-            <pubDate>{{ coment.fecha|date:"Y-m-d" }}</pubDate>
+            <guid>http://www.ubufaq.com/story/{{ coment.id_enlace }}#{{ coment.key }}</guid>
+            <pubDate>{{ coment.fecha|date:"r" }}</pubDate>
             <description>{{ coment.contenido|capfirst|truncatewords:50 }}</description>
         </item>
 {% endfor %}
