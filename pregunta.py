@@ -38,12 +38,19 @@ class Nueva_pregunta(Pagina):
         path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
         self.response.out.write(template.render(path, template_values))
     
+    def extraer_tags(self, texto):
+        retorno = ''
+        for tag in KEYWORD_LIST:
+            if texto.lower().find(tag) != -1:
+                retorno += ', ' + tag
+        return retorno
+    
     # crea la pregunta
     def post(self):
         p = Pregunta()
         p.titulo = cgi.escape( self.request.get('titulo') )
         p.contenido = cgi.escape( self.request.get('contenido') )
-        p.tags = cgi.escape( self.request.get('tags') )
+        p.tags = self.extraer_tags( self.request.get('titulo') + self.request.get('contenido') )
         p.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
@@ -210,6 +217,28 @@ class Borrar_pregunta(webapp.RequestHandler):
             self.redirect('/error/403')
 
 class Responder(webapp.RequestHandler):
+    def actualizar_pregunta(self, id_pregunta, respuesta):
+        memcache.delete( id_pregunta )
+        p = Pregunta.get( id_pregunta )
+        p.respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1", id_pregunta).count()
+        p.fecha = datetime.now()
+        
+        # cambiamos el estado de la pregunta en funcion de la respuesta
+        if respuesta.autor:
+            if respuesta.autor == p.autor:
+                if respuesta.contenido.lower().find('solucionad') != -1:
+                    p.estado = 10
+            else:
+                p.estado = 2
+        else:
+            p.estado = 2
+        
+        try:
+            p.put()
+            self.redirect('/question/' + self.request.get('id_pregunta'))
+        except:
+            self.redirect('/error/503')
+    
     def post(self):
         fallo = 0
         r = Respuesta()
@@ -244,15 +273,7 @@ class Responder(webapp.RequestHandler):
             fallo = 1
         
         if fallo == 0:
-            memcache.delete( self.request.get('id_pregunta') )
-            p = Pregunta.get( self.request.get('id_pregunta') )
-            p.respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1", self.request.get('id_pregunta')).count()
-            p.fecha = datetime.now()
-            try:
-                p.put()
-                self.redirect('/question/' + self.request.get('id_pregunta'))
-            except:
-                self.redirect('/error/503')
+            self.actualizar_pregunta( self.request.get('id_pregunta'), r )
         elif fallo == 1:
             self.redirect('/error/403')
         elif fallo == 2:

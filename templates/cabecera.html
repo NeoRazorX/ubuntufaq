@@ -342,7 +342,6 @@
         {
             var titulo = document.pregunta.titulo.value;
             var contenido = document.pregunta.contenido.value;
-            var etiquetas = document.pregunta.tags.value;
             var mensaje;
             var continuar = false;
             
@@ -350,13 +349,7 @@
             {
                 if(contenido != '' && contenido != 'Descripcion')
                 {
-                    if(etiquetas != '') { continuar = true; }
-                    else
-                    {
-                        mensaje = 'Debes modificar las etiquetas de la pregunta';
-                        document.pregunta.tags.focus();
-                        document.pregunta.tags.select();
-                    }
+                    continuar = true;
                 }
                 else
                 {

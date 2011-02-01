@@ -3,6 +3,7 @@
 import logging
 from google.appengine.ext import db
 from google.appengine.api import mail, urlfetch, users, memcache
+from datetime import datetime
 from base import *
 
 class steam:
@@ -72,14 +73,28 @@ class steam:
         except:
             logging.error("Unable to disable link!!!")
     
+    def clean_garbage(self):
+        comments = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha DESC", STEAM_ENLACE_KEY).fetch(100)
+        code = ''
+        for co in comments:
+            if co.os == 'steam.py' and co.contenido == code:
+                co.delete()
+            elif co.os == 'steam.py':
+                code = co.contenido
+    
     def make_a_comment(self, comment):
         c = Comentario()
         c.contenido = comment
         c.id_enlace = STEAM_ENLACE_KEY
         c.os = 'steam.py'
         
+        e = Enlace.get( STEAM_ENLACE_KEY )
+        e.comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1", STEAM_ENLACE_KEY).count()
+        e.fecha = datetime.now()
+        
         try:
             c.put()
+            e.put()
             memcache.delete( STEAM_ENLACE_KEY )
             memcache.delete('steam4linux')
         except:
@@ -94,6 +109,7 @@ class steam:
                     self.make_a_comment('STEAM FOR LINUX READY!!!')
             else:
                 logging.info('Steam for Linux not ready yet...')
+                self.clean_garbage()
                 self.make_a_comment('Steam for Linux not ready yet... code: ' + str(code))
         else:
             logging.info('STEAM_ENLACE_KEY is empty!')
