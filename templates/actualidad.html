@@ -13,6 +13,9 @@
         <br/>
         <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
         <br/>{{ captcha }}
+    {% if formulario %}
+        <input type="checkbox" name="anonimo"/>An&oacute;nimo
+    {% endif %}
         <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
     </form>
     </div>
@@ -33,7 +36,7 @@
     <td class="avatar">{{ enlace.autor.email|avatar:40 }}</td>
     <td>
     <div class="respuesta">
-        {{ enlace.descripcion|capfirst|urlize }}
+        {{ enlace.descripcion|urlize }}
         - <a href="/e/{{ enlace.key }}">{{ enlace.url|slice:":37" }}</a>
     </div>
     <div class="info_respuesta_down">

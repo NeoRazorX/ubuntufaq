@@ -176,6 +176,9 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <input type="hidden" name="id_pregunta" value="{{ pregunta.key }}"/>
     <textarea name="contenido" rows="6" cols="60">Utiliza un lenguaje claro y conciso.</textarea>
     <br/>{{ captcha }}
+{% if formulario %}
+    <input type="checkbox" name="anonimo"/>An&oacute;nimo
+{% endif %}
     <input type="button" class="boton" value="responder" onclick="enviar_respuesta()"/>
     </form>
     </div>

@@ -20,12 +20,14 @@ def menu_cabecera(vista, seleccion=''):
 
 
 def avatar(email, size=80):
+    imagen = '<img src="/img/anonymous.gif" alt="anonymous" />'
     if email:
-        return '<img src="http://www.gravatar.com/avatar/' + hashlib.md5(str(email)).hexdigest() + '?s=' + str(size) + '" alt="avatar" />'
+        imagen = '<img src="http://www.gravatar.com/avatar/' + hashlib.md5(str(email)).hexdigest()
+        imagen += '?s=' + str(size) + '&amp;d=' + urllib.quote('http://www.ubufaq.com/img/guy-' + str(size) + '.gif')
+        imagen += '" alt="avatar" />'
     elif size == 40:
-        return '<img src="/img/anonymous-40.gif" alt="anonymous" />'
-    else:
-        return '<img src="/img/anonymous.gif" alt="anonymous" />'
+        imagen = '<img src="/img/anonymous-40.gif" alt="anonymous" />'
+    return imagen
 
 
 def karmsg(puntos):

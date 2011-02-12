@@ -13,10 +13,10 @@
     {% for pregunta in preguntas %}
     <div class="pregunta">
         <div class="titulo">
-            <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|capfirst }}</a>
+            <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo }}</a>
             <span>{{ pregunta.estado|estado_pregunta }}</span>
         </div>
-        {{ pregunta.contenido|capfirst|truncatewords:25 }}
+        {{ pregunta.contenido|truncatewords:25 }}
         <br/>
         <span>
         {{ pregunta.respuestas }} respuestas |
@@ -59,13 +59,9 @@
 <td class="widget">
 
 {% if enlaces %}
-    {% ifequal vista 'inicio' %}
-    <center>{{ enlaces|randomsg }}</center>
-    {% endifequal %}
-    
     <div class="ultimas_respuestas">Actualidad:</div>
     {% for enlace in enlaces %}
-    <div class="respuesta">{{ enlace.descripcion|capfirst|truncatewords:20 }}<br/>
+    <div class="respuesta">{{ enlace.descripcion|truncatewords:25 }}<br/>
     <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:":37" }}</a></div>
     <div class="info_respuesta_down">
         {{ enlace.creado|date:"d/m/Y H:i" }} |
@@ -83,7 +79,7 @@
 {% if respuestas %}
     <div class="ultimas_respuestas">&Uacute;ltimas respuestas:</div>
     {% for respuesta in respuestas %}
-        <div class="respuesta">{{respuesta.contenido|capfirst|truncatewords:25|urlizetrunc:30}}</div>
+        <div class="respuesta">{{respuesta.contenido|truncatewords:25|urlizetrunc:30}}</div>
         <div class="info_respuesta_down">
         <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{respuesta.fecha|date:"d/m/Y H:i"}}</a> -
     {% if respuesta.autor %}

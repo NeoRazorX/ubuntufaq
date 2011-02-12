@@ -54,8 +54,9 @@ class Nueva_pregunta(Pagina):
         p.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
-            p.autor = users.get_current_user()
-            p.enviar_email = True
+            if self.request.get('anonimo') != 'on':
+                p.autor = users.get_current_user()
+                p.enviar_email = True
             try:
                 p.put()
                 self.redirect('/question/' + str( p.key() ))
@@ -247,7 +248,8 @@ class Responder(webapp.RequestHandler):
         r.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('id_pregunta') and self.request.get('contenido'):
-            r.autor = users.get_current_user()
+            if self.request.get('anonimo') != 'on':
+                r.autor = users.get_current_user()
             try:
                 r.put()
             except:

@@ -90,7 +90,6 @@ class steam:
         
         e = Enlace.get( STEAM_ENLACE_KEY )
         e.comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1", STEAM_ENLACE_KEY).count()
-        e.fecha = datetime.now()
         
         try:
             c.put()

@@ -63,6 +63,9 @@
         <br/>
         <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
         <br/>{{ captcha }}
+    {% if formulario %}
+        <input type="checkbox" name="anonimo"/>An&oacute;nimo
+    {% endif %}
         <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
     </form>
     </div>

@@ -1,5 +1,5 @@
 application: ubuntu-faq
-version: 38
+version: 39
 runtime: python
 api_version: 1
 
@@ -13,24 +13,28 @@ handlers:
   static_files: img/favicon.ico
   upload: img/favicon.ico
 
+- url: /tasks/antiguas
+  script: tasks/antiguas.py
+  login: admin
+
 - url: /tasks/emails
-  script: emails.py
+  script: tasks/emails.py
   login: admin
 
 - url: /tasks/enlaces
-  script: enlaces.py
+  script: tasks/enlaces.py
   login: admin
 
 - url: /tasks/karma
-  script: karma.py
+  script: tasks/karma.py
   login: admin
 
 - url: /tasks/rss-scanner
-  script: rss-scanner.py
+  script: tasks/rss-scanner.py
   login: admin
 
 - url: /tasks/steam
-  script: steam.py
+  script: tasks/steam.py
   login: admin
 
 - url: /sitemap

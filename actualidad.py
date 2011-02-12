@@ -63,8 +63,9 @@ class Actualidad(Pagina):
                 enl.os = self.request.environ['HTTP_USER_AGENT']
                 
                 if users.get_current_user():
-                    try:
+                    if self.request.get('anonimo') != 'on':
                         enl.autor = users.get_current_user()
+                    try:
                         enl.put()
                         self.redirect('/story/' + str( enl.key() ))
                     except:
@@ -298,7 +299,8 @@ class Comentar(webapp.RequestHandler):
         c.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('contenido') and self.request.get('id_enlace'):
-            c.autor = users.get_current_user()
+            if self.request.get('anonimo') != 'on':
+                c.autor = users.get_current_user()
             try:
                 c.put()
                 memcache.delete( self.request.get('id_enlace') )
