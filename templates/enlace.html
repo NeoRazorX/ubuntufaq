@@ -1,5 +1,4 @@
 {% include "cabecera.html" %}
-
 <div class="preguntas">
 
 {% if enlace %}
@@ -9,7 +8,7 @@
         <form name="enlace" action="/mod_e" method="post">
         <input type="hidden" name="id" value="{{ enlace.key }}"/>
         <input id="titulo" type="text" name="url" size="50" maxlength="100" value="{{ enlace.url }}"/>
-        <textarea name="descripcion" rows="6" cols="60">{{ enlace.descripcion }}</textarea>
+        <textarea name="descripcion" rows="6" cols="60">{{ enlace.descripcion|safe }}</textarea>
         <br/>
         Tipo enlace: <input type="text" name="tipo_enlace" size="30" maxlength="100" value="{{ enlace.tipo_enlace }}"/>
         <input type="submit" class="boton" value="modificar">
@@ -44,11 +43,11 @@
 {% ifequal tipo_enlace 'texto' %}
 <div class="comentario">
     <a href="/story/{{ enlace.key }}">#0</a>
-    {{ enlace.descripcion|capfirst|urlizetrunc:30 }} - <a href="{{ enlace.url }}">{{ enlace.url|slice:":37" }}</a>
+    {{ enlace.descripcion|safe|urlizetrunc:30 }} - <a href="{{ enlace.url }}">{{ enlace.url|slice:":37" }}</a>
 </div>
 {% else %}
 <div class="comentario">
-    <a href="/story/{{ enlace.key }}">#0</a> {{ enlace.descripcion|capfirst|urlizetrunc:30 }}</a>
+    <a href="/story/{{ enlace.key }}">#0</a> {{ enlace.descripcion|safe|urlizetrunc:30 }}</a>
 </div>
 {% endifequal %}
 
@@ -91,41 +90,79 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% endif %}
 
 
-<table>
-{% for coment in comentarios %}
-<tr>
-    <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
-    <td width="100%" valign="top">
-    <div class="respuesta">
-    {% if modificar %}
-        <form name="comentario{{ forloop.counter }}" action="/mod_c" method="post">
-        <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
-        <input type="hidden" name="id_comentario" value="{{ coment.key }}"/>
-        <textarea name="contenido" rows="6" cols="60">{{ coment.contenido }}</textarea>
-        <input type="submit" class="boton" value="modificar">
-        </form>
-    {% else %}
-        <a name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-        {{ coment.contenido|linebreaksbr|urlize }}
-    {% endif %}
-    </div>
-    <div class="info_respuesta_down">
-        <a name="{{ coment.key }}"></a>{{ coment.fecha|date:"d/m/Y H:i" }} |
-    {% if coment.autor %}
-        <a href="/u/{{ coment.autor.email|urlencode }}">{{ coment.autor.nickname|cortamail }}</a>
-        {{ coment.puntos }}
-    {% else %}
-        an&oacute;nimo
-    {% endif %}
-        | {{ coment.os|muestra_os }}
-    
-    {% if administrador %}
-        | <a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a>
-    {% endif %}
-    </div>
-    </td>
-</tr>
-{% endfor %}
+{% if comentarios %}
+    {% for coment in comentarios %}
+    <table>
+    <tr>
+        <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
+        <td width="100%" valign="top">
+        <div class="respuesta">
+        {% if modificar %}
+            <form name="comentario{{ forloop.counter }}" action="/mod_c" method="post">
+            <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
+            <input type="hidden" name="id_comentario" value="{{ coment.key }}"/>
+            <textarea name="contenido" rows="6" cols="60">{{ coment.contenido|safe }}</textarea>
+            <input type="submit" class="boton" value="modificar">
+            </form>
+        {% else %}
+            <a name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
+            {{ coment.contenido|safe|linebreaksbr|urlize }}
+        {% endif %}
+        </div>
+        <div class="info_respuesta_down">
+            <a name="{{ coment.key }}"></a>{{ coment.fecha|date:"d/m/Y H:i" }} |
+        {% if coment.autor %}
+            <a href="/u/{{ coment.autor.email|urlencode }}">{{ coment.autor.nickname|cortamail }}</a>
+            {{ coment.puntos }}
+        {% else %}
+            an&oacute;nimo
+        {% endif %}
+            | {{ coment.os|muestra_os }}
+        
+        {% if administrador %}
+            | <a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a>
+        {% endif %}
+        </div>
+        </td>
+    </tr>
+    {% endfor %}
+{% else %}
+    <script src="http://widgets.twimg.com/j/2/widget.js"></script>
+    <script>
+    new TWTR.Widget({
+      version: 2,
+      type: 'search',
+      search: '{{ enlace.url }}',
+      interval: 6000,
+      title: '',
+      subject: '',
+      width: 'auto',
+      height: 200,
+      theme: {
+        shell: {
+          background: '#191919',
+          color: '#ffffff'
+        },
+        tweets: {
+          background: '#ffffff',
+          color: '#444444',
+          links: '#dd4a14'
+        }
+      },
+      features: {
+        scrollbar: false,
+        loop: true,
+        live: true,
+        hashtags: true,
+        timestamp: true,
+        avatars: true,
+        toptweets: true,
+        behavior: 'default'
+      }
+    }).render().start();
+    </script>
+    <table>
+{% endif %}
 
 
 <tr>
@@ -135,7 +172,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <form name="comentario" action="/add_c" method="post">
     <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
     <textarea name="contenido" rows="6" cols="60">Deja un comentario, es gratis!</textarea>
-    <br/>{{ captcha }}
+    <br/>{{ captcha|safe }}
 {% if formulario %}
     <input type="checkbox" name="anonimo"/>An&oacute;nimo
 {% endif %}
@@ -146,6 +183,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 </tr>
 </table>
 
-</div>
+<div class="mensaje">Comparte con nosotros enlaces de inter&eacute;s: un art&iacute;culo, un v&iacute;deo, una foto, etc. Usa el <a href="/#nuevo-enlace">formulario</a>.</div>
 
+</div>
 {% include "pie.html" %}

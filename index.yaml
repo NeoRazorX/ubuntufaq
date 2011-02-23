@@ -18,6 +18,11 @@ indexes:
 
 - kind: Comentario
   properties:
+  - name: autor
+  - name: puntos
+
+- kind: Comentario
+  properties:
   - name: id_enlace
   - name: fecha
 
@@ -35,6 +40,11 @@ indexes:
 
 - kind: Enlace
   properties:
+  - name: autor
+  - name: puntos
+
+- kind: Enlace
+  properties:
   - name: tipo_enlace
   - name: fecha
     direction: desc
@@ -47,6 +57,11 @@ indexes:
 
 - kind: Pregunta
   properties:
+  - name: autor
+  - name: puntos
+
+- kind: Pregunta
+  properties:
   - name: respuestas
   - name: fecha
     direction: desc
@@ -56,6 +71,11 @@ indexes:
   - name: autor
   - name: fecha
     direction: desc
+
+- kind: Respuesta
+  properties:
+  - name: autor
+  - name: puntos
 
 - kind: Respuesta
   properties:

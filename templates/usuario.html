@@ -28,7 +28,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
             | {{ pregunta.respuestas }} respuestas
         </div>
         <div class="respuesta">
-            <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|capfirst }}</a> - {{ pregunta.estado|estado_pregunta }}.
+            <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|safe }}</a> - {{ pregunta.estado|estado_pregunta }}.
         </div>
     {% endfor %}
 </ul>
@@ -48,7 +48,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
         {% else %}
             <div class="respuesta">
         {% endif %}
-        {{ respuesta.contenido|capfirst|truncatewords:50 }}
+        {{ respuesta.contenido|safe|truncatewords:50 }}
         </div>
     {% endfor %}
 </ul>
@@ -64,7 +64,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
         {{ enlace.fecha|date:"d/m/Y H:i" }}
         | {{ enlace.comentarios }} comentarios
     </div>
-    <div class="respuesta">{{ enlace.descripcion|capfirst }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
+    <div class="respuesta">{{ enlace.descripcion|safe }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
 {% endfor %}
 </ul>
 {% else %}
@@ -78,7 +78,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <div class="info_respuesta_up">
         <a href="/story/{{ coment.id_enlace }}#{{ coment.key }}">{{ coment.fecha|date:"d/m/Y H:i" }}</a>:
     </div>
-    <div class="respuesta">{{ coment.contenido|capfirst }}</div>
+    <div class="respuesta">{{ coment.contenido|safe }}</div>
 {% endfor %}
 </ul>
 {% else %}

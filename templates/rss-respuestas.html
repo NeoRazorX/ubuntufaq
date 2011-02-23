@@ -14,7 +14,7 @@
             <link>http://www.ubufaq.com/question/{{ respuesta.id_pregunta }}#{{ respuesta.key }}</link>
             <guid>http://www.ubufaq.com/question/{{ respuesta.id_pregunta }}#{{ respuesta.key }}</guid>
             <pubDate>{{ respuesta.fecha|date:"r" }}</pubDate>
-            <description>{{ respuesta.contenido|capfirst|truncatewords:50 }}</description>
+            <description>{{ respuesta.contenido|safe|truncatewords:50 }}</description>
         </item>
 {% endfor %}
 {% for coment in comentarios %}
@@ -27,7 +27,7 @@
             <link>http://www.ubufaq.com/story/{{ coment.id_enlace }}#{{ coment.key }}</link>
             <guid>http://www.ubufaq.com/story/{{ coment.id_enlace }}#{{ coment.key }}</guid>
             <pubDate>{{ coment.fecha|date:"r" }}</pubDate>
-            <description>{{ coment.contenido|capfirst|truncatewords:50 }}</description>
+            <description>{{ coment.contenido|safe|truncatewords:50 }}</description>
         </item>
 {% endfor %}
     </channel>

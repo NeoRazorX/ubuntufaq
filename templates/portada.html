@@ -1,0 +1,130 @@
+{% include "cabecera.html" %}
+<div class="preguntas">
+
+<table width='100%'>
+{% for mix in mixto %}
+    <tr>
+    <td class="avatar">{{ mix.autor.email|avatar:40 }}</td>
+    <td>
+    <div class="respuesta">
+    {% ifequal mix.tipo 'pregunta' %}
+        <div class='titulo'>
+            <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
+            <span>{{ mix.estado|estado_pregunta }}</span>
+        </div>
+        {{ mix.descripcion|safe|truncatewords:50 }}
+    {% else %}
+        {{ mix.descripcion|safe|urlize }}... <a href="/story/{{ mix.key }}">seguir leyendo.</a>
+    {% endifequal %}
+    </div>
+    <div class="info_respuesta_down">
+        {{ mix.clicks }} clicks |
+        {{ mix.creado|date:"d/m/Y H:i" }} |
+    {% if mix.autor %}
+        <a href="/u/{{ mix.autor.email|urlencode }}">{{ mix.autor.nickname|cortamail }}</a>
+        {{ mix.puntos }}
+    {% else %}
+        an&oacute;nimo
+    {% endif %}
+    </div>
+    </td>
+    <td width='110' valign="top">
+    {% ifequal mix.tipo 'imagen' %}
+        <a href="/images"><img src="/img/photo.png" alt="imagen"/></a>
+    {% endifequal %}
+    {% ifequal mix.tipo 'youtube' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    {% ifequal mix.tipo 'vimeo' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    {% ifequal mix.tipo 'vhtml5' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    
+    {% if mix.comentarios %}
+        <a href="{{ mix.link }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
+        {{ mix.comentarios }}
+    {% else %}
+        <a href="{{ mix.link }}"><img src="/img/comment.png" alt="comentarios" title="deja un comentario"/></a>
+    {% endif %}
+    </tr>
+{% endfor %}
+</table>
+
+<div id="cse" style="width: 100%;">Cargando...</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+  google.setOnLoadCallback(function() {
+    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.setAutoComplete(true);
+    customSearchControl.draw('cse', options);
+  }, true);
+</script>
+
+<table width='100%'>
+<tr>
+    <td valign="top" width="45%">
+    <a name="nueva-pregunta"></a>
+    <div class="titulo">Nueva pregunta:</div>
+    <form name="pregunta" action="/add_p" method="post">
+        <input id="titulo" type="text" name="titulo" size="50" maxlength="100" value="Titulo"/>
+        <textarea name="contenido" rows="6" cols="60">Descripcion</textarea>
+        <br/>
+    {% if formulario %}
+        <input type="checkbox" name="anonimo"/>An&oacute;nimo
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_pregunta(false)"/>
+    {% else %}
+        <input type="hidden" name="recaptcha_challenge_field" value=""/>
+        <input type="hidden" name="recaptcha_response_field" value=""/>
+        <b>¡No olvides resolver el captcha!</b>
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_pregunta(true)"/>
+    {% endif %}
+    </form>
+    <ul>
+        <li>Comprueba que la pregunta que quieres hacer no haya sido publicada previamente.</li>
+        <li>Utiliza un <b>t&iacute;tulo</b> descriptivo.</li>
+        <li>Cuanto m&aacute;s detallada sea la <b>descripci&oacute;n</b> de la pregunta, m&aacute;s f&aacute;cil y r&aacute;pido te contestar&aacute;n. No olvides decir qu&eacute; <b>versi&oacute;n de Ubuntu</b> est&aacute;s usando.</li>
+        <li>Repasa la ortograf&iacute;a.</li>
+        <li>Se te notificar&aacute; por email la primera respuesta.</li>
+    </ul>
+    </td>
+    <td valign="top">
+        {% if captcha %}
+            <form name="captcha">{{ captcha|safe }}</form>
+        {% else %}
+            <center>{{ usuario.email|avatar }}</center>
+        {% endif %}
+    </td>
+    <td valign="top" width="45%">
+    <a name="nuevo-enlace"></a>
+    <div class="titulo">Compartir enlace:</div>
+    <form name="enlace" action="/add_e" method="post">
+        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
+        <br/>
+        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
+        <br/>
+    {% if formulario %}
+        <input type="checkbox" name="anonimo"/>An&oacute;nimo
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace(false)"/>
+    {% else %}
+        <input type="hidden" name="recaptcha_challenge_field" value=""/>
+        <input type="hidden" name="recaptcha_response_field" value=""/>
+        <b>¡No olvides resolver el captcha!</b>
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace(true)"/>
+    {% endif %}
+    </form>
+    <ul>
+        <li>Una noticia, un art&iacute;culo o un blog.</li>
+        <li>Un v&iacute;deo de <a href="http://www.youtube.com" target="_Blank">youtube</a>, <a href="http://www.vimeo.com" target="_Blank">vimeo</a> o incluso v&iacute;deos en formato OGM o WEB.</li>
+        <li>Una imagen o una captura de pantalla, puedes usar el servicio <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.</li>
+    </ul>
+    </td>
+</tr>
+</table>
+
+</div>
+{% include "pie.html" %}

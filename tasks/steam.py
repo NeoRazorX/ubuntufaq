@@ -21,7 +21,7 @@ class steam:
         autores = []
         try:
             enlace = Enlace.get( STEAM_ENLACE_KEY )
-            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", STEAM_ENLACE_KEY)
+            comentarios = enlace.get_comentarios( enlace.comentarios )
         except:
             enlace = comentarios = None
         
@@ -94,8 +94,7 @@ class steam:
         try:
             c.put()
             e.put()
-            memcache.delete( STEAM_ENLACE_KEY )
-            memcache.delete('steam4linux')
+            e.borrar_cache()
         except:
             logging.error('Cant save comment: ' + comment)
     

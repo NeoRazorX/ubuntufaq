@@ -1,14 +1,123 @@
 #!/usr/bin/env python
 
-import cgi, os, urllib
-from google.appengine.ext import db, webapp
+import cgi, os, urllib, logging
+
+# cargamos django 1.2
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+from google.appengine.dist import use_library
+use_library('django', '1.2')
 from google.appengine.ext.webapp import template
+
+from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.api import users
+from google.appengine.api import users, memcache
+
+from recaptcha.client import captcha
 from base import *
 from pregunta import *
 from actualidad import *
 from imagenes import *
+
+class Portada(Pagina):
+    def mezclar(self):
+        preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(12)
+        enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(12)
+        mixto = []
+        p = e = 0
+        while p < len(preguntas) or e < len(enlaces):
+            if p >= len(preguntas):
+                mixto.append({'tipo': enlaces[e].tipo_enlace,
+                            'key': enlaces[e].key(),
+                            'autor': enlaces[e].autor,
+                            'puntos': enlaces[e].puntos,
+                            'descripcion': enlaces[e].descripcion,
+                            'clicks': enlaces[e].clicks,
+                            'creado': enlaces[e].creado,
+                            'comentarios': enlaces[e].comentarios,
+                            'link': '/story/' + str(enlaces[e].key())})
+                e += 1
+            elif e >= len(enlaces):
+                mixto.append({'tipo': 'pregunta',
+                            'key': preguntas[p].key(),
+                            'autor': preguntas[p].autor,
+                            'puntos': preguntas[p].puntos,
+                            'descripcion': preguntas[p].contenido,
+                            'clicks': preguntas[p].visitas,
+                            'creado': preguntas[p].creado,
+                            'comentarios': preguntas[p].respuestas,
+                            'titulo': preguntas[p].titulo,
+                            'estado': preguntas[p].estado,
+                            'link': '/question/' + str(preguntas[p].key())})
+                p += 1
+            elif preguntas[p].fecha > enlaces[e].fecha:
+                mixto.append({'tipo': 'pregunta',
+                            'key': preguntas[p].key(),
+                            'autor': preguntas[p].autor,
+                            'puntos': preguntas[p].puntos,
+                            'descripcion': preguntas[p].contenido,
+                            'clicks': preguntas[p].visitas,
+                            'creado': preguntas[p].creado,
+                            'comentarios': preguntas[p].respuestas,
+                            'titulo': preguntas[p].titulo,
+                            'estado': preguntas[p].estado,
+                            'link': '/question/' + str(preguntas[p].key())})
+                p += 1
+            else:
+                mixto.append({'tipo': enlaces[e].tipo_enlace,
+                            'key': enlaces[e].key(),
+                            'autor': enlaces[e].autor,
+                            'puntos': enlaces[e].puntos,
+                            'descripcion': enlaces[e].descripcion,
+                            'clicks': enlaces[e].clicks,
+                            'creado': enlaces[e].creado,
+                            'comentarios': enlaces[e].comentarios,
+                            'link': '/story/' + str(enlaces[e].key())})
+                e += 1
+        return mixto
+    
+    def get_portada(self):
+        mixto = memcache.get( 'portada' )
+        if mixto is not None:
+            logging.info('Leyendo de memcache para la portada')
+        else:
+            mixto = self.mezclar()
+            if not memcache.add('portada', mixto):
+                logging.error("Fallo almacenando en memcache la portada ")
+            else:
+                logging.info('Almacenando en memcache la portada')
+        return mixto
+    
+    def get(self):
+        Pagina.get(self)
+        mixto = self.get_portada()
+        vista = 'portada'
+        
+        # el captcha
+        if users.get_current_user():
+            chtml = ''
+        else:
+            chtml = captcha.displayhtml(
+                public_key = RECAPTCHA_PUBLIC_KEY,
+                use_ssl = False,
+                error = None)
+        
+        template_values = {
+            'titulo': 'Ubuntu FAQ - ' + vista,
+            'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias. Si tienes alguna duda compartela con nosotros!',
+            'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmin, lucid, maverick, natty',
+            'mixto': mixto,
+            'url': self.url,
+            'url_linktext': self.url_linktext,
+            'mi_perfil': self.mi_perfil,
+            'formulario' : self.formulario,
+            'captcha': chtml,
+            'usuario': users.get_current_user(),
+            'vista': vista,
+            'error_dominio': self.error_dominio
+        }
+        
+        path = os.path.join(os.path.dirname(__file__), 'templates/portada.html')
+        self.response.out.write( template.render(path, template_values) )
 
 # clase para listar las preguntas
 class Indice(Pagina):
@@ -19,14 +128,14 @@ class Indice(Pagina):
         if vista == 'sin-solucionar':
             p_query = db.GqlQuery("SELECT * FROM Pregunta WHERE estado < 10 ORDER BY estado ASC")
             enlaces = None
-            respuestas = Respuesta.all().order('-fecha').fetch(15)
+            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC LIMIT 18")
         elif vista == 'populares':
             p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY visitas DESC")
-            enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY clicks DESC").fetch(15)
+            enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY clicks DESC LIMIT 18")
             respuestas = None
         else:
             p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC")
-            enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(15)
+            enlaces = None
             respuestas = None
             vista = 'inicio'
         
@@ -89,10 +198,10 @@ class Detalle_usuario(Pagina):
         if email:
             try:
                 usuario = users.User( urllib.unquote( email ) )
-                p = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(10)
-                r = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(10)
-                e = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(10)
-                c = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(10)
+                p = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
+                r = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
+                e = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
+                c = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
                 continuar = True
             except:
                 pass
@@ -190,7 +299,7 @@ class Perror(Pagina):
         self.response.out.write(template.render(path, template_values))
 
 def main():
-    application = webapp.WSGIApplication([('/', Indice),
+    application = webapp.WSGIApplication([('/', Portada),
                                         ('/inicio', Indice),
                                         (r'/inicio/(.*)', Indice),
                                         ('/populares', Populares),
@@ -228,7 +337,7 @@ def main():
                                         ('/.*', Perror),
                                     ],
                                     debug=DEBUG_FLAG)
-    webapp.template.register_template_library('filtros_django')
+    webapp.template.register_template_library('filters.filtros_django')
     run_wsgi_app(application)
 
 if __name__ == "__main__":

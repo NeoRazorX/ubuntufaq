@@ -396,7 +396,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <form name="comentario" action="/steam4linux" method="post">
     <b>Email</b>: <input type="text" name="email" value="" size="30" maxlength="99" />
     <textarea name="contenido" rows="6" cols="60">Make a comment!</textarea>
-    <br/>{{ captcha }}
+    <br/>{{ captcha|safe }}
     <input type="submit" class="boton" value="comment"/>
     </form>
     </div>
@@ -406,7 +406,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <tr>
     <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
     <td width="100%" valign="top">
-    <div class="respuesta">{{ coment.contenido|linebreaksbr|urlize }}</div>
+    <div class="respuesta">{{ coment.contenido|safe|linebreaksbr|urlize }}</div>
     <div class="info_respuesta_down">
         <a name="{{ coment.key }}"></a>{{ coment.fecha|date:"d/m/Y H:i" }} |
     {% if coment.autor %}

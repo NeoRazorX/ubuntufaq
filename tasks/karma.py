@@ -2,76 +2,10 @@
 
 import logging, random
 from google.appengine.ext import db
-from google.appengine.api import users
+from google.appengine.api import users, memcache
 from base import *
 
 class karma:
-    def paginar(self, consulta):
-        total = consulta.count()
-        if consulta.count() > 10:
-            eleccion = random.randint(0, total - 1)
-        else:
-            eleccion = 0
-        
-        return consulta.fetch( 10, eleccion ), total
-    
-    def calcular(self, autor):
-        if autor:
-            logging.info("Calculando el karma del usuario " + str(autor))
-            
-            # obtenemos los ultimos registros del usuario
-            try:
-                q_preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1", autor)
-                q_respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1", autor)
-                q_enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1", autor)
-                q_comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1", autor)
-                
-                # paginamos a la vez que calculamos el karma
-                caca = 0
-                preguntas, caca = self.paginar( q_preguntas )
-                respuestas, caca = self.paginar( q_respuestas )
-                puntos = 1 + caca
-                enlaces, caca = self.paginar( q_enlaces )
-                puntos += caca
-                comentarios, caca = self.paginar( q_comentarios )
-                puntos += caca
-            except:
-                logging.error("Imposible obtener los registros del usuario " + str(autor))
-                preguntas = None
-                respuestas = None
-                enlaces = None
-                comentarios = None
-            
-            # modificamos cada registro
-            if preguntas:
-                for p in preguntas:
-                    p.puntos = puntos
-            if respuestas:
-                for r in respuestas:
-                    r.puntos = puntos
-            if enlaces:
-                for e in enlaces:
-                    e.puntos = puntos
-            if comentarios:
-                for c in comentarios:
-                    c.puntos = puntos
-            
-            # guardamos los datos
-            try:
-                if preguntas:
-                    db.put(preguntas)
-                if respuestas:
-                    db.put(respuestas)
-                if enlaces:
-                    db.put(enlaces)
-                if comentarios:
-                    db.put(comentarios)
-                logging.info("Actualizado el karma del usuario " + str(autor))
-            except:
-                logging.error("Imposible actualizar el karma del usuario " + str(autor))
-        else:
-            logging.info("El elemento seleccionado pertenece a un usuario anonimo")
-    
     def __init__(self):
         # elegimos aleatoriamente una tabla
         eleccion = random.randint(0, 3)
@@ -104,6 +38,91 @@ class karma:
                 logging.info("No se ha encontrado ningun usuario al que actualizar el karma")
         else:
             logging.info("No hay suficientes elementos en la seleccion inicial")
+    
+    def calcular(self, autor):
+        if autor:
+            # leemos de memcache
+            continuar = True
+            karma = memcache.get( 'usuario_' + str(autor) )
+            if karma is not None:
+                logging.info("Lellendo karma del usuario " + str(autor) + ' desde memcache')
+            else:
+                karma = {'puntos': 0,
+                    'preguntas': False,
+                    'respuestas': False,
+                    'enlaces': False,
+                    'comentarios': False
+                }
+                if not memcache.add( 'usuario_' + str(autor), karma, 86400 ):
+                    logging.error("Imposible almacenar el karma del usuario " + str(autor) + ' en memcache')
+                    continuar = False
+            
+            if not karma['preguntas'] and continuar:
+                query = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1", autor)
+                karma['puntos'] += query.count()
+                karma['preguntas'] = True
+                memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                continuar = False
+            
+            if not karma['respuestas'] and continuar:
+                query = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1", autor)
+                karma['puntos'] += query.count()
+                karma['respuestas'] = True
+                memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                continuar = False
+            
+            if not karma['enlaces'] and continuar:
+                query = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1", autor)
+                karma['puntos'] += query.count()
+                karma['enlaces'] = True
+                memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                continuar = False
+            
+            if not karma['comentarios'] and continuar:
+                query = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1", autor)
+                karma['puntos'] += query.count()
+                karma['comentarios'] = True
+                memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                continuar = False
+            
+            if karma['preguntas'] and karma['respuestas'] and karma['enlaces'] and karma['comentarios'] and continuar:
+                self.actualizar(autor, karma['puntos'])
+        else:
+            logging.info("El elemento seleccionado pertenece a un usuario anonimo")
+    
+    def actualizar(self, autor, puntos):
+        # elegimos aleatoriamente una tabla
+        eleccion = random.randint(0, 3)
+        
+        if eleccion == 0:
+            seleccion = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 AND puntos != :2", autor, puntos)
+        elif eleccion == 1:
+            seleccion = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 AND puntos != :2", autor, puntos)
+        elif eleccion == 2:
+            seleccion = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 AND puntos != :2", autor, puntos)
+        else:
+            seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 AND puntos != :2", autor, puntos)
+        
+        try:
+            elementos = self.paginar( seleccion )
+            
+            # modificamos cada registro
+            for ele in elementos:
+                ele.puntos = puntos
+            
+            # guardamos los datos
+            db.put( elementos )
+            logging.info("Actualizado el karma del usuario " + str(autor))
+        except:
+            logging.error("Imposible actualizar el karma del usuario " + str(autor))
+    
+    def paginar(self, consulta):
+        total = consulta.count()
+        if consulta.count() > 20:
+            eleccion = random.randint(0, total - 1)
+        else:
+            eleccion = 0
+        return consulta.fetch( 20, eleccion )
 
 if __name__ == "__main__":
     karma()

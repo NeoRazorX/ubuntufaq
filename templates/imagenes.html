@@ -1,6 +1,33 @@
 {% include "cabecera.html" %}
 
 <div class="preguntas">
+<table>
+<tr>
+<td class="avatar"><br/><br/>{{ usuario.email|avatar:40 }}</td>
+<td valign="top">
+    <a name="nuevo-enlace"></a>
+    <div class="formulario">
+    <div class="titulo">Compartir imagen:</div>
+    <form name="enlace" action="/add_e" method="post">
+        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
+        <br/>
+        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
+        <br/>{{ captcha|safe }}
+    {% if formulario %}
+        <input type="checkbox" name="anonimo"/>An&oacute;nimo
+    {% endif %}
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
+    </form>
+    </div>
+</td>
+<td valign="top">
+<br/>
+<b>Comparte:</b><br/>
+- Una foto, una imagen o una captura de pantalla, puedes usar el servicio <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.
+</td>
+</tr>
+</table>
+
 
 {% if imagenes %}
 {% for imagen in imagenes %}
@@ -23,7 +50,7 @@
         <br/>
         {{ imagen.creado|date:"d/m/Y H:i" }} | {{ imagen.clicks }} clicks
         <br/>
-        {{ imagen.descripcion|capfirst|urlizetrunc:30 }}
+        {{ imagen.descripcion|safe|urlizetrunc:30 }}
     </div>
     </td>
     </tr>
@@ -51,31 +78,6 @@
 </td>
 </tr>
 {% endifnotequal %}
-
-<tr>
-<td class="avatar"><br/><br/>{{ usuario.email|avatar:40 }}</td>
-<td valign="top">
-    <a name="nuevo-enlace"></a>
-    <div class="formulario">
-    <div class="titulo">Compartir imagen:</div>
-    <form name="enlace" action="/add_e" method="post">
-        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
-        <br/>
-        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
-        <br/>{{ captcha }}
-    {% if formulario %}
-        <input type="checkbox" name="anonimo"/>An&oacute;nimo
-    {% endif %}
-        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
-    </form>
-    </div>
-</td>
-<td valign="top">
-<br/>
-<b>Comparte:</b><br/>
-- Una foto, una imagen o una captura de pantalla, puedes usar el servicio <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.
-</td>
-</tr>
 </table>
 </div>
 

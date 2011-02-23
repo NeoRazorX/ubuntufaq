@@ -1,43 +1,27 @@
 #!/usr/bin/env python
 
 import os, logging, cgi
-from google.appengine.ext import db, webapp
+
+# cargamos django 1.2
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+from google.appengine.dist import use_library
+use_library('django', '1.2')
 from google.appengine.ext.webapp import template
+
+from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.api import users, memcache
+from google.appengine.api import users
 from recaptcha.client import captcha
-from datetime import datetime
 from base import *
 
 class steam4linux(webapp.RequestHandler):
-    def get_enlace(self):
-        e = Enlace.get( STEAM_ENLACE_KEY )
-        
-        # actualizamos los clicks, no pasa nada si no podemos
-        if e.ultima_ip != self.request.remote_addr:
-            e.ultima_ip = self.request.remote_addr
-            e.clicks += 1
-            try:
-                e.put()
-            except:
-                pass
-        return e
-    
-    def get_comentarios(self):
-        comentarios = memcache.get('steam4linux')
-        if comentarios is not None:
-            logging.info('Leyendo de memcache para: steam4linux')
-            return comentarios
-        else:
-            comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha DESC", STEAM_ENLACE_KEY).fetch(100)
-            if not memcache.add('steam4linux', comentarios):
-                logging.error("Fallo almacenando en memcache: steam4linux")
-            else:
-                logging.info('Almacenando en memcache: steam4linux')
-            return comentarios
-    
     def get(self):
         if STEAM_ENLACE_KEY != '':
+            e = Enlace.get( STEAM_ENLACE_KEY )
+            e.clickar( self.request.remote_addr )
+            comentarios = e.get_comentarios( e.comentarios )
+            comentarios.reverse()
+            
             #captcha
             chtml = captcha.displayhtml(
                 public_key = RECAPTCHA_PUBLIC_KEY,
@@ -45,8 +29,8 @@ class steam4linux(webapp.RequestHandler):
                 error = None)
             
             template_values = {
-                'enlace': self.get_enlace(),
-                'comentarios': self.get_comentarios(),
+                'enlace': e,
+                'comentarios': comentarios,
                 'usuario': users.get_current_user(),
                 'url_login': users.create_login_url( self.request.uri ),
                 'error': self.request.get('error'),
@@ -57,12 +41,6 @@ class steam4linux(webapp.RequestHandler):
             self.response.out.write( template.render(path, template_values) )
         else:
             self.redirect('/')
-    
-    def actualizar_enlace(self, id_enlace):
-        e = Enlace.get( id_enlace )
-        e.comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1", id_enlace).count()
-        e.fecha = datetime.now()
-        e.put()
     
     def post(self):
         challenge = self.request.get('recaptcha_challenge_field')
@@ -83,9 +61,9 @@ class steam4linux(webapp.RequestHandler):
                 if self.request.get('email'):
                     c.autor = users.User( self.request.get('email') )
                 c.put()
-                memcache.delete( STEAM_ENLACE_KEY )
-                memcache.delete('steam4linux')
-                self.actualizar_enlace( STEAM_ENLACE_KEY )
+                e = Enlace.get( STEAM_ENLACE_KEY )
+                e.actualizar()
+                e.borrar_cache()
                 self.redirect('/steam4linux')
             except:
                 self.redirect('/steam4linux?error=503')
@@ -94,7 +72,7 @@ class steam4linux(webapp.RequestHandler):
 
 def main():
     application = webapp.WSGIApplication( [('/steam4linux', steam4linux)], debug=DEBUG_FLAG )
-    template.register_template_library('filtros_django')
+    template.register_template_library('filters.filtros_django')
     run_wsgi_app(application)
 
 if __name__ == "__main__":

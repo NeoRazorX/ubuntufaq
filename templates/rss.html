@@ -6,12 +6,12 @@
         <link>http://www.ubufaq.com</link>
 {% for enlace in enlaces %}
         <item>
-            <title>{{ enlace.descripcion|capfirst|truncatewords:10 }}</title>
+            <title>{{ enlace.descripcion|safe|truncatewords:10 }}</title>
             <link>http://www.ubufaq.com/story/{{ enlace.key }}</link>
             <guid>http://www.ubufaq.com/story/{{ enlace.key }}</guid>
             <pubDate>{{ enlace.creado|date:"r" }}</pubDate>
             <description>
-                {{ enlace.descripcion|capfirst }}
+                {{ enlace.descripcion|safe }}
                 &lt;br/&gt;&lt;br/&gt;
                 {{ enlace.comentarios }} comentarios
             </description>
@@ -19,12 +19,12 @@
 {% endfor %}
 {% for pregunta in preguntas %}
         <item>
-            <title>{{ pregunta.titulo }}</title>
+            <title>{{ pregunta.titulo|safe }}</title>
             <link>http://www.ubufaq.com/question/{{ pregunta.key }}</link>
             <guid>http://www.ubufaq.com/question/{{ pregunta.key }}</guid>
             <pubDate>{{ pregunta.creado|date:"r" }}</pubDate>
             <description>
-                {{ pregunta.contenido|capfirst|truncatewords:50 }}
+                {{ pregunta.contenido|safe|truncatewords:50 }}
                 &lt;br/&gt;&lt;br/&gt;
                 {{ pregunta.respuestas }} respuestas
             </description>

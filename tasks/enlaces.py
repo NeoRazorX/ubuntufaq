@@ -38,6 +38,7 @@ class enlaces:
             enlace.tipo_enlace = tipo_enlace
             try:
                 enlace.put()
+                enlace.borrar_cache()
             except:
                 logging.error('Imposible modificar en enlace!')
         

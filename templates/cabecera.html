@@ -131,7 +131,7 @@
     
     table.widgets td.widget {
         vertical-align: top;
-        width: 40%;
+        width: 30%;
     }
     
     div.pregunta {
@@ -338,7 +338,7 @@
     </style>
     <script type="text/javascript">
         <!--
-        function enviar_pregunta()
+        function enviar_pregunta(captcha)
         {
             var titulo = document.pregunta.titulo.value;
             var contenido = document.pregunta.contenido.value;
@@ -365,6 +365,12 @@
                 document.pregunta.titulo.select();
             }
             
+            if(captcha)
+            {
+                document.pregunta.recaptcha_challenge_field.value = document.captcha.recaptcha_challenge_field.value;
+                document.pregunta.recaptcha_response_field.value = document.captcha.recaptcha_response_field.value;
+            }
+            
             if(continuar) { document.pregunta.submit(); }
             else { alert( mensaje ); }
         }
@@ -384,7 +390,7 @@
             }
         }
         
-        function enviar_enlace()
+        function enviar_enlace(captcha)
         {
             var descripcion = document.enlace.descripcion.value;
             var url = document.enlace.url.value;
@@ -406,6 +412,12 @@
                 mensaje = 'Debes modificar la descripción del enlace, recuerda que hay un máximo de 450 caracteres. Actual=' + descripcion.length;
                 document.enlace.descripcion.focus();
                 document.enlace.descripcion.select();
+            }
+            
+            if(captcha)
+            {
+                document.enlace.recaptcha_challenge_field.value = document.captcha.recaptcha_challenge_field.value;
+                document.enlace.recaptcha_response_field.value = document.captcha.recaptcha_response_field.value;
             }
             
             if(continuar) { document.enlace.submit(); }
@@ -478,7 +490,8 @@
     <br/><span>Actualidad, blogs, wallpapers y soluciones r&aacute;pidas para tus problemas con Ubuntu Linux</span>
 </div>
 <div class="menucabecera">
-    <span {{ vista|menu_cabecera:"inicio" }}><a href="/inicio">inicio</a></span>
+    <span {{ vista|menu_cabecera:"portada" }}><a href="/">inicio</a></span>
+    <span {{ vista|menu_cabecera:"inicio" }}><a href="/inicio">preguntas</a></span>
     <span {{ vista|menu_cabecera:"actualidad" }}><a href="/actualidad">actualidad</a></span>
     <span {{ vista|menu_cabecera:"populares" }}><a href="/populares">populares</a></span>
     <span {{ vista|menu_cabecera:"sin-solucionar" }}><a href="/sin-solucionar">sin solucionar</a></span>

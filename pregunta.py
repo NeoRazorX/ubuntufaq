@@ -3,9 +3,8 @@
 import cgi, os, logging
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
-from google.appengine.api import users, memcache
+from google.appengine.api import users
 from recaptcha.client import captcha
-from datetime import datetime
 from base import *
 
 class Nueva_pregunta(Pagina):
@@ -38,13 +37,6 @@ class Nueva_pregunta(Pagina):
         path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
         self.response.out.write(template.render(path, template_values))
     
-    def extraer_tags(self, texto):
-        retorno = ''
-        for tag in KEYWORD_LIST:
-            if texto.lower().find(tag) != -1:
-                retorno += ', ' + tag
-        return retorno
-    
     # crea la pregunta
     def post(self):
         p = Pregunta()
@@ -59,6 +51,7 @@ class Nueva_pregunta(Pagina):
                 p.enviar_email = True
             try:
                 p.put()
+                p.borrar_cache()
                 self.redirect('/question/' + str( p.key() ))
             except:
                 self.redirect('/error/503')
@@ -75,6 +68,7 @@ class Nueva_pregunta(Pagina):
             if cResponse.is_valid:
                 try:
                     p.put()
+                    p.borrar_cache()
                     self.redirect('/question/' + str( p.key() ))
                 except:
                     self.redirect('/error/503')
@@ -91,19 +85,6 @@ class Redir_pregunta(Pagina):
             self.redirect('/error/404')
 
 class Detalle_pregunta(Pagina):
-    def get_respuestas(self, id_enlace, numero=100):
-        respuestas = memcache.get( str(id_enlace) )
-        if respuestas is not None:
-            logging.info('Leyendo de memcache para: ' + str(id_enlace))
-            return respuestas
-        else:
-            respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1 ORDER BY fecha ASC", str(id_enlace)).fetch(numero)
-            if not memcache.add(str(id_enlace), respuestas):
-                logging.error("Fallo almacenando en memcache: " + str(id_enlace))
-            else:
-                logging.info('Almacenando en memcache: ' + str(id_enlace))
-            return respuestas
-    
     # muestra la pregunta
     def get(self, id_p=None):
         Pagina.get(self)
@@ -114,16 +95,8 @@ class Detalle_pregunta(Pagina):
             p = None
         
         if p:
-            # actualizamos las visitas, no pasa nada si no se puede
-            if p.ultima_ip != self.request.remote_addr:
-                p.ultima_ip = self.request.remote_addr
-                p.visitas += 1
-                try:
-                    p.put()
-                except:
-                    pass
-            
-            r = self.get_respuestas( id_p, p.respuestas )
+            p.visitar( self.request.remote_addr )
+            r = p.get_respuestas( p.respuestas )
             editar = False
             modificar = False
             
@@ -181,6 +154,7 @@ class Detalle_pregunta(Pagina):
                     p.tags = cgi.escape( self.request.get('tags') )
                     p.estado = int( self.request.get('estado') )
                     p.put()
+                    p.borrar_cache()
                     logging.warning("Se ha modificado la pregunta con id: " + self.request.get('id'))
                     self.redirect('/question/' + self.request.get('id'))
                 except:
@@ -197,7 +171,6 @@ class Borrar_pregunta(webapp.RequestHandler):
             try:
                 r = Respuesta.all().filter('id_pregunta =', self.request.get('id'))
                 db.delete(r)
-                memcache.delete( self.request.get('id') )
             except:
                 continuar = False
             
@@ -205,6 +178,7 @@ class Borrar_pregunta(webapp.RequestHandler):
             if continuar:
                 try:
                     p = Pregunta.get( self.request.get('id') )
+                    p.borrar_cache()
                     p.delete()
                 except:
                     continuar = False
@@ -219,10 +193,9 @@ class Borrar_pregunta(webapp.RequestHandler):
 
 class Responder(webapp.RequestHandler):
     def actualizar_pregunta(self, id_pregunta, respuesta):
-        memcache.delete( id_pregunta )
         p = Pregunta.get( id_pregunta )
-        p.respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1", id_pregunta).count()
-        p.fecha = datetime.now()
+        p.actualizar()
+        p.borrar_cache()
         
         # cambiamos el estado de la pregunta en funcion de la respuesta
         if respuesta.autor:
@@ -299,7 +272,7 @@ class Destacar_respuesta(webapp.RequestHandler):
                 try:
                     r.destacada = not(r.destacada)
                     r.put()
-                    memcache.delete( self.request.get('id') )
+                    p.borrar_cache()
                     self.redirect('/question/' + self.request.get('id'))
                 except:
                     self.redirect('/error/503')
@@ -322,7 +295,7 @@ class Modificar_respuesta(webapp.RequestHandler):
                 try:
                     r.contenido = cgi.escape( self.request.get('contenido') )
                     r.put()
-                    memcache.delete( self.request.get('id_pregunta') )
+                    p.borrar_cache()
                     self.redirect('/question/' + self.request.get('id_pregunta'))
                 except:
                     self.redirect('/error/503')
@@ -338,7 +311,6 @@ class Borrar_respuesta(webapp.RequestHandler):
             try:
                 r = Respuesta.get( self.request.get('r') )
                 r.delete()
-                memcache.delete( self.request.get('id') )
             except:
                 continuar = False
             
@@ -346,8 +318,8 @@ class Borrar_respuesta(webapp.RequestHandler):
             if continuar:
                 try:
                     p = Pregunta.get( self.request.get('id') )
-                    p.respuestas = Respuesta.all().filter("id_pregunta =", self.request.get('id')).count()
-                    p.put()
+                    p.actualizar()
+                    p.borrar_cache()
                 except:
                     continuar = False
             
