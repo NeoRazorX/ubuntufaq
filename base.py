@@ -13,7 +13,7 @@ RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
     'http://www.genbeta.com/index.xml']
 KEYWORD_LIST = ['ubuntu', 'linux', 'canonical', 'unity', 'gnome', 'kde', 'x.org', 'android',
     'wayland', 'compiz', 'wine', 'ppa', 'lucid', 'maverick', 'natty', 'unix', 'plymouth',
-    'chrome os', 'kms', 'systemd', 'kernel', 'fedora', 'suse', 'debian', 'gcc',
+    'chrome os', 'kms', 'systemd', 'kernel', 'fedora', 'suse', 'debian', 'gcc', 'grub',
     'gnu', 'linus', 'gallium3d', 'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs']
 SITEMAP_CACHE_TIME = 14400
 

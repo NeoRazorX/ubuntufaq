@@ -142,7 +142,7 @@ class Detalle_enlace(Pagina):
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
                 'descripcion': descripcion,
-                'tags': 'ubufaq, ubuntu faq' + self.extraer_tags(e.descripcion),
+                'tags': 'ubufaq, ubuntu faq, ' + self.extraer_tags(e.descripcion),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,

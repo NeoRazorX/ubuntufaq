@@ -40,7 +40,7 @@ class enlaces:
                 enlace.put()
                 enlace.borrar_cache()
             except:
-                logging.error('Imposible modificar en enlace!')
+                logging.error('Imposible modificar el enlace!')
         
         # enviamos un mail a wordpress
         if WORDPRESS_PRIVATE_EMAIL != '':

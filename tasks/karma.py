@@ -95,34 +95,23 @@ class karma:
         eleccion = random.randint(0, 3)
         
         if eleccion == 0:
-            seleccion = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 AND puntos != :2", autor, puntos)
+            seleccion = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
         elif eleccion == 1:
-            seleccion = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 AND puntos != :2", autor, puntos)
+            seleccion = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
         elif eleccion == 2:
-            seleccion = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 AND puntos != :2", autor, puntos)
+            seleccion = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
         else:
-            seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 AND puntos != :2", autor, puntos)
+            seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
         
         try:
-            elementos = self.paginar( seleccion )
-            
             # modificamos cada registro
-            for ele in elementos:
+            for ele in seleccion:
                 ele.puntos = puntos
+                ele.put()
             
-            # guardamos los datos
-            db.put( elementos )
             logging.info("Actualizado el karma del usuario " + str(autor))
         except:
             logging.error("Imposible actualizar el karma del usuario " + str(autor))
-    
-    def paginar(self, consulta):
-        total = consulta.count()
-        if consulta.count() > 20:
-            eleccion = random.randint(0, total - 1)
-        else:
-            eleccion = 0
-        return consulta.fetch( 20, eleccion )
 
 if __name__ == "__main__":
     karma()
