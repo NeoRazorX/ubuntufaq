@@ -89,8 +89,6 @@ class Portada(Pagina):
     
     def get(self):
         Pagina.get(self)
-        mixto = self.get_portada()
-        vista = 'portada'
         
         # el captcha
         if users.get_current_user():
@@ -102,17 +100,17 @@ class Portada(Pagina):
                 error = None)
         
         template_values = {
-            'titulo': 'Ubuntu FAQ - ' + vista,
-            'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias. Si tienes alguna duda compartela con nosotros!',
-            'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmin, lucid, maverick, natty',
-            'mixto': mixto,
+            'titulo': 'Ubuntu FAQ - pportada',
+            'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias. Si tienes alguna duda compartela con nosotros!',
+            'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmic, lucid, maverick, natty',
+            'mixto': self.get_portada(),
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
             'formulario' : self.formulario,
             'captcha': chtml,
             'usuario': users.get_current_user(),
-            'vista': vista,
+            'vista': 'portada',
             'error_dominio': self.error_dominio
         }
         
@@ -145,7 +143,7 @@ class Indice(Pagina):
         template_values = {
             'titulo': 'Ubuntu FAQ - ' + vista,
             'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias. Si tienes alguna duda compartela con nosotros!',
-            'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmin, lucid, maverick, natty',
+            'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmic, lucid, maverick, natty',
             'preguntas': preguntas,
             'respuestas': respuestas,
             'enlaces': enlaces,
@@ -194,14 +192,15 @@ class Detalle_usuario(Pagina):
     def get(self, email=None):
         Pagina.get(self)
         continuar = False
+        numreg = 10
         
         if email:
             try:
                 usuario = users.User( urllib.unquote( email ) )
-                p = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
-                r = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
-                e = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
-                c = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 ORDER BY fecha DESC LIMIT 10", usuario)
+                p = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(numreg)
+                r = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(numreg)
+                e = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(numreg)
+                c = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(numreg)
                 continuar = True
             except:
                 pass
@@ -213,8 +212,14 @@ class Detalle_usuario(Pagina):
                 vista = ''
             
             karma = 0
-            if r:
+            if p:
+                for col in p:
+                    karma = max(col.puntos, karma)
+            elif r:
                 for col in r:
+                    karma = max(col.puntos, karma)
+            elif e:
+                for col in e:
                     karma = max(col.puntos, karma)
             elif c:
                 for col in c:
@@ -244,25 +249,6 @@ class Detalle_usuario(Pagina):
         else:
             self.redirect('/error/404')
 
-class Buscar(Pagina):
-    def get(self):
-        Pagina.get(self)
-        
-        template_values = {
-            'titulo': 'Buscador de Ubuntu FAQ',
-            'descripcion': 'Buscador de Ubuntu FAQ, soluciones rapidas para tus problemas con Ubuntu',
-            'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, linux, lucid, maverick, natty',
-            'url': self.url,
-            'url_linktext': self.url_linktext,
-            'mi_perfil': self.mi_perfil,
-            'formulario': self.formulario,
-            'vista': 'buscar',
-            'error_dominio': self.error_dominio
-            }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
-        self.response.out.write(template.render(path, template_values))
-
 class Perror(Pagina):
     def get(self, cerror='404'):
         Pagina.get(self)
@@ -281,6 +267,15 @@ class Perror(Pagina):
             '503': '503 - Error en Ubuntu FAQ,<br/>consulta el estado en: http://code.google.com/status/appengine',
         }
         
+        # el captcha
+        if users.get_current_user():
+            chtml = ''
+        else:
+            chtml = captcha.displayhtml(
+                public_key = RECAPTCHA_PUBLIC_KEY,
+                use_ssl = False,
+                error = None)
+        
         template_values = {
             'titulo': str(cerror) + ' - Ubuntu FAQ',
             'descripcion': derror.get(cerror, 'Error desconocido'),
@@ -292,10 +287,12 @@ class Perror(Pagina):
             'vista': '404',
             'error': merror.get(cerror, 'Error desconocido'),
             'cerror': cerror,
+            'captcha': chtml,
+            'usuario': users.get_current_user(),
             'error_dominio': self.error_dominio
             }
         
-        path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
+        path = os.path.join(os.path.dirname(__file__), 'templates/portada.html')
         self.response.out.write(template.render(path, template_values))
 
 def main():
@@ -330,8 +327,6 @@ def main():
                                         ('/del_c', Borrar_comentario),
                                         (r'/u/(.*)', Detalle_usuario),
                                         ('/ayuda', Ayuda),
-                                        ('/buscar', Buscar),
-                                        ('/nueva', Nueva_pregunta),
                                         ('/add_p', Nueva_pregunta),
                                         (r'/error/(.*)', Perror),
                                         ('/.*', Perror),

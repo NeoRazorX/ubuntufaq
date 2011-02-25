@@ -1,5 +1,4 @@
 {% include "cabecera.html" %}
-
 <div class="preguntas">
 
 {% ifequal vista '404' %}
@@ -24,28 +23,5 @@
   }, true);
 </script>
 
-{% ifequal vista 'nueva' %}
-<div class="formulario">
-    <div class="titulo">Nueva pregunta:</div>
-    <ul>
-        <li>Comprueba que la pregunta que quieres hacer no haya sido publicada previamente.</li>
-        <li>Utiliza un <b>t&iacute;tulo</b> descriptivo.</li>
-        <li>Cuanto m&aacute;s detallada sea la <b>descripci&oacute;n</b> de la pregunta, m&aacute;s f&aacute;cil y r&aacute;pido te contestar&aacute;n. No olvides decir qu&eacute; <b>versi&oacute;n de Ubuntu</b> est&aacute;s usando.</li>
-        <li>Repasa la ortograf&iacute;a.</li>
-        <li>Se te notificar&aacute; por email la primera respuesta.</li>
-    </ul>
-    <form name="pregunta" action="/add_p" method="post">
-        <input id="titulo" type="text" name="titulo" size="50" maxlength="100" value="Titulo"/>
-        <textarea name="contenido" rows="6" cols="60">Descripcion</textarea>
-        <br/>{{ captcha }}
-    {% if formulario %}
-        <input type="checkbox" name="anonimo"/>An&oacute;nimo
-    {% endif %}
-        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_pregunta()"/>
-    </form>
 </div>
-{% endifequal %}
-
-</div>
-
 {% include "pie.html" %}

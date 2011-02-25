@@ -56,12 +56,15 @@ class karma:
                 if not memcache.add( 'usuario_' + str(autor), karma, 86400 ):
                     logging.error("Imposible almacenar el karma del usuario " + str(autor) + ' en memcache')
                     continuar = False
+                else:
+                    logging.info("Almacenado el karma del usuario " + str(autor) + ' en memcache')
             
             if not karma['preguntas'] and continuar:
                 query = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1", autor)
                 karma['puntos'] += query.count()
                 karma['preguntas'] = True
                 memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                logging.info("Actualizado el karma del usuario " + str(autor) + ' en base a las preguntas')
                 continuar = False
             
             if not karma['respuestas'] and continuar:
@@ -69,6 +72,7 @@ class karma:
                 karma['puntos'] += query.count()
                 karma['respuestas'] = True
                 memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                logging.info("Actualizado el karma del usuario " + str(autor) + ' en base a las respuestas')
                 continuar = False
             
             if not karma['enlaces'] and continuar:
@@ -76,6 +80,7 @@ class karma:
                 karma['puntos'] += query.count()
                 karma['enlaces'] = True
                 memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                logging.info("Actualizado el karma del usuario " + str(autor) + ' en base a los enlaces')
                 continuar = False
             
             if not karma['comentarios'] and continuar:
@@ -83,6 +88,7 @@ class karma:
                 karma['puntos'] += query.count()
                 karma['comentarios'] = True
                 memcache.replace( 'usuario_' + str(autor), karma, 86400 )
+                logging.info("Actualizado el karma del usuario " + str(autor) + ' en base a los comentarios')
                 continuar = False
             
             if karma['preguntas'] and karma['respuestas'] and karma['enlaces'] and karma['comentarios'] and continuar:
@@ -105,13 +111,15 @@ class karma:
         
         try:
             # modificamos cada registro
-            for ele in seleccion:
-                ele.puntos = puntos
-                ele.put()
-            
-            logging.info("Actualizado el karma del usuario " + str(autor))
+            if seleccion:
+                for ele in seleccion:
+                    ele.puntos = puntos
+                    ele.put()
+                logging.info("Actualizado el karma del usuario")
+            else:
+                logging.info("No hay registros para actualizar (tabla: " + str(eleccion) + ")")
         except:
-            logging.error("Imposible actualizar el karma del usuario " + str(autor))
+            logging.error("Imposible actualizar el karma del usuario")
 
 if __name__ == "__main__":
     karma()

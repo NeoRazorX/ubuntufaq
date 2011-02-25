@@ -54,6 +54,16 @@
     
     img.galeria {
         border: 3px double #191919;
+        max-width: 200px;
+        max-height: 200px;
+    }
+    
+    h3 {
+        text-align: center;
+    }
+    
+    hr {
+        border: 1px dashed #191919;
     }
     
     div.cabecera {
@@ -236,7 +246,7 @@
         font-weight: bold;
         font-size: 15px;
         letter-spacing: 0.12em;
-        border-bottom: 1px solid #191919;
+        border-bottom: 1px dotted #191919;
         margin-bottom: 3px;
         padding-bottom: 3px;
     }
@@ -338,41 +348,83 @@
     </style>
     <script type="text/javascript">
         <!--
-        function enviar_pregunta(captcha)
+        function cambio_publicar()
         {
-            var titulo = document.pregunta.titulo.value;
-            var contenido = document.pregunta.contenido.value;
-            var mensaje;
-            var continuar = false;
-            
-            if(titulo != '' && titulo != 'Titulo')
+            if( document.publicar.tipo[0].checked )
             {
-                if(contenido != '' && contenido != 'Descripcion')
-                {
-                    continuar = true;
-                }
-                else
-                {
-                    mensaje = 'Debes modificar la descripción de la pregunta';
-                    document.pregunta.contenido.focus();
-                    document.pregunta.contenido.select();
-                }
+                document.publicar.titulo.value = "Título de la pregunta";
+                document.publicar.contenido.value = "Descripción de la pregunta.";
             }
             else
             {
-                mensaje = 'Debes modificar el título de la pregunta';
-                document.pregunta.titulo.focus();
-                document.pregunta.titulo.select();
+                document.publicar.titulo.value = 'http://';
+                document.publicar.contenido.value = "Descripción del enlace (450 caracteres max.).";
             }
+        }
+        
+        function enviar_publicar()
+        {
+            var titulo = document.publicar.titulo.value;
+            var contenido = document.publicar.contenido.value;
+            var mensaje;
+            var continuar = true;
             
-            if(captcha)
+            if(titulo == '' || titulo == 'http://' || titulo == "Título de la pregunta")
             {
-                document.pregunta.recaptcha_challenge_field.value = document.captcha.recaptcha_challenge_field.value;
-                document.pregunta.recaptcha_response_field.value = document.captcha.recaptcha_response_field.value;
+                continuar = false;
+                if( document.publicar.tipo[0].checked )
+                {
+                    mensaje = "¡Debes modificar el título!";
+                }
+                else
+                {
+                    mensaje = "¡Debes modificar la URL del enlace!";
+                }
+                document.publicar.titulo.focus();
+                document.publicar.titulo.select();
             }
             
-            if(continuar) { document.pregunta.submit(); }
-            else { alert( mensaje ); }
+            if(contenido == '' || contenido == "Descripción de la pregunta." || contenido == "Descripción del enlace (450 caracteres max.).")
+            {
+                continuar = false;
+                mensaje = "¡Debes modificar la descripción!";
+                document.publicar.contenido.focus();
+                document.publicar.contenido.select();
+            }
+            
+            if(document.publicar.tipo[1].checked && contenido.length > 450)
+            {
+                continuar = false;
+                mensaje = "¡La descripción del enlace es demasiado larga! Max. 450 caracteres, actual=" + contenido.length;
+                document.publicar.contenido.focus();
+                document.publicar.contenido.select();
+            }
+            
+            if( !document.publicar.tipo[0].checked && !document.publicar.tipo[1].checked )
+            {
+                continuar = false;
+                mensaje = "¡Debes elegir un tipo de publicación! Pregunta o enlace.";
+                document.publicar.tipo[0].focus();
+            }
+            
+            if(continuar)
+            {
+                if( document.publicar.tipo[0].checked )
+                {
+                    document.publicar.action = '/add_p';
+                }
+                else
+                {
+                    document.publicar.url.value = titulo;
+                    document.publicar.descripcion.value = contenido;
+                    document.publicar.action = '/add_e';
+                }
+                document.publicar.submit();
+            }
+            else
+            {
+                alert( mensaje );
+            }
         }
         
         function enviar_respuesta()
@@ -388,40 +440,6 @@
                 document.respuesta.contenido.focus();
                 document.respuesta.contenido.select();
             }
-        }
-        
-        function enviar_enlace(captcha)
-        {
-            var descripcion = document.enlace.descripcion.value;
-            var url = document.enlace.url.value;
-            var mensaje;
-            var continuar = false;
-            
-            if(descripcion != '' && descripcion != 'Descripcion (450 caracteres max.)' && descripcion.length <= 450)
-            {
-                if(url != '' && url != 'http://') { continuar = true; }
-                else
-                {
-                    mensaje = 'Debes modificar la URL';
-                    document.enlace.url.focus();
-                    document.enlace.url.select();
-                }
-            }
-            else
-            {
-                mensaje = 'Debes modificar la descripción del enlace, recuerda que hay un máximo de 450 caracteres. Actual=' + descripcion.length;
-                document.enlace.descripcion.focus();
-                document.enlace.descripcion.select();
-            }
-            
-            if(captcha)
-            {
-                document.enlace.recaptcha_challenge_field.value = document.captcha.recaptcha_challenge_field.value;
-                document.enlace.recaptcha_response_field.value = document.captcha.recaptcha_response_field.value;
-            }
-            
-            if(continuar) { document.enlace.submit(); }
-            else { alert( mensaje ); }
         }
         
         function enviar_comentario()
@@ -496,7 +514,6 @@
     <span {{ vista|menu_cabecera:"populares" }}><a href="/populares">populares</a></span>
     <span {{ vista|menu_cabecera:"sin-solucionar" }}><a href="/sin-solucionar">sin solucionar</a></span>
     <span {{ vista|menu_cabecera:"imagenes" }}><a href="/images">im&aacute;genes</a></span>
-    <span {{ vista|menu_cabecera:"buscar" }}><a href="/buscar">buscar</a></span>
     <span {{ vista|menu_cabecera:"ayuda" }}><a href="/ayuda">ayuda</a></span>
     <span>|</span>
 
