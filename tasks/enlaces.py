@@ -43,7 +43,7 @@ class enlaces:
                 logging.error('Imposible modificar el enlace!')
         
         # enviamos un mail a wordpress
-        if WORDPRESS_PRIVATE_EMAIL != '':
+        if WORDPRESS_PRIVATE_EMAIL != '' and enlace.os != 'rss-scanner.py':
             if len(enlace.descripcion) < 50:
                 subject = body = enlace.descripcion
             else:

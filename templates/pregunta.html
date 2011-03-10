@@ -3,7 +3,7 @@
 <div class="preguntas">
 
 {% if modificar %}
-    <div>
+    <div class="pregunta">
         <div class="titulo">Editar pregunta:</div>
         <form name="pregunta" action="/mod_p" method="post">
         <input type="hidden" name="id" value="{{ pregunta.key }}"/>
@@ -65,6 +65,9 @@
 {% else %}
 <table>
 <tr>
+<td valign="top">
+    <div class="avatar">{{ pregunta.autor.email|avatar }}<br/>{{ pregunta.puntos|puntos }}</div>
+</td>
 <td width="100%">
     <form name="pregunta" action="/mod_ep" method="post">
     <input type="hidden" name="id" value="{{ pregunta.key }}"/>
@@ -77,7 +80,7 @@
     <br/>
     <span>
         {{ pregunta.respuestas }} respuestas |
-        {{ pregunta.visitas }} visitas |
+        {{ pregunta.visitas }} clics |
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
     {% if pregunta.autor %}
@@ -105,19 +108,16 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     </ul>
     </form>
 </td>
-<td valign="top">
-    <div class="avatar">{{ pregunta.autor.email|avatar }}<br/>{{ pregunta.puntos|puntos }}</div>
-</td>
 </tr>
 </table>
 {% endif %}
 
 
-<table>
+<table width="100%">
 {% for respuesta in respuestas %}
 <tr>
 <td class="avatar">{{ respuesta.autor.email|avatar:40 }}</td>
-<td width="100%" valign="top">
+<td valign="top">
     {% if respuesta.destacada %}
     <div class="respuesta_d">
     {% else %}
@@ -133,11 +133,11 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
         <input type="submit" class="boton" value="modificar">
         </form>
     {% else %}
-        <a name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
+        <a class="comentario" name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
         {{ respuesta.contenido|safe|linebreaksbr|urlize }}
     {% endif %}
     {% else %}
-        <a name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
+        <a class="comentario" name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
         {{ respuesta.contenido|safe|linebreaksbr|urlize }}
     {% endif %}
     
@@ -166,11 +166,26 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     </div>
 </td>
 </tr>
+{% empty %}
+<tr>
+<td class="avatar"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
+<td valign="top">
+    <div class="mensaje">
+    Cada vez que una pregunta se queda sin respuesta, Dios mata un gatito.
+    <br/>
+    Por favor, piensa en los gatitos!
+    </div>
+</td>
+</tr>
 {% endfor %}
+</table>
 
+<hr/>
+
+<table width="100%">
 <tr>
 <td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
-<td width="100%">
+<td>
     <div class="formulario">
     <form name="respuesta" action="/add_r" method="post">
     <input type="hidden" name="id_pregunta" value="{{ pregunta.key }}"/>
@@ -183,10 +198,11 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     </form>
     </div>
 </td>
+<td width="250" valign="top">
+    <br/><div class="mensaje">¿T&uacute; tambi&eacute;n tienes alguna pregunta? <a href="/#buscador">busca</a> o usa el formulario de <a href="/#nueva-pregunta">nueva pregunta</a>.</div>
+</td>
 </tr>
 </table>
-
-<div class="mensaje">¿T&uacute; tambi&eacute;n tienes alguna pregunta? <a href="/buscar">busca</a> o usa el formulario de <a href="/#nueva-pregunta">nueva pregunta</a>.</div>
 
 </div>
 {% include "pie.html" %}

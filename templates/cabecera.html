@@ -27,6 +27,10 @@
         text-decoration: underline;
     }
     
+    a.comentario {
+        margin-right: 10px;
+    }
+    
     textarea {
         width: 99%;
         border: 1px solid #191919;
@@ -142,6 +146,25 @@
     table.widgets td.widget {
         vertical-align: top;
         width: 30%;
+    }
+    
+    td.avatar {
+        vertical-align: top;
+        width: 44px;
+        text-align: center;
+    }
+    
+    td.clics {
+        vertical-align: top;
+    }
+    
+    div.clics {
+        text-align: center;
+        color: white;
+        background-color: #FF6400;
+        border: 2px outset #FF6400;
+        padding-left: 5px;
+        padding-right: 5px;
     }
     
     div.pregunta {
@@ -274,12 +297,6 @@
         color: #191919;
     }
     
-    td.avatar {
-        vertical-align: top;
-        width: 44px;
-        text-align: center;
-    }
-    
     div.paginacion {
         padding-left: 50px;
         margin-top: 10px;
@@ -288,12 +305,10 @@
     }
     
     div.paginacion span {
-        background-color: #191919;
-        border: 1px outset #191919;
-        color: white;
+        background-color: #EFEFEF;
+        border: 1px outset #DEDEDE;
         margin-right: 5px;
-        padding-left: 5px;
-        padding-right: 5px;
+        padding: 5px;
     }
     
     div.paginacion span#actual {
@@ -301,7 +316,7 @@
         border: 1px outset #DD4814;
     }
     
-    div.paginacion span a {
+    div.paginacion span#actual a {
         color: white;
     }
     
@@ -504,12 +519,12 @@
 </head>
 <body>
 <div class="cabecera">
-    <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu Linux" href="/">Ubuntu <s>FUCK</s> FAQ</a>
-    <br/><span>Actualidad, blogs, wallpapers y soluciones r&aacute;pidas para tus problemas con Ubuntu Linux</span>
+    <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
+    <br/><span>Actualidad y soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general.</span>
 </div>
 <div class="menucabecera">
     <span {{ vista|menu_cabecera:"portada" }}><a href="/">inicio</a></span>
-    <span {{ vista|menu_cabecera:"inicio" }}><a href="/inicio">preguntas</a></span>
+    <span {{ vista|menu_cabecera:"preguntas" }}><a href="/preguntas">preguntas</a></span>
     <span {{ vista|menu_cabecera:"actualidad" }}><a href="/actualidad">actualidad</a></span>
     <span {{ vista|menu_cabecera:"populares" }}><a href="/populares">populares</a></span>
     <span {{ vista|menu_cabecera:"sin-solucionar" }}><a href="/sin-solucionar">sin solucionar</a></span>

@@ -17,15 +17,7 @@ class Imagenes(Pagina):
         
         # paginamos
         imagenes, paginas, p_actual = self.paginar(enlaces_query, 20, p)
-        
-        # el captcha
-        if users.get_current_user():
-            chtml = ''
-        else:
-            chtml = captcha.displayhtml(
-                public_key = RECAPTCHA_PUBLIC_KEY,
-                use_ssl = False,
-                error = None)
+        datos_paginacion = [paginas, p_actual, '/images/']
         
         template_values = {
             'titulo': 'Imagenes de Ubuntu FAQ',
@@ -37,10 +29,7 @@ class Imagenes(Pagina):
             'formulario': self.formulario,
             'vista': 'imagenes',
             'imagenes': imagenes,
-            'captcha': chtml,
-            'paginas': paginas,
-            'rango_paginas': range(paginas),
-            'pag_actual': p_actual,
+            'datos_paginacion': datos_paginacion,
             'usuario': users.get_current_user(),
             'error_dominio': self.error_dominio
             }

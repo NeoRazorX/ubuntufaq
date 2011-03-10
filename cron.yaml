@@ -12,6 +12,10 @@ cron:
   url: /tasks/emails
   schedule: every 30 minutes
 
+- description: estadisticas
+  url: /tasks/stats
+  schedule: every 2 hours
+
 - description: RSS scanner
   url: /tasks/rss-scanner
   schedule: every 3 hours

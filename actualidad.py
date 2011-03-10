@@ -17,6 +17,7 @@ class Actualidad(Pagina):
         
         # paginamos
         enlaces, paginas, p_actual = self.paginar(enlaces_query, 20, p)
+        datos_paginacion = [paginas, p_actual, '/actualidad/']
         
         template_values = {
             'titulo': 'Actualidad de Ubuntu FAQ',
@@ -28,9 +29,7 @@ class Actualidad(Pagina):
             'formulario': self.formulario,
             'vista': 'actualidad',
             'enlaces': enlaces,
-            'paginas': paginas,
-            'rango_paginas': range(paginas),
-            'pag_actual': p_actual,
+            'datos_paginacion': datos_paginacion,
             'usuario': users.get_current_user(),
             'error_dominio': self.error_dominio
             }
@@ -309,7 +308,7 @@ class Borrar_comentario(webapp.RequestHandler):
             try:
                 c = Comentario.get( self.request.get('c') )
                 c.delete()
-                e = Enlace.get( id_enlace )
+                e = Enlace.get( self.request.get('id') )
                 e.actualizar()
                 e.borrar_cache()
                 logging.warning('Se ha borrado el comentario con id: ' + self.request.get('c'))

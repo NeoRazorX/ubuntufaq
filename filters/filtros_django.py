@@ -9,7 +9,10 @@ register = webapp.template.create_template_register()
 
 @register.filter
 def cortamail(email):
-    return str(email).split('@')[0]
+    if email:
+        return str(email).split('@')[0]
+    else:
+        return 'anonimo'
 
 @register.filter
 def menu_cabecera(vista, seleccion=''):
@@ -89,9 +92,81 @@ def muestra_os(os):
 
 @register.filter
 def miniatura(url):
-    mini = '<img class="galeria" src="http://api.thumbalizr.com/?url=' + urllib.quote( str(url) ) + '" alt="imagen"/>'
+    mini = '<img class="galeria" src="' + str(url) + '" alt="imagen"/>'
     if url[:19] == 'http://i.imgur.com/':
         aux = str(url).split('.')
         mini = '<img class="galeria" src="http://i.imgur.' + aux[2] + 's.' + aux[3] + '" width="180" alt="imagen"/>'
     return mark_safe(mini)
+
+@register.filter
+def sin_solucionar(preguntas, respuestas):
+    texto = '<ul>'
+    estado = -1
+    primera = True
+    for p in preguntas:
+        if p.estado != estado:
+            # agrupamos por estado
+            if primera:
+                primera = False
+            else:
+                texto += '</ul><br/>'
+            estado = p.estado
+            
+            # mostramos el estado
+            if estado == 0:
+                texto += '<li><b>Preguntas nuevas</b>:</li>\n'
+            elif estado == 1:
+                texto += '<li><b>Preguntas incompletas</b>:</li>\n'
+            elif estado == 2:
+                texto += '<li><b>Preguntas abiertas</b>:</li>\n'
+            elif estado == 3:
+                texto += '<li><b>Preguntas parcialmente solucionadas</b>:</li>\n'
+            texto += '<ul>'
+        
+        # titulo de la pregunta
+        texto += '<li>' + p.creado.strftime("%d/%m/%Y") + ', '
+        texto += '<b>' + cortamail(p.autor) + '</b> pregunta: '
+        texto += '<a href="/question/' + str(p.key()) + '" title="' + p.contenido + '\n\n' + str(p.respuestas) + ' respuestas">' + p.titulo + '</a></li>\n'
+        
+        # respuestas
+        texto += '<ul>'
+        for r in respuestas:
+            if r.id_pregunta == str(p.key()):
+                texto += '<li><a href="/question/' + str(p.key()) + '#' + str(r.key()) + '">' + r.fecha.strftime("%d/%m/%Y") + '</a> <b>' + cortamail(r.autor) + '</b> responde - ' + r.contenido[:99] + '</li>\n'
+        texto += '</ul>'
+    
+    # cerramos etiquetas
+    if primera:
+        texto += '</ul>'
+    else:
+        texto += '</ul></ul>'
+    return mark_safe(texto)
+
+@register.filter
+def paginar(datos):
+    texto = '<div class="paginacion"><span>' + str(datos[0]) + ' p&aacute;ginas</span>\n'
+    
+    # primera
+    if datos[1] > 0:
+        texto += '<span><a href="' + datos[2] + '0">&lt;&lt; primera</a></span>\n'
+    
+    # anteriores
+    for pag in range(datos[1] - 5, datos[1]):
+        if pag >= 0:
+            texto += '<span><a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a></span>\n'
+    
+    # actual
+    texto += '<span id="actual"><a href="' + datos[2] + str(datos[1]) + '">' + str(datos[1]) + '</a></span>\n'
+    
+    # siguientes
+    for pag in range(datos[1] + 1, datos[1] + 6):
+        if pag < datos[0]:
+            texto += '<span><a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a></span>\n'
+    
+    # ultima
+    if datos[1] < (datos[0] - 1):
+        texto += '<span><a href="' + datos[2] + str(datos[0] - 1) + '">&uacute;ltima &gt;&gt;</a></span>\n'
+    
+    texto += '</div>'
+    return mark_safe(texto)
 

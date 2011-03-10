@@ -8,35 +8,6 @@ from recaptcha.client import captcha
 from base import *
 
 class Nueva_pregunta(Pagina):
-    # formulario de creacion de pregunta
-    def get(self):
-        Pagina.get(self)
-        
-        # el captcha
-        if users.get_current_user():
-            chtml = ''
-        else:
-            chtml = captcha.displayhtml(
-                public_key = RECAPTCHA_PUBLIC_KEY,
-                use_ssl = False,
-                error = None)
-        
-        template_values = {
-            'titulo': 'Ubuntu FAQ - nueva pregunta',
-            'descripcion': 'Formulario de creacion de preguntas en torno a Ubuntu Linux',
-            'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, linux, lucid, maverick, natty',
-            'url': self.url,
-            'url_linktext': self.url_linktext,
-            'mi_perfil': self.mi_perfil,
-            'formulario': self.formulario,
-            'vista': 'nueva',
-            'captcha': chtml,
-            'error_dominio': self.error_dominio
-            }
-        
-        path = os.path.join(os.path.dirname(__file__), 'templates/buscar.html')
-        self.response.out.write(template.render(path, template_values))
-    
     # crea la pregunta
     def post(self):
         p = Pregunta()
@@ -48,7 +19,6 @@ class Nueva_pregunta(Pagina):
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
                 p.autor = users.get_current_user()
-                p.enviar_email = True
             try:
                 p.put()
                 p.borrar_cache()
@@ -119,7 +89,7 @@ class Detalle_pregunta(Pagina):
                 'titulo': p.titulo + ' - Ubuntu FAQ',
                 'descripcion': p.contenido,
                 'pregunta': p,
-                'tags': 'problema ubuntu, ' + p.tags,
+                'tags': 'problema, duda, ayuda, ' + p.tags,
                 'respuestas': r,
                 'url': self.url,
                 'url_linktext': self.url_linktext,
@@ -202,9 +172,9 @@ class Responder(webapp.RequestHandler):
             if respuesta.autor == p.autor:
                 if respuesta.contenido.lower().find('solucionad') != -1:
                     p.estado = 10
-            else:
+            elif p.estado == 0:
                 p.estado = 2
-        else:
+        elif p.estado == 0:
             p.estado = 2
         
         try:
@@ -307,26 +277,15 @@ class Modificar_respuesta(webapp.RequestHandler):
 class Borrar_respuesta(webapp.RequestHandler):
     def get(self):
         if users.is_current_user_admin() and self.request.get('id') and self.request.get('r'):
-            continuar = True
             try:
                 r = Respuesta.get( self.request.get('r') )
                 r.delete()
-            except:
-                continuar = False
-            
-            # actualizamos la pregunta
-            if continuar:
-                try:
-                    p = Pregunta.get( self.request.get('id') )
-                    p.actualizar()
-                    p.borrar_cache()
-                except:
-                    continuar = False
-            
-            if continuar:
+                p = Pregunta.get( self.request.get('id') )
+                p.actualizar()
+                p.borrar_cache()
                 logging.warning('Se ha eliminado la respuesta con id: ' + self.request.get('r'))
                 self.redirect('/question/' + self.request.get('id'))
-            else:
+            except:
                 self.redirect('/error/503')
         else:
             self.redirect('/error/403')

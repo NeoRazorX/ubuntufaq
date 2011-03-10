@@ -1,0 +1,45 @@
+{% include "cabecera.html" %}
+<div class="preguntas">
+
+<div class="mensaje">¿Tienes alg&uacute;n problema con Ubuntu? <a href="/#buscador">busca</a> o usa el formulario de <a href="/#nueva-pregunta">nueva pregunta</a>.</div>
+
+<table width='100%'>
+{% for preg in preguntas %}
+    <tr>
+    <td class="avatar">{{ preg.autor.email|avatar:40 }}</td>
+    <td>
+    <div class="respuesta">
+        <div class='titulo'>
+            <a href="/question/{{ preg.key }}">{{ preg.titulo|safe }}</a>
+            <span>{{ preg.estado|estado_pregunta }}</span>
+        </div>
+        {{ preg.contenido|safe|truncatewords:50 }}
+    </div>
+    <div class="info_respuesta_down">
+        {{ preg.visitas }} clics |
+        {{ preg.creado|date:"d/m/Y H:i" }} |
+    {% if preg.autor %}
+        <a href="/u/{{ preg.autor.email|urlencode }}">{{ preg.autor.nickname|cortamail }}</a>
+        {{ preg.puntos }}
+    {% else %}
+        an&oacute;nimo
+    {% endif %}
+    </div>
+    </td>
+    <td width='110' valign="top">
+    {% if preg.respuestas %}
+        <a href="/question/{{ preg.key }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
+        {{ preg.respuestas }}
+    {% else %}
+        <a href="/question/{{ preg.key }}"><img src="/img/comment.png" alt="comentarios" title="deja un comentario"/></a>
+    {% endif %}
+    </tr>
+{% empty %}
+    <div class="mensaje">Sin resultados.</div>
+{% endfor %}
+</table>
+
+{{ datos_paginacion|paginar }}
+
+</div>
+{% include "pie.html" %}

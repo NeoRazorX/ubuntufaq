@@ -82,7 +82,7 @@ class Portada(Pagina):
         else:
             mixto = self.mezclar()
             if not memcache.add('portada', mixto):
-                logging.error("Fallo almacenando en memcache la portada ")
+                logging.error("Fallo almacenando en memcache la portada")
             else:
                 logging.info('Almacenando en memcache la portada')
         return mixto
@@ -100,9 +100,9 @@ class Portada(Pagina):
                 error = None)
         
         template_values = {
-            'titulo': 'Ubuntu FAQ - pportada',
-            'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias. Si tienes alguna duda compartela con nosotros!',
-            'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmic, lucid, maverick, natty',
+            'titulo': 'Ubuntu FAQ - portada',
+            'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
+            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'mixto': self.get_portada(),
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -122,52 +122,172 @@ class Indice(Pagina):
     def get(self, p=0, vista='inicio'):
         Pagina.get(self)
         
-        # filtramos
-        if vista == 'sin-solucionar':
-            p_query = db.GqlQuery("SELECT * FROM Pregunta WHERE estado < 10 ORDER BY estado ASC")
-            enlaces = None
-            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC LIMIT 18")
-        elif vista == 'populares':
-            p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY visitas DESC")
-            enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY clicks DESC LIMIT 18")
-            respuestas = None
-        else:
-            p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC")
-            enlaces = None
-            respuestas = None
-            vista = 'inicio'
-        
         # paginamos
+        p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC")
         preguntas, paginas, p_actual = self.paginar(p_query, 20, p)
+        datos_paginacion = [paginas, p_actual, '/preguntas/']
         
         template_values = {
             'titulo': 'Ubuntu FAQ - ' + vista,
-            'descripcion': vista + ' - Soluciones rapidas para tus problemas con Ubuntu linux, asi como dudas y noticias. Si tienes alguna duda compartela con nosotros!',
-            'tags': 'ubufaq, ubuntu faq, problema ubuntu, linux, karmic, lucid, maverick, natty',
+            'descripcion': vista + ' - soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
+            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'preguntas': preguntas,
-            'respuestas': respuestas,
-            'enlaces': enlaces,
-            'paginas': paginas,
-            'rango_paginas': range(paginas),
-            'pag_actual': p_actual,
+            'datos_paginacion': datos_paginacion,
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
             'formulario' : self.formulario,
-            'vista': vista,
+            'vista': 'preguntas',
             'error_dominio': self.error_dominio
         }
         
-        path = os.path.join(os.path.dirname(__file__), 'templates/index.html')
+        path = os.path.join(os.path.dirname(__file__), 'templates/preguntas.html')
         self.response.out.write( template.render(path, template_values) )
 
-class Populares(Indice):
-    def get(self, p=0):
-        Indice.get(self, p, 'populares')
+class Populares(Pagina):
+    def mezclar(self):
+        preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY visitas DESC").fetch(15)
+        enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY clicks DESC").fetch(15)
+        mixto = []
+        p = e = 0
+        while p < len(preguntas) or e < len(enlaces):
+            if p >= len(preguntas):
+                mixto.append({'tipo': enlaces[e].tipo_enlace,
+                            'key': enlaces[e].key(),
+                            'autor': enlaces[e].autor,
+                            'puntos': enlaces[e].puntos,
+                            'descripcion': enlaces[e].descripcion,
+                            'clicks': enlaces[e].clicks,
+                            'creado': enlaces[e].creado,
+                            'comentarios': enlaces[e].comentarios,
+                            'link': '/story/' + str(enlaces[e].key())})
+                e += 1
+            elif e >= len(enlaces):
+                mixto.append({'tipo': 'pregunta',
+                            'key': preguntas[p].key(),
+                            'autor': preguntas[p].autor,
+                            'puntos': preguntas[p].puntos,
+                            'descripcion': preguntas[p].contenido,
+                            'clicks': preguntas[p].visitas,
+                            'creado': preguntas[p].creado,
+                            'comentarios': preguntas[p].respuestas,
+                            'titulo': preguntas[p].titulo,
+                            'estado': preguntas[p].estado,
+                            'link': '/question/' + str(preguntas[p].key())})
+                p += 1
+            elif preguntas[p].visitas > enlaces[e].clicks:
+                mixto.append({'tipo': 'pregunta',
+                            'key': preguntas[p].key(),
+                            'autor': preguntas[p].autor,
+                            'puntos': preguntas[p].puntos,
+                            'descripcion': preguntas[p].contenido,
+                            'clicks': preguntas[p].visitas,
+                            'creado': preguntas[p].creado,
+                            'comentarios': preguntas[p].respuestas,
+                            'titulo': preguntas[p].titulo,
+                            'estado': preguntas[p].estado,
+                            'link': '/question/' + str(preguntas[p].key())})
+                p += 1
+            else:
+                mixto.append({'tipo': enlaces[e].tipo_enlace,
+                            'key': enlaces[e].key(),
+                            'autor': enlaces[e].autor,
+                            'puntos': enlaces[e].puntos,
+                            'descripcion': enlaces[e].descripcion,
+                            'clicks': enlaces[e].clicks,
+                            'creado': enlaces[e].creado,
+                            'comentarios': enlaces[e].comentarios,
+                            'link': '/story/' + str(enlaces[e].key())})
+                e += 1
+        return mixto
+    
+    def get_portada(self):
+        mixto = memcache.get( 'populares' )
+        if mixto is not None:
+            logging.info('Leyendo de memcache para populares')
+        else:
+            mixto = self.mezclar()
+            if not memcache.add('populares', mixto):
+                logging.error("Fallo almacenando en memcache populares")
+            else:
+                logging.info('Almacenando en memcache populares')
+        return mixto
+    
+    def get_stats(self):
+        stats = memcache.get( 'stats' )
+        if stats is not None:
+            logging.info('Leyendo stats de memcache')
+        else:
+            logging.info('Imposible leer stats de memcache')
+        return stats
+    
+    def get(self):
+        Pagina.get(self)
+        
+        template_values = {
+            'titulo': 'Ubuntu FAQ - populares',
+            'descripcion': 'Listado de preguntas y noticias populares de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
+            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
+            'mixto': self.get_portada(),
+            'stats': self.get_stats(),
+            'url': self.url,
+            'url_linktext': self.url_linktext,
+            'mi_perfil': self.mi_perfil,
+            'formulario' : self.formulario,
+            'usuario': users.get_current_user(),
+            'vista': 'populares',
+            'error_dominio': self.error_dominio
+        }
+        
+        path = os.path.join(os.path.dirname(__file__), 'templates/populares.html')
+        self.response.out.write( template.render(path, template_values) )
 
-class Sin_contestar(Indice):
+class Sin_solucionar(Pagina):
+    def get_preguntas(self):
+        preguntas = memcache.get('sin-solucionar')
+        if preguntas is not None:
+            logging.info('Leyendo sin-solucionar de memcache')
+        else:
+            preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE estado < 10 ORDER BY estado ASC").fetch(100)
+            if not memcache.add('sin-solucionar', preguntas):
+                logging.error("Fallo al rellenar memcache con las preguntas de sin-solucionar")
+            else:
+                logging.info('Almacenando sin-solucionar en memcache')
+        return preguntas
+    
+    def get_respuestas(self):
+        respuestas = memcache.get('ultimas-respuestas')
+        if respuestas is not None:
+            logging.info('Leyendo ultimas-respuestas de memcache')
+        else:
+            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(20)
+            respuestas.reverse()
+            if not memcache.add('ultimas-respuestas', respuestas, SITEMAP_CACHE_TIME):
+                logging.error("Fallo al rellenar memcache con las preguntas ultimas-respuestas")
+            else:
+                logging.info('Almacenando ultimas-respuestas en memcache')
+        return respuestas
+    
     def get(self, p=0):
-        Indice.get(self, p, 'sin-solucionar')
+        Pagina.get(self)
+        
+        template_values = {
+            'titulo': 'Ubuntu FAQ - sin solucionar',
+            'descripcion': 'Listado de preguntas sin solucionar de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
+            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
+            'preguntas': self.get_preguntas(),
+            'respuestas': self.get_respuestas(),
+            'url': self.url,
+            'url_linktext': self.url_linktext,
+            'mi_perfil': self.mi_perfil,
+            'formulario' : self.formulario,
+            'usuario': users.get_current_user(),
+            'vista': 'sin-solucionar',
+            'error_dominio': self.error_dominio
+        }
+        
+        path = os.path.join(os.path.dirname(__file__), 'templates/sin-solucionar.html')
+        self.response.out.write( template.render(path, template_values) )
 
 class Ayuda(Pagina):
     def get(self):
@@ -175,8 +295,8 @@ class Ayuda(Pagina):
         
         template_values = {
             'titulo': 'Ayuda de Ubuntu FAQ',
-            'descripcion': 'Seccion de ayuda de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu',
-            'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, ayuda ubuntu, linux, lucid, maverick, natty',
+            'descripcion': 'Seccion de ayuda de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
+            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
@@ -234,8 +354,7 @@ class Detalle_usuario(Pagina):
                 'comentarios': c,
                 'usuario': usuario,
                 'karma': karma,
-                'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, linux, lucid, maverick, natty, ' + str(usuario),
-                'paginas': 1,
+                'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot, ' + str(usuario),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
@@ -279,7 +398,7 @@ class Perror(Pagina):
         template_values = {
             'titulo': str(cerror) + ' - Ubuntu FAQ',
             'descripcion': derror.get(cerror, 'Error desconocido'),
-            'tags': 'ubufaq, ubuntu FAQ, problema ubuntu, linux, lucid, maverick, natty',
+            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
@@ -298,11 +417,10 @@ class Perror(Pagina):
 def main():
     application = webapp.WSGIApplication([('/', Portada),
                                         ('/inicio', Indice),
-                                        (r'/inicio/(.*)', Indice),
+                                        ('/preguntas', Indice),
+                                        (r'/preguntas/(.*)', Indice),
                                         ('/populares', Populares),
-                                        (r'/populares/(.*)', Populares),
-                                        ('/sin-solucionar', Sin_contestar),
-                                        (r'/sin-solucionar/(.*)', Sin_contestar),
+                                        ('/sin-solucionar', Sin_solucionar),
                                         ('/actualidad', Actualidad),
                                         (r'/actualidad/(.*)', Actualidad),
                                         ('/add_e', Actualidad),

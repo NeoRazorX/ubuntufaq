@@ -11,10 +11,12 @@ RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
     'http://feeds.feedburner.com/fayerwayer',
     'http://www.muylinux.com/feed/',
     'http://www.genbeta.com/index.xml']
-KEYWORD_LIST = ['ubuntu', 'linux', 'canonical', 'unity', 'gnome', 'kde', 'x.org', 'android',
-    'wayland', 'compiz', 'wine', 'ppa', 'lucid', 'maverick', 'natty', 'unix', 'plymouth',
-    'chrome os', 'kms', 'systemd', 'kernel', 'fedora', 'suse', 'debian', 'gcc', 'grub',
-    'gnu', 'linus', 'gallium3d', 'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs']
+KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', 'meego', 'fedora',
+    'suse', 'debian', 'unix', 'canonical', 'lucid', 'maverick', 'natty', 'ocelot', 'chrome os',
+    'unity', 'gnome', 'kde', 'xfce', 'enlightment', 'x.org', 'wayland', 'compiz',
+    'plymouth', 'kms', 'systemd', 'kernel', 'gcc', 'grub', 'wine', 'ppa', 'gallium3d',
+    'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs',
+    'gnu', 'linus', 'desura', 'libreoffice']
 SITEMAP_CACHE_TIME = 14400
 
 import math, logging
@@ -32,7 +34,7 @@ class Pregunta(db.Model):
     tags = db.StringProperty()
     visitas = db.IntegerProperty(default=0)
     ultima_ip = db.StringProperty(default="0.0.0.0")
-    enviar_email = db.BooleanProperty(default=False)
+    enviar_email = db.BooleanProperty(default=True)
     estado = db.IntegerProperty(default=0)
     puntos = db.IntegerProperty(default=0)
     os = db.StringProperty(default="desconocido")
@@ -70,6 +72,8 @@ class Pregunta(db.Model):
     def borrar_cache(self):
         memcache.delete( str(self.key()) )
         memcache.delete( 'portada' )
+        memcache.delete( 'sin-solucionar' )
+        memcache.delete( 'populares' )
 
 class Respuesta(db.Model):
     autor = db.UserProperty()
@@ -126,6 +130,7 @@ class Enlace(db.Model):
     def borrar_cache(self):
         memcache.delete( str(self.key()) )
         memcache.delete( 'portada' )
+        memcache.delete( 'populares' )
 
 class Comentario(db.Model):
     autor = db.UserProperty()
@@ -167,13 +172,11 @@ class Pagina(webapp.RequestHandler):
             self.formulario = False
             self.mi_perfil = '/'
     
-    def paginar(self, query, limite, actual):
+    def paginar(self, query, limite=20, actual=0):
         # calculamos todo lo necesario para paginar
         paginas = int( math.ceil( query.count() / float(limite) ) )
         if paginas < 1:
             paginas = 1
-        elif paginas > 10:
-            paginas = 10
         
         try:
             p_actual = int(actual)

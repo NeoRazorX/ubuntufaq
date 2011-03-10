@@ -22,15 +22,16 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% if preguntas %}
 <ul>
     <li>&Uacute;ltimas preguntas:</li>
+    <ul>
     {% for pregunta in preguntas %}
-        <div class="info_respuesta_up">
-            {{ pregunta.fecha|date:"d/m/Y H:i" }}
-            | {{ pregunta.respuestas }} respuestas
-        </div>
-        <div class="respuesta">
-            <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|safe }}</a> - {{ pregunta.estado|estado_pregunta }}.
-        </div>
+        <li>
+        {{ pregunta.fecha|date:"d/m/Y H:i" }} -
+        <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|safe }}</a>
+        [<b>{{ pregunta.estado|estado_pregunta }}</b>]
+        [{{ pregunta.respuestas }} respuestas]
+        </li>
     {% endfor %}
+    </ul>
 </ul>
 {% else %}
 <ul><li>Sin preguntas.</li></ul>
@@ -39,18 +40,14 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% if respuestas %}
 <ul>
     <li>&Uacute;ltimas respuestas:</li>
+    <ul>
     {% for respuesta in respuestas %}
-        <div class="info_respuesta_up">
-            <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{ respuesta.fecha|date:"d/m/Y H:i" }}</a>
-        </div>
-        {% if respuesta.destacada %}
-            <div class="respuesta_d">
-        {% else %}
-            <div class="respuesta">
-        {% endif %}
+        <li>
+        <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{ respuesta.fecha|date:"d/m/Y H:i" }}</a> -
         {{ respuesta.contenido|safe|truncatewords:50 }}
-        </div>
+        </li>
     {% endfor %}
+    </ul>
 </ul>
 {% else %}
 <ul><li>Sin respuestas.</li></ul>
@@ -59,13 +56,15 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% if enlaces %}
 <ul>
     <li>&Uacute;ltimos enlaces:</li>
+    <ul>
     {% for enlace in enlaces %}
-    <div class="info_respuesta_up">
-        {{ enlace.fecha|date:"d/m/Y H:i" }}
-        | {{ enlace.comentarios }} comentarios
-    </div>
-    <div class="respuesta">{{ enlace.descripcion|safe }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a></div>
-{% endfor %}
+        <li>
+        {{ enlace.fecha|date:"d/m/Y H:i" }} -
+        {{ enlace.descripcion|safe }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a>
+        [{{ enlace.comentarios }} comentarios]
+        </li>
+    {% endfor %}
+    </ul>
 </ul>
 {% else %}
 <ul><li>Sin enlaces.</li></ul>
@@ -74,12 +73,14 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% if comentarios %}
 <ul>
     <li>&Uacute;ltimos comentarios:</li>
+    <ul>
     {% for coment in comentarios %}
-    <div class="info_respuesta_up">
-        <a href="/story/{{ coment.id_enlace }}#{{ coment.key }}">{{ coment.fecha|date:"d/m/Y H:i" }}</a>:
-    </div>
-    <div class="respuesta">{{ coment.contenido|safe }}</div>
-{% endfor %}
+        <li>
+        <a href="/story/{{ coment.id_enlace }}#{{ coment.key }}">{{ coment.fecha|date:"d/m/Y H:i" }}</a> -
+        {{ coment.contenido|safe }}
+        </li>
+    {% endfor %}
+    </ul>
 </ul>
 {% else %}
 <ul><li>Sin comentarios.</li></ul>

@@ -1,0 +1,102 @@
+{% include "cabecera.html" %}
+<div class="preguntas">
+
+<table width='100%'>
+{% for mix in mixto %}
+    <tr>
+    <td class="clics"><div class="clics"><b>{{ mix.clicks }}</b> clics</a></td>
+    <td>
+    <div class="respuesta">
+    {% ifequal mix.tipo 'pregunta' %}
+        <div class='titulo'>
+            <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
+            <span>{{ mix.estado|estado_pregunta }}</span>
+        </div>
+        {{ mix.descripcion|safe|truncatewords:50 }}
+    {% else %}
+        {{ mix.descripcion|safe|urlize }}
+        {% ifequal mix.tipo 'texto' %}
+            - <a href="/e/{{ mix.key }}" target="_Blank">fuente original</a>.
+        {% endifequal %}
+    {% endifequal %}
+    </div>
+    <div class="info_respuesta_down">
+        {{ mix.creado|date:"d/m/Y H:i" }} |
+    {% if mix.autor %}
+        <a href="/u/{{ mix.autor.email|urlencode }}">{{ mix.autor.nickname|cortamail }}</a>
+        {{ mix.puntos }}
+    {% else %}
+        an&oacute;nimo
+    {% endif %}
+    </div>
+    </td>
+    <td width="110" valign="top">
+    {% ifequal mix.tipo 'imagen' %}
+        <img src="/img/photo.png" alt="imagen"/>
+    {% endifequal %}
+    {% ifequal mix.tipo 'youtube' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    {% ifequal mix.tipo 'vimeo' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    {% ifequal mix.tipo 'vhtml5' %}
+        <img src="/img/video.png" alt="v&iacute;deo"/>
+    {% endifequal %}
+    
+    {% if mix.comentarios %}
+        <a href="{{ mix.link }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
+        {{ mix.comentarios }}
+    {% else %}
+        <a href="{{ mix.link }}"><img src="/img/comment.png" alt="comentarios" title="deja un comentario"/></a>
+    {% endif %}
+    </tr>
+{% empty %}
+    <div class="mensaje">Sin resultados.</div>
+{% endfor %}
+</table>
+
+{% if stats %}
+<hr/>
+<table width="100%">
+<tr>
+    <td width="90">
+        {{ stats.top_user.email|avatar }}
+    </td>
+    <td>
+    <ul>
+        <li>Usuario m&aacute;s valorado:</li>
+        <ul>
+        <li><a href="/u/{{ stats.top_user.email|urlencode }}">{{ stats.top_user.nickname|cortamail }}</a></li>
+        <li>{{ stats.tu_puntos|puntos }} puntos</li>
+        </ul>
+    </ul>
+    </td>
+    <td>
+    <ul>
+        <li>Preguntas: {{ stats.preguntas }}</li>
+        <ul>
+        <li>Clics en preguntas: {{ stats.clics_p }}</li>
+        <li>Clics por pregunta: {{ stats.clics_pp }}</li>
+        <li>Respuestas: {{ stats.respuestas }}</li>
+        <li>Respuestas por pregunta: {{ stats.rpp }}</li>
+        </ul>
+    </ul>
+    </td>
+    <td>
+    <ul>
+        <li>Enlaces: {{ stats.enlaces }}</li>
+        <ul>
+        <li>Clics en enlaces: {{ stats.clics_e }}</li>
+        <li>Clics por enlace: {{ stats.clics_pe }}</li>
+        <li>Comentarios: {{ stats.comentarios }}</li>
+        <li>Comentarios por enlace: {{ stats.cpe }}</li>
+        </ul>
+    </ul>
+    </td>
+</tr>
+</table>
+{% endif %}
+
+</div>
+{% include "pie.html" %}

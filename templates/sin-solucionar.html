@@ -1,0 +1,28 @@
+{% include "cabecera.html" %}
+<div class="preguntas">
+
+<div class="mensaje">¿Tienes alg&uacute;n problema con Ubuntu? <a href="/#buscador">busca</a> o usa el formulario de <a href="/#nueva-pregunta">nueva pregunta</a>.</div>
+
+{% if preguntas %}
+    {{ preguntas|sin_solucionar:respuestas }}
+{% else %}
+    <div class="mensaje">Sin resultados.</div>
+{% endif %}
+
+<br/><hr/>
+
+<table width='100%'>
+<tr>
+<td class="avatar"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
+<td valign="top">
+    <div class="mensaje">
+    Cada vez que una pregunta se queda sin respuesta, Dios mata un gatito.
+    <br/>
+    Por favor, piensa en los gatitos!
+    </div>
+</td>
+</tr>
+</table>
+
+</div>
+{% include "pie.html" %}

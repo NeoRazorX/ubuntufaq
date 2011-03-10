@@ -1,5 +1,5 @@
 application: ubuntu-faq
-version: 41
+version: 42
 runtime: python
 api_version: 1
 
@@ -31,6 +31,10 @@ handlers:
 
 - url: /tasks/rss-scanner
   script: tasks/rss-scanner.py
+  login: admin
+
+- url: /tasks/stats
+  script: tasks/stats.py
   login: admin
 
 - url: /tasks/steam

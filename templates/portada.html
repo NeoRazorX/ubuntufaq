@@ -14,11 +14,14 @@
         </div>
         {{ mix.descripcion|safe|truncatewords:50 }}
     {% else %}
-        {{ mix.descripcion|safe|urlize }}... <a href="/story/{{ mix.key }}">seguir leyendo.</a>
+        {{ mix.descripcion|safe|urlize }}
+        {% ifequal mix.tipo 'texto' %}
+            - <a href="/e/{{ mix.key }}" target="_Blank">fuente original</a>.
+        {% endifequal %}
     {% endifequal %}
     </div>
     <div class="info_respuesta_down">
-        {{ mix.clicks }} clicks |
+        {{ mix.clicks }} clics |
         {{ mix.creado|date:"d/m/Y H:i" }} |
     {% if mix.autor %}
         <a href="/u/{{ mix.autor.email|urlencode }}">{{ mix.autor.nickname|cortamail }}</a>
@@ -30,7 +33,7 @@
     </td>
     <td width='110' valign="top">
     {% ifequal mix.tipo 'imagen' %}
-        <a href="/images"><img src="/img/photo.png" alt="imagen"/></a>
+        <img src="/img/photo.png" alt="imagen"/>
     {% endifequal %}
     {% ifequal mix.tipo 'youtube' %}
         <img src="/img/video.png" alt="v&iacute;deo"/>
@@ -49,9 +52,23 @@
         <a href="{{ mix.link }}"><img src="/img/comment.png" alt="comentarios" title="deja un comentario"/></a>
     {% endif %}
     </tr>
+{% empty %}
+    <div class="mensaje">Sin resultados.</div>
 {% endfor %}
 </table>
 
+{% ifequal vista '404' %}
+<center>
+    {% ifequal cerror '503' %}
+        <img src="/img/nuclear-explosion.gif" alt="explosi&oacute;n"/>
+    {% endifequal %}
+    <h1>{{ error|safe|urlize }}</h1>
+</center>
+{% endifequal %}
+
+<br/><hr/>
+
+<a name="buscador"></a>
 <div id="cse" style="width: 100%;">Cargando...</div>
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
 <script type="text/javascript">
@@ -67,23 +84,9 @@
 
 <table width='100%'>
 <tr>
-    <td valign="top" width="45%">
+    <td valign="top">
     <a name="nueva-pregunta"></a>
-    <div class="titulo">Nueva pregunta:</div>
-    <form name="pregunta" action="/add_p" method="post">
-        <input id="titulo" type="text" name="titulo" size="50" maxlength="100" value="Titulo"/>
-        <textarea name="contenido" rows="6" cols="60">Descripcion</textarea>
-        <br/>
-    {% if formulario %}
-        <input type="checkbox" name="anonimo"/>An&oacute;nimo
-        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_pregunta(false)"/>
-    {% else %}
-        <input type="hidden" name="recaptcha_challenge_field" value=""/>
-        <input type="hidden" name="recaptcha_response_field" value=""/>
-        <b>¡No olvides resolver el captcha!</b>
-        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_pregunta(true)"/>
-    {% endif %}
-    </form>
+    <h3>Pregunta:</h3>
     <ul>
         <li>Comprueba que la pregunta que quieres hacer no haya sido publicada previamente.</li>
         <li>Utiliza un <b>t&iacute;tulo</b> descriptivo.</li>
@@ -93,30 +96,27 @@
     </ul>
     </td>
     <td valign="top">
-        {% if captcha %}
-            <form name="captcha">{{ captcha|safe }}</form>
-        {% else %}
-            <center>{{ usuario.email|avatar }}</center>
-        {% endif %}
-    </td>
-    <td valign="top" width="45%">
-    <a name="nuevo-enlace"></a>
-    <div class="titulo">Compartir enlace:</div>
-    <form name="enlace" action="/add_e" method="post">
-        <input id="titulo" type="text" name="url" value="http://" size="70" maxlength="200" title="Escribe la url de la noticia, im&aacute;gen, v&iacute;deo o blog que quieras compartir"/>
-        <br/>
-        <textarea name="descripcion" rows="4" cols="60">Descripcion (450 caracteres max.)</textarea>
+    <div class="titulo">¿Qu&eacute; quieres publicar?</div>
+    <form name="publicar" action="/" method="post">
+        <input type="radio" name="tipo" value="pregunta" onchange="cambio_publicar()"/>Una pregunta.
+        <input type="radio" name="tipo" value="enlace" onchange="cambio_publicar()"/>Un enlace.
+        <br/><br/>
+        <input type="hidden" name="url" value=""/>
+        <input type="hidden" name="descripcion" value=""/>
+        <input id="titulo" type="text" name="titulo" size="50" maxlength="100" value=""/>
+        <textarea name="contenido" rows="6" cols="60"></textarea>
         <br/>
     {% if formulario %}
         <input type="checkbox" name="anonimo"/>An&oacute;nimo
-        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace(false)"/>
     {% else %}
-        <input type="hidden" name="recaptcha_challenge_field" value=""/>
-        <input type="hidden" name="recaptcha_response_field" value=""/>
-        <b>¡No olvides resolver el captcha!</b>
-        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace(true)"/>
+        {{ captcha|safe }}
     {% endif %}
+        <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_publicar()"/>
     </form>
+    </td>
+    <td valign="top">
+    <a name="nuevo-enlace"></a>
+    <h3>Enlace:</h3>
     <ul>
         <li>Una noticia, un art&iacute;culo o un blog.</li>
         <li>Un v&iacute;deo de <a href="http://www.youtube.com" target="_Blank">youtube</a>, <a href="http://www.vimeo.com" target="_Blank">vimeo</a> o incluso v&iacute;deos en formato OGM o WEB.</li>
