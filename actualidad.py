@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import cgi, os, logging
+import cgi, os, logging, random
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
@@ -92,6 +92,15 @@ class Redir_enlace(webapp.RequestHandler):
             self.redirect('/error/404')
 
 class Detalle_enlace(Pagina):
+    # devuelve las paginas relacionadas con alguno de los tags del enlace
+    def relacionadas(self, cadena):
+        tags = cadena.split(', ')
+        if len(tags) > 1:
+            eleccion = tags[random.randint(0, len( tags ) - 1)]
+        elif len(tags) == 1:
+            eleccion = tags[0]
+        return memcache.get( 'tag_' + eleccion )
+    
     # muestra el enlace
     def get(self, id_enlace=None):
         Pagina.get(self)
@@ -106,6 +115,7 @@ class Detalle_enlace(Pagina):
             c = e.get_comentarios( e.comentarios )
             tipo_enlace = 'texto'
             aux_enlace = None
+            tags = self.extraer_tags(e.descripcion)
             
             if e.url[:23] == 'http://www.youtube.com/':
                 tipo_enlace = 'youtube'
@@ -141,7 +151,7 @@ class Detalle_enlace(Pagina):
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
                 'descripcion': descripcion,
-                'tags': 'ubufaq, ubuntu faq, ' + self.extraer_tags(e.descripcion),
+                'tags': 'ubufaq, ubuntu faq, ' + tags,
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
@@ -151,6 +161,7 @@ class Detalle_enlace(Pagina):
                 'aux_enlace': aux_enlace,
                 'comentarios': c,
                 'captcha': chtml,
+                'relacionadas': self.relacionadas(tags),
                 'administrador': users.is_current_user_admin(),
                 'modificar': modificar,
                 'usuario': users.get_current_user(),

@@ -202,6 +202,19 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <br/><div class="mensaje">¿T&uacute; tambi&eacute;n tienes alguna pregunta? <a href="/#buscador">busca</a> o usa el formulario de <a href="/#nueva-pregunta">nueva pregunta</a>.</div>
 </td>
 </tr>
+{% if relacionadas %}
+<tr>
+    <td></td>
+    <td>
+    <b>Informaci&oacute;n relacionada:</b>
+    <ul>
+    {% for rel in relacionadas %}
+        <li><a href="{{ rel.link }}">{{ rel.title|truncatewords:20 }}</a></li>
+    {% endfor %}
+    </ul>
+    </td>
+</tr>
+{% endif %}
 </table>
 
 </div>

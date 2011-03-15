@@ -168,5 +168,9 @@ def paginar(datos):
         texto += '<span><a href="' + datos[2] + str(datos[0] - 1) + '">&uacute;ltima &gt;&gt;</a></span>\n'
     
     texto += '</div>'
-    return mark_safe(texto)
+    
+    if datos[0] > 1:
+        return mark_safe(texto)
+    else:
+        return ''
 

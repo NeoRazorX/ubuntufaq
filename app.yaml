@@ -41,6 +41,10 @@ handlers:
   script: tasks/steam.py
   login: admin
 
+- url: /tasks/tags
+  script: tasks/tags.py
+  login: admin
+
 - url: /sitemap
   script: sitemap.py
 

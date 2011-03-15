@@ -16,7 +16,7 @@ KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', '
     'unity', 'gnome', 'kde', 'xfce', 'enlightment', 'x.org', 'wayland', 'compiz',
     'plymouth', 'kms', 'systemd', 'kernel', 'gcc', 'grub', 'wine', 'ppa', 'gallium3d',
     'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs',
-    'gnu', 'linus', 'desura', 'libreoffice']
+    'gnu', 'linus', 'desura', 'libreoffice', 'nautilus']
 SITEMAP_CACHE_TIME = 14400
 
 import math, logging
