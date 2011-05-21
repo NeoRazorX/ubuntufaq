@@ -18,46 +18,15 @@
 <table width="100%">
 <tr>
     <td valign="top">
-    {% ifequal tipo_enlace 'texto' %}
-        <div class="avatar">{{ enlace.autor.email|avatar }}<br/>{{ enlace.puntos|puntos }}</div>
-    {% endifequal %}
-    
-    {% ifequal tipo_enlace 'youtube' %}
-        <iframe title="YouTube video player" class="youtube-player" type="text/html" width="425" height="349" src="http://www.youtube.com/embed/{{ aux_enlace }}" frameborder="0"></iframe>
-    {% endifequal %}
-    
-    {% ifequal tipo_enlace 'vimeo' %}
-        <iframe src="http://player.vimeo.com/video/{{ aux_enlace }}" width="400" height="300" frameborder="0"></iframe>
-    {% endifequal %}
-    
-    {% ifequal tipo_enlace 'vhtml5' %}
-        <video src="{{ enlace.url }}" controls="controls">¡Tu navegador no soporta el tag de v&iacute;deo en html5!</video>
-    {% endifequal %}
-    
-    {% ifequal tipo_enlace 'imagen' %}
-        <a href="{{ enlace.url }}" target="_Blank">{{ enlace.url|miniatura }}</a></center>
-    {% endifequal %}
-    
-    {% ifequal tipo_enlace 'deb' %}
-        <a href="{{ enlace.url }}"><img src="/img/application-x-deb.png" alt="{{ enlace.descripcion }}"/></a>
-    {% endifequal %}
-    
-    {% ifequal tipo_enlace 'package' %}
-        <a href="{{ enlace.url }}"><img src="/img/emblem-package.png" alt="{{ enlace.descripcion }}" title="clic para descargar"/></a>
-    {% endifequal %}
+    {{ enlace|tipo_enlace }}
     </td>
     <td valign="top" width="100%">
         <div class="info_respuesta_up">
         {{ enlace.creado|date:"d/m/Y H:i" }} |
         {{ enlace.clicks }} clicks |
         {{ enlace.comentarios }} comentarios |
-        {% if enlace.autor %}
-            <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
-            {{ enlace.puntos }}
-        {% else %}
-            an&oacute;nimo
-        {% endif %}
-        | {{ enlace.os|muestra_os }}
+        {{ enlace.os|muestra_os }} |
+        {{ enlace.autor|autor }}
         {% if administrador %}
             | <a href="/story/{{ enlace.key }}?modificar=ok">modificar</a>
             | <a href="#" onclick="hundir_enlace('{{ enlace.key }}')">hundir</a>
@@ -65,14 +34,10 @@
         {% endif %}
         </div>
         <div class="comentario">
-        {% if tipo_enlace != 'texto' %}
+        {% if enlace.tipo_enlace != 'texto' %}
             {{ enlace.autor.email|avatar }}
             <br/>
-            {% if enlace.autor %}
-                <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a> {{ enlace.puntos }}
-            {% else %}
-                an&oacute;nimo
-            {% endif %}
+            {{ enlace.autor|autor }}
             <br/><br/>
         {% endif %}
         <a href="/story/{{ enlace.key }}">#0</a> {{ enlace.descripcion|safe|urlizetrunc:30 }}
@@ -98,7 +63,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <tr>
     <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
     <td valign="top">
-    <div class="respuesta">
+        <div class="respuesta">
         {% if modificar %}
             <form name="comentario{{ forloop.counter }}" action="/mod_c" method="post">
             <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
@@ -112,19 +77,14 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
         {% endif %}
         </div>
         <div class="info_respuesta_down">
-            <a name="{{ coment.key }}"></a>{{ coment.fecha|date:"d/m/Y H:i" }} |
-        {% if coment.autor %}
-            <a href="/u/{{ coment.autor.email|urlencode }}">{{ coment.autor.nickname|cortamail }}</a>
-            {{ coment.puntos }}
-        {% else %}
-            an&oacute;nimo
-        {% endif %}
-            | {{ coment.os|muestra_os }}
-        
+            <a name="{{ coment.key }}"></a>
+            {{ coment.fecha|timesince|traducir }} |
+            {{ coment.os|muestra_os }} |
+            {{ coment.autor|autor }}
         {% if administrador %}
             | <a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a>
         {% endif %}
-    </div>
+        </div>
     </td>
 </tr>
 {% empty %}

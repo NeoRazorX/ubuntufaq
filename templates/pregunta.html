@@ -83,13 +83,8 @@
         {{ pregunta.visitas }} clics |
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         etiquetas: {{ pregunta.tags }} |
-    {% if pregunta.autor %}
-        <a href="/u/{{ pregunta.autor.email|urlencode }}">{{ pregunta.autor.nickname|cortamail }}</a>
-        {{ pregunta.puntos }}
-    {% else %}
-        an&oacute;nimo
-    {% endif %}
-        | {{ pregunta.os|muestra_os }}
+        {{ pregunta.os|muestra_os }} |
+        {{ pregunta.autor|autor }}
         {% if editar %}
             | <a href="/question/{{ pregunta.key }}?modificar=ok">modificar</a>
         {% endif %}
@@ -144,14 +139,10 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     </div>
     
     <div class="info_respuesta_down">
-        <a name="{{respuesta.key}}"></a>{{ respuesta.fecha|date:"d/m/Y H:i" }} |
-    {% if respuesta.autor %}
-        <a href="/u/{{respuesta.autor.email|urlencode}}">{{ respuesta.autor.nickname|cortamail }}</a>
-        {{ respuesta.puntos }}
-    {% else %}
-        an&oacute;nimo
-    {% endif %}
-        | {{ respuesta.os|muestra_os }}
+        <a name="{{respuesta.key}}"></a>
+        {{ respuesta.fecha|timesince|traducir }} |
+        {{ respuesta.os|muestra_os }} |
+        {{ respuesta.autor|autor }}
     {% if editar %}
         {% if respuesta.destacada %}
             | <a href="/dest_r?id={{pregunta.key}}&r={{respuesta.key}}"><s>destacar</s></a>

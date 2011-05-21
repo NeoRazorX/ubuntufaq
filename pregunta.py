@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cgi, os, logging, random
 from google.appengine.ext import db, webapp
@@ -19,10 +35,12 @@ class Nueva_pregunta(Pagina):
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
                 p.autor = users.get_current_user()
+                p.enviar_email = True
+                p.stop_emails = False
             try:
                 p.put()
                 p.borrar_cache()
-                self.redirect('/question/' + str( p.key() ))
+                self.redirect( p.get_link() )
             except:
                 self.redirect('/error/503')
         elif self.request.get('titulo') and self.request.get('contenido'):
@@ -39,7 +57,7 @@ class Nueva_pregunta(Pagina):
                 try:
                     p.put()
                     p.borrar_cache()
-                    self.redirect('/question/' + str( p.key() ))
+                    self.redirect( p.get_link() )
                 except:
                     self.redirect('/error/503')
             else:
@@ -74,8 +92,6 @@ class Detalle_pregunta(Pagina):
             p = None
         
         if p:
-            p.visitar( self.request.remote_addr )
-            r = p.get_respuestas( p.respuestas )
             editar = False
             modificar = False
             
@@ -99,7 +115,7 @@ class Detalle_pregunta(Pagina):
                 'descripcion': p.contenido,
                 'pregunta': p,
                 'tags': 'problema, duda, ayuda, ' + p.tags,
-                'respuestas': r,
+                'respuestas': p.get_respuestas(self.request.remote_addr),
                 'relacionadas': self.relacionadas( p.tags ),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
@@ -136,7 +152,7 @@ class Detalle_pregunta(Pagina):
                     p.put()
                     p.borrar_cache()
                     logging.warning("Se ha modificado la pregunta con id: " + self.request.get('id'))
-                    self.redirect('/question/' + self.request.get('id'))
+                    self.redirect( p.get_link() )
                 except:
                     self.redirect('/error/503')
             else:
@@ -147,52 +163,30 @@ class Detalle_pregunta(Pagina):
 class Borrar_pregunta(webapp.RequestHandler):
     def get(self):
         if users.is_current_user_admin() and self.request.get('id'):
-            continuar = True
             try:
-                r = Respuesta.all().filter('id_pregunta =', self.request.get('id'))
-                db.delete(r)
-            except:
-                continuar = False
-            
-            # borramos la pregunta
-            if continuar:
-                try:
-                    p = Pregunta.get( self.request.get('id') )
-                    p.borrar_cache()
-                    p.delete()
-                except:
-                    continuar = False
-            
-            if continuar:
+                Pregunta.get( self.request.get('id') ).borrar_todo()
                 logging.warning('Se ha eliminado la pregunta con id: ' + self.request.get('id'))
                 self.redirect('/')
-            else:
+            except:
                 self.redirect('/error/503')
         else:
             self.redirect('/error/403')
 
-class Responder(webapp.RequestHandler):
-    def actualizar_pregunta(self, id_pregunta, respuesta):
-        p = Pregunta.get( id_pregunta )
-        p.actualizar()
-        p.borrar_cache()
-        
-        # cambiamos el estado de la pregunta en funcion de la respuesta
-        if respuesta.autor:
-            if respuesta.autor == p.autor:
-                if respuesta.contenido.lower().find('solucionad') != -1:
-                    p.estado = 10
-            elif p.estado == 0:
-                p.estado = 2
-        elif p.estado == 0:
-            p.estado = 2
-        
+class Stop_emails(webapp.RequestHandler):
+    def get(self, id_p=None):
         try:
-            p.put()
-            self.redirect('/question/' + self.request.get('id_pregunta'))
+            p = Pregunta.get( id_p )
+            if users.get_current_user() == p.autor:
+                p.enviar_email = False
+                p.stop_emails = True
+                p.put()
+                self.redirect( p.get_link() )
+            else:
+                self.redirect('/error/403')
         except:
-            self.redirect('/error/503')
-    
+            self.redirect('/error/404')
+
+class Responder(webapp.RequestHandler):
     def post(self):
         fallo = 0
         r = Respuesta()
@@ -205,6 +199,7 @@ class Responder(webapp.RequestHandler):
                 r.autor = users.get_current_user()
             try:
                 r.put()
+                r.get_pregunta().borrar_cache()
             except:
                 fallo = 2
         elif self.request.get('id_pregunta') and self.request.get('contenido'):
@@ -217,9 +212,12 @@ class Responder(webapp.RequestHandler):
                 RECAPTCHA_PRIVATE_KEY,
                 remoteip)
             
-            if cResponse.is_valid:
+            if r.contenido.strip() == 'Utiliza un lenguaje claro y conciso.':
+                fallo = 4
+            elif cResponse.is_valid:
                 try:
                     r.put()
+                    r.get_pregunta().borrar_cache()
                 except:
                     fallo = 2
             else:
@@ -228,13 +226,17 @@ class Responder(webapp.RequestHandler):
             fallo = 1
         
         if fallo == 0:
-            self.actualizar_pregunta( self.request.get('id_pregunta'), r )
+            p = r.get_pregunta()
+            p.actualizar( r )
+            self.redirect( p.get_link() )
         elif fallo == 1:
             self.redirect('/error/403')
         elif fallo == 2:
             self.redirect('/error/503')
         elif fallo == 3:
             self.redirect('/error/403c')
+        elif fallo == 4:
+            self.redirect('/error/606')
         else:
             self.redirect('/error/503')
 
@@ -242,45 +244,29 @@ class Responder(webapp.RequestHandler):
 class Destacar_respuesta(webapp.RequestHandler):
     def get(self):
         try:
-            p = Pregunta.get( self.request.get('id') )
             r = Respuesta.get( self.request.get('r') )
-        except:
-            p = r = None
-        
-        if p and r:
+            p = r.get_pregunta()
             if (users.get_current_user() == p.autor) or users.is_current_user_admin():
-                try:
-                    r.destacada = not(r.destacada)
-                    r.put()
-                    p.borrar_cache()
-                    self.redirect('/question/' + self.request.get('id'))
-                except:
-                    self.redirect('/error/503')
+                r.destacar()
+                self.redirect( p.get_link() )
             else:
                 self.redirect('/error/403')
-        else:
-            self.redirect('/error/403')
+        except:
+            self.redirect('/error/503')
 
 # solo el autor de la preguna o un administrador puede destacar una respuesta
 class Modificar_respuesta(webapp.RequestHandler):
     def post(self):
-        try:
-            p = Pregunta.get( self.request.get('id_pregunta') )
-            r = Respuesta.get( self.request.get('id_respuesta') )
-        except:
-            p = r = None
-        
-        if p and r:
-            if users.is_current_user_admin():
-                try:
-                    r.contenido = cgi.escape( self.request.get('contenido') )
-                    r.put()
-                    p.borrar_cache()
-                    self.redirect('/question/' + self.request.get('id_pregunta'))
-                except:
-                    self.redirect('/error/503')
-            else:
-                self.redirect('/error/403')
+        if users.is_current_user_admin():
+            try:
+                r = Respuesta.get( self.request.get('id_respuesta') )
+                p = r.get_pregunta()
+                r.contenido = cgi.escape( self.request.get('contenido') )
+                r.put()
+                p.borrar_cache()
+                self.redirect( p.get_link() )
+            except:
+                self.redirect('/error/503')
         else:
             self.redirect('/error/403')
 
@@ -289,12 +275,11 @@ class Borrar_respuesta(webapp.RequestHandler):
         if users.is_current_user_admin() and self.request.get('id') and self.request.get('r'):
             try:
                 r = Respuesta.get( self.request.get('r') )
+                p = r.get_pregunta()
                 r.delete()
-                p = Pregunta.get( self.request.get('id') )
-                p.actualizar()
                 p.borrar_cache()
                 logging.warning('Se ha eliminado la respuesta con id: ' + self.request.get('r'))
-                self.redirect('/question/' + self.request.get('id'))
+                self.redirect( p.get_link() )
             except:
                 self.redirect('/error/503')
         else:

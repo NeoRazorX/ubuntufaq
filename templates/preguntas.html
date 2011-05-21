@@ -3,6 +3,8 @@
 
 <div class="mensaje">¿Tienes alg&uacute;n problema con Ubuntu? <a href="/#buscador">busca</a> o usa el formulario de <a href="/#nueva-pregunta">nueva pregunta</a>.</div>
 
+{{ datos_paginacion|paginar }}
+
 <table width='100%'>
 {% for preg in preguntas %}
     <tr>
@@ -13,17 +15,13 @@
             <a href="/question/{{ preg.key }}">{{ preg.titulo|safe }}</a>
             <span>{{ preg.estado|estado_pregunta }}</span>
         </div>
-        {{ preg.contenido|safe|truncatewords:50 }}
+        {{ preg.contenido|safe|truncatewords:35 }}
     </div>
     <div class="info_respuesta_down">
-        {{ preg.visitas }} clics |
+        {{ preg.creado|timesince|traducir }} |
         {{ preg.creado|date:"d/m/Y H:i" }} |
-    {% if preg.autor %}
-        <a href="/u/{{ preg.autor.email|urlencode }}">{{ preg.autor.nickname|cortamail }}</a>
-        {{ preg.puntos }}
-    {% else %}
-        an&oacute;nimo
-    {% endif %}
+        {{ preg.visitas }} clics |
+        {{ preg.autor|autor }}
     </div>
     </td>
     <td width='110' valign="top">

@@ -12,7 +12,8 @@
             <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
             <span>{{ mix.estado|estado_pregunta }}</span>
         </div>
-        {{ mix.descripcion|safe|truncatewords:50 }}
+        {{ mix.descripcion|safe|truncatewords:35 }}
+        {{ mix.key|ultimas_respuestas:urespuestas }}
     {% else %}
         {{ mix.descripcion|safe|urlize }}
         {% ifequal mix.tipo 'texto' %}
@@ -21,14 +22,9 @@
     {% endifequal %}
     </div>
     <div class="info_respuesta_down">
+        {{ mix.fecha|timesince|traducir }} |
         {{ mix.clicks }} clics |
-        {{ mix.creado|date:"d/m/Y H:i" }} |
-    {% if mix.autor %}
-        <a href="/u/{{ mix.autor.email|urlencode }}">{{ mix.autor.nickname|cortamail }}</a>
-        {{ mix.puntos }}
-    {% else %}
-        an&oacute;nimo
-    {% endif %}
+        {{ mix.autor|autor }}
     </div>
     </td>
     <td width='110' valign="top">
@@ -68,7 +64,6 @@
 
 <br/><hr/>
 
-<a name="buscador"></a>
 <div id="cse" style="width: 100%;">Cargando...</div>
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
 <script type="text/javascript">
@@ -125,6 +120,10 @@
     </td>
 </tr>
 </table>
+
+<br/>
+<center><img src="http://code.google.com/appengine/images/appengine-noborder-120x30.gif" 
+alt="Con la tecnología de Google App Engine" /></center>
 
 </div>
 {% include "pie.html" %}

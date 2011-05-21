@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging, random
 from google.appengine.ext import db
@@ -10,9 +26,7 @@ class stats:
         # leemos de memcache
         continuar = True
         stats = memcache.get( 'stats' )
-        if stats is not None:
-            logging.info("Lellendo stats desde memcache")
-        else:
+        if stats is None:
             stats = {'iterador': 0,
                     'preguntas': 0,
                     'respuestas': 0,
@@ -27,11 +41,13 @@ class stats:
                     'top_user': None,
                     'tu_puntos': 0
             }
-            if not memcache.add('stats', stats):
+            if memcache.add('stats', stats):
+                logging.info("Almacenado stats en memcache")
+            else:
                 logging.error("Imposible almacenar stats en memcache")
                 continuar = False
-            else:
-                logging.info("Almacenado stats en memcache")
+        else:
+            logging.info("Lellendo stats desde memcache")
         
         # actualizamos el numero de preguntas
         if stats['iterador'] == 0 and continuar:

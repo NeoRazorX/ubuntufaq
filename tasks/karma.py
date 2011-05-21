@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging, random
 from google.appengine.ext import db
@@ -31,7 +47,7 @@ class karma:
             
             # elegimos aleatoriamente un elemento
             if len( autores ) > 1:
-                self.calcular( autores[random.randint(0, len( autores ) - 1)] )
+                self.calcular( random.choice(autores) )
             elif len( autores ) == 1:
                 self.calcular( autores.pop() )
             else:
@@ -44,20 +60,20 @@ class karma:
             # leemos de memcache
             continuar = True
             karma = memcache.get( 'usuario_' + str(autor) )
-            if karma is not None:
-                logging.info("Lellendo karma del usuario " + str(autor) + ' desde memcache')
-            else:
+            if karma is None:
                 karma = {'puntos': 0,
                     'preguntas': False,
                     'respuestas': False,
                     'enlaces': False,
                     'comentarios': False
                 }
-                if not memcache.add( 'usuario_' + str(autor), karma, 86400 ):
+                if memcache.add( 'usuario_' + str(autor), karma, 86400 ):
+                    logging.info("Almacenado el karma del usuario " + str(autor) + ' en memcache')
+                else:
                     logging.error("Imposible almacenar el karma del usuario " + str(autor) + ' en memcache')
                     continuar = False
-                else:
-                    logging.info("Almacenado el karma del usuario " + str(autor) + ' en memcache')
+            else:
+                logging.info("Lellendo karma del usuario " + str(autor) + ' desde memcache')
             
             if not karma['preguntas'] and continuar:
                 query = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1", autor)

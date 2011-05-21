@@ -3,6 +3,8 @@
 
 <div class="mensaje">Comparte con nosotros enlaces de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, etc. Usa el <a href="/#nuevo-enlace">formulario</a>.</div>
 
+{{ datos_paginacion|paginar }}
+
 {% for imagen in imagenes %}
 <table>
 <tr>

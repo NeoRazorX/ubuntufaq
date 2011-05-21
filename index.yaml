@@ -18,30 +18,14 @@ indexes:
 
 - kind: Comentario
   properties:
-  - name: autor
-  - name: puntos
-
-- kind: Comentario
-  properties:
   - name: id_enlace
   - name: fecha
-
-- kind: Comentario
-  properties:
-  - name: id_enlace
-  - name: fecha
-    direction: desc
 
 - kind: Enlace
   properties:
   - name: autor
   - name: fecha
     direction: desc
-
-- kind: Enlace
-  properties:
-  - name: autor
-  - name: puntos
 
 - kind: Enlace
   properties:
@@ -55,27 +39,11 @@ indexes:
   - name: fecha
     direction: desc
 
-- kind: Pregunta
-  properties:
-  - name: autor
-  - name: puntos
-
-- kind: Pregunta
-  properties:
-  - name: respuestas
-  - name: fecha
-    direction: desc
-
 - kind: Respuesta
   properties:
   - name: autor
   - name: fecha
     direction: desc
-
-- kind: Respuesta
-  properties:
-  - name: autor
-  - name: puntos
 
 - kind: Respuesta
   properties:

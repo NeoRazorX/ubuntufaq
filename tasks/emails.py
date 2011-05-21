@@ -1,20 +1,31 @@
 #!/usr/bin/env python
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging
 from google.appengine.ext import db
-from google.appengine.api import users, mail, urlfetch
+from google.appengine.api import users, mail
 from base import *
 
 class emails:
-    def acortar_url(self, url):
-        try:
-            result = urlfetch.fetch("http://is.gd/api.php?longurl=" + url)
-            if result.status_code == 200:
-                return result.content
-            else:
-                return url
-        except:
-            return url
+    def __init__(self):
+        preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE enviar_email = True").fetch(5)
+        for p in preguntas:
+            self.comprobar(p)
     
     def comprobar(self, p):
         if p.autor:
@@ -27,30 +38,20 @@ class emails:
                     if r.autor != p.autor:
                         self.enviar(p)
                         break
-        else:
+        else: # es una pregunta anonima
             p.enviar_email = False
+            p.stop_emails = True
             p.put()
-        
-        # enviamos un mail a wordpress
-        if WORDPRESS_PRIVATE_EMAIL != '' and not p.enviar_email:
-            subject = p.titulo
-            body = p.contenido[:100] + '...'
-            body += ' m&aacute;s en Ubuntu FAQ: ' + self.acortar_url('http://www.ubufaq.com/question/' + str(p.key()) )
-            
-            try:
-                mail.send_mail("contacto@ubufaq.com", WORDPRESS_PRIVATE_EMAIL, subject, body)
-                logging.info('Enviado email a wordpress para la pregunta: ' + str(p.key()))
-            except:
-                logging.error('Error al enviar el email a wordpress para la pregunta: ' + str(p.key()))
     
     def enviar(self, p):
         subject = "Han contestado a tu pregunta en Ubuntu FAQ"
         valores = {
             't': p.titulo,
-            'l': "http://www.ubufaq.com/question/" + str(p.key())
+            'l': "http://www.ubufaq.com/question/" + str(p.key()),
+            'l2': "http://www.ubufaq.com/stop_emails/" + str(p.key())
             }
         
-        body = """El motivo de este mensaje es informarte que han contestado a tu pregunta: "%(t)s".\nPuedes ver la respuesta en el siguiente enlace -> %(l)s\n\nAtentamente,\nEl Cron de Ubuntu FAQ.""" % valores
+        body = """El motivo de este mensaje es informarte que han contestado a tu pregunta: "%(t)s".\nPuedes ver la respuesta en el siguiente enlace -> %(l)s\nSi no deseas recivir mas mensajes, haz clic en el siguiente enlace -> %(l2)s\n\nAtentamente,\nEl Cron de Ubuntu FAQ.""" % valores
         
         try:
             mail.send_mail("contacto@ubufaq.com", p.autor.email(), subject, body)
@@ -59,11 +60,7 @@ class emails:
             logging.info('Enviado email para la pregunta: ' + str(p.key()))
         except:
             logging.error('Error al enviar el email para la pregunta: ' + str(p.key()))
-    
-    def __init__(self):
-        preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE enviar_email = True").fetch(5)
-        for p in preguntas:
-            self.comprobar(p)
+
 
 if __name__ == "__main__":
     emails()

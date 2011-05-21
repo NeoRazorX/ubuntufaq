@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cgi, os, urllib, logging
 
@@ -33,6 +49,7 @@ class Portada(Pagina):
                             'descripcion': enlaces[e].descripcion,
                             'clicks': enlaces[e].clicks,
                             'creado': enlaces[e].creado,
+                            'fecha': enlaces[e].fecha,
                             'comentarios': enlaces[e].comentarios,
                             'link': '/story/' + str(enlaces[e].key())})
                 e += 1
@@ -44,6 +61,7 @@ class Portada(Pagina):
                             'descripcion': preguntas[p].contenido,
                             'clicks': preguntas[p].visitas,
                             'creado': preguntas[p].creado,
+                            'fecha': preguntas[p].fecha,
                             'comentarios': preguntas[p].respuestas,
                             'titulo': preguntas[p].titulo,
                             'estado': preguntas[p].estado,
@@ -57,6 +75,7 @@ class Portada(Pagina):
                             'descripcion': preguntas[p].contenido,
                             'clicks': preguntas[p].visitas,
                             'creado': preguntas[p].creado,
+                            'fecha': preguntas[p].fecha,
                             'comentarios': preguntas[p].respuestas,
                             'titulo': preguntas[p].titulo,
                             'estado': preguntas[p].estado,
@@ -70,6 +89,7 @@ class Portada(Pagina):
                             'descripcion': enlaces[e].descripcion,
                             'clicks': enlaces[e].clicks,
                             'creado': enlaces[e].creado,
+                            'fecha': enlaces[e].fecha,
                             'comentarios': enlaces[e].comentarios,
                             'link': '/story/' + str(enlaces[e].key())})
                 e += 1
@@ -77,14 +97,14 @@ class Portada(Pagina):
     
     def get_portada(self):
         mixto = memcache.get( 'portada' )
-        if mixto is not None:
-            logging.info('Leyendo de memcache para la portada')
-        else:
+        if mixto is None:
             mixto = self.mezclar()
-            if not memcache.add('portada', mixto):
-                logging.error("Fallo almacenando en memcache la portada")
-            else:
+            if memcache.add('portada', mixto):
                 logging.info('Almacenando en memcache la portada')
+            else:
+                logging.error("Fallo almacenando en memcache la portada")
+        else:
+            logging.info('Leyendo de memcache para la portada')
         return mixto
     
     def get(self):
@@ -104,6 +124,7 @@ class Portada(Pagina):
             'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
             'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'mixto': self.get_portada(),
+            'urespuestas': memcache.get('ultimas-respuestas'),
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
@@ -203,23 +224,18 @@ class Populares(Pagina):
     
     def get_portada(self):
         mixto = memcache.get( 'populares' )
-        if mixto is not None:
-            logging.info('Leyendo de memcache para populares')
-        else:
+        if mixto is None:
             mixto = self.mezclar()
-            if not memcache.add('populares', mixto):
-                logging.error("Fallo almacenando en memcache populares")
-            else:
+            if memcache.add('populares', mixto):
                 logging.info('Almacenando en memcache populares')
+            else:
+                logging.error("Fallo almacenando en memcache populares")
+        else:
+            logging.info('Leyendo de memcache para populares')
         return mixto
     
     def get_stats(self):
-        stats = memcache.get( 'stats' )
-        if stats is not None:
-            logging.info('Leyendo stats de memcache')
-        else:
-            logging.info('Imposible leer stats de memcache')
-        return stats
+        return memcache.get( 'stats' )
     
     def get(self):
         Pagina.get(self)
@@ -245,27 +261,27 @@ class Populares(Pagina):
 class Sin_solucionar(Pagina):
     def get_preguntas(self):
         preguntas = memcache.get('sin-solucionar')
-        if preguntas is not None:
-            logging.info('Leyendo sin-solucionar de memcache')
-        else:
+        if preguntas is None:
             preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE estado < 10 ORDER BY estado ASC").fetch(100)
-            if not memcache.add('sin-solucionar', preguntas):
-                logging.error("Fallo al rellenar memcache con las preguntas de sin-solucionar")
-            else:
+            if memcache.add('sin-solucionar', preguntas):
                 logging.info('Almacenando sin-solucionar en memcache')
+            else:
+                logging.error("Fallo al rellenar memcache con las preguntas de sin-solucionar")
+        else:
+            logging.info('Leyendo sin-solucionar de memcache')
         return preguntas
     
     def get_respuestas(self):
         respuestas = memcache.get('ultimas-respuestas')
-        if respuestas is not None:
-            logging.info('Leyendo ultimas-respuestas de memcache')
-        else:
-            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(20)
+        if respuestas is None:
+            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(25)
             respuestas.reverse()
-            if not memcache.add('ultimas-respuestas', respuestas, SITEMAP_CACHE_TIME):
-                logging.error("Fallo al rellenar memcache con las preguntas ultimas-respuestas")
-            else:
+            if memcache.add('ultimas-respuestas', respuestas, SITEMAP_CACHE_TIME):
                 logging.info('Almacenando ultimas-respuestas en memcache')
+            else:
+                logging.error("Fallo al rellenar memcache con las preguntas ultimas-respuestas")
+        else:
+            logging.info('Leyendo ultimas-respuestas de memcache')
         return respuestas
     
     def get(self, p=0):
@@ -377,6 +393,7 @@ class Perror(Pagina):
             '403c': 'Permiso denegado - error en el captcha',
             '404': 'Pagina no encontrada en Ubuntu FAQ',
             '503': 'Error en Ubuntu FAQ',
+            '606': 'Gilipollas detectado'
         }
         
         merror = {
@@ -384,6 +401,7 @@ class Perror(Pagina):
             '403c': '403 - Permiso denegado: debes repetir el captcha',
             '404': '404 - P&aacute;gina no encontrada en Ubuntu FAQ',
             '503': '503 - Error en Ubuntu FAQ,<br/>consulta el estado en: http://code.google.com/status/appengine',
+            '606': '606 - Hemos detectado un gilipollas, TU!'
         }
         
         # el captcha
@@ -430,6 +448,7 @@ def main():
                                         (r'/question/(.*)', Detalle_pregunta),
                                         ('/mod_p', Detalle_pregunta),
                                         ('/del_p', Borrar_pregunta),
+                                        ('/stop_emails/(.*)', Stop_emails),
                                         ('/add_r', Responder),
                                         ('/dest_r', Destacar_respuesta),
                                         ('/mod_r', Modificar_respuesta),

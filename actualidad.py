@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import cgi, os, logging, random
 from google.appengine.ext import db, webapp
@@ -57,7 +73,7 @@ class Actualidad(Pagina):
                     try:
                         enl.put()
                         enl.borrar_cache()
-                        self.redirect('/story/' + str( enl.key() ))
+                        self.redirect( enl.get_link() )
                     except:
                         logging.warning('Imposible guardar enlace a: ' + url)
                         self.redirect('/error/503')
@@ -75,7 +91,7 @@ class Actualidad(Pagina):
                         try:
                             enl.put()
                             enl.borrar_cache()
-                            self.redirect('/story/' + str( enl.key() ))
+                            self.redirect( enl.get_link() )
                         except:
                             logging.warning('Imposible guardar enlace a: ' + url)
                             self.redirect('/error/503')
@@ -111,27 +127,6 @@ class Detalle_enlace(Pagina):
             e = None
         
         if e:
-            e.clickar( self.request.remote_addr )
-            c = e.get_comentarios( e.comentarios )
-            tipo_enlace = 'texto'
-            aux_enlace = None
-            tags = self.extraer_tags(e.descripcion)
-            
-            if e.url[:23] == 'http://www.youtube.com/':
-                tipo_enlace = 'youtube'
-                aux_enlace = e.url.split('?v=')[1]
-            elif e.url[:21] == 'http://www.vimeo.com/':
-                tipo_enlace = 'vimeo'
-                aux_enlace = e.url.split('/')[3]
-            elif e.url[-4:] in ['.ogv', '.OGV', '.mp4', '.MP4'] or e.url[-5:] in ['.webm', '.WEBM']:
-                tipo_enlace = 'vhtml5'
-            elif e.url[-4:] in ['.png', '.PNG', '.jpg', '.JPG', '.gif', '.GIF'] or e.url[-5:] in ['.jpeg', '.JPEG']:
-                tipo_enlace = 'imagen'
-            elif e.url[-4:] in ['.deb', '.DEB']:
-                tipo_enlace = 'deb'
-            elif e.url[-4:] in ['.deb', '.DEB', '.tgz', '.TGZ', '.bz2', '.BZ2'] or e.url[-3:] in ['.gz', '.GZ']:
-                tipo_enlace = 'package'
-            
             # el captcha
             if users.get_current_user():
                 chtml = ''
@@ -146,22 +141,18 @@ class Detalle_enlace(Pagina):
             else:
                 modificar = False
             
-            descripcion = 'Discusion sobre: ' + e.descripcion + ' | enlace a ' + tipo_enlace + ', ' + str(e.comentarios) + ' comentarios.'
-            
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
-                'descripcion': descripcion,
-                'tags': 'ubufaq, ubuntu faq, ' + tags,
+                'descripcion': 'Discusion sobre: ' + e.descripcion,
+                'tags': 'ubufaq, ubuntu faq, ' + self.extraer_tags(e.descripcion),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
                 'formulario': self.formulario,
                 'enlace': e,
-                'tipo_enlace': tipo_enlace,
-                'aux_enlace': aux_enlace,
-                'comentarios': c,
+                'comentarios': e.get_comentarios(self.request.remote_addr),
                 'captcha': chtml,
-                'relacionadas': self.relacionadas(tags),
+                'relacionadas': self.relacionadas( self.extraer_tags(e.descripcion) ),
                 'administrador': users.is_current_user_admin(),
                 'modificar': modificar,
                 'usuario': users.get_current_user(),
@@ -175,28 +166,21 @@ class Detalle_enlace(Pagina):
     
     # modifica el enlace
     def post(self):
-        try:
-            e = Enlace.get( self.request.get('id') )
-        except:
-            e = None
-        
-        if e and self.request.get('url') and self.request.get('descripcion') and self.request.get('tipo_enlace'):
-            if users.is_current_user_admin():
-                try:
-                    e.url = self.request.get('url')
-                    e.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
-                    if self.request.get('tipo_enlace') in ['youtube', 'vimeo', 'vhtml5', 'imagen', 'deb', 'package', 'texto']:
-                        e.tipo_enlace = self.request.get('tipo_enlace')
-                    else:
-                        e.tipo_enlace = None
-                    e.put()
-                    e.borrar_cache()
-                    logging.warning('Se ha modificado el enlace con id: ' + self.request.get('id'))
-                    self.redirect('/story/' + str( e.key() ))
-                except:
-                    self.redirect('/error/503')
-            else:
-                self.redirect('/error/403')
+        if users.is_current_user_admin():
+            try:
+                e = Enlace.get( self.request.get('id') )
+                e.url = self.request.get('url')
+                e.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
+                if self.request.get('tipo_enlace') in ['youtube', 'vimeo', 'vhtml5', 'imagen', 'deb', 'package', 'texto']:
+                    e.tipo_enlace = self.request.get('tipo_enlace')
+                else:
+                    e.tipo_enlace = None
+                e.put()
+                e.borrar_cache()
+                logging.warning('Se ha modificado el enlace con id: ' + self.request.get('id'))
+                self.redirect( e.get_link() )
+            except:
+                self.redirect('/error/503')
         else:
             self.redirect('/error/403')
 
@@ -204,13 +188,9 @@ class Acceder_enlace(webapp.RequestHandler):
     def get(self, id_enlace=None):
         try:
             e = Enlace.get( id_enlace )
-        except:
-            e = None
-        
-        if e:
-            e.clickar( self.request.remote_addr )
+            e.get_comentarios(self.request.remote_addr) # contabiliza clic
             self.redirect( e.url )
-        else:
+        except:
             self.redirect('/error/404')
 
 class Hundir_enlace(webapp.RequestHandler):
@@ -218,10 +198,7 @@ class Hundir_enlace(webapp.RequestHandler):
         if users.is_current_user_admin() and self.request.get('id'):
             try:
                 e = Enlace.get( self.request.get('id') )
-                e.fecha = datetime.min
-                e.put()
-                e.borrar_cache()
-                logging.warning('Se ha hundido el enlace con id: ' + self.request.get('id'))
+                e.hundir()
                 self.redirect('/actualidad')
             except:
                 self.redirect('/error/503')
@@ -230,24 +207,12 @@ class Hundir_enlace(webapp.RequestHandler):
 
 class Borrar_enlace(webapp.RequestHandler):
     def get(self):
-        if users.is_current_user_admin() and self.request.get('id'):
-            continuar = True
+        if users.is_current_user_admin():
             try:
-                c = Comentario.all().filter('id_enlace =', self.request.get('id'))
-                db.delete(c)
+                Enlace.get( self.request.get('id') ).borrar_todo()
+                logging.warning('Se ha borrado el enlace con id: ' + self.request.get('id'))
+                self.redirect('/actualidad')
             except:
-                continuar = False
-            
-            if continuar:
-                try:
-                    e = Enlace.get( self.request.get('id') )
-                    e.borrar_cache()
-                    e.delete()
-                    logging.warning('Se ha borrado el enlace con id: ' + self.request.get('id'))
-                    self.redirect('/actualidad')
-                except:
-                    self.redirect('/error/503')
-            else:
                 self.redirect('/error/503')
         else:
             self.redirect('/error/403')
@@ -281,35 +246,30 @@ class Comentar(webapp.RequestHandler):
             self.redirect('/error/403')
     
     def finalizar(self, comentario):
-        try:
-            comentario.put()
-            e = Enlace.get( comentario.id_enlace )
-            e.actualizar()
-            e.borrar_cache()
-            self.redirect('/story/' + str( e.key() ))
-        except:
-            self.redirect('/error/503')
+        if comentario.contenido.strip() == 'Deja un comentario, es gratis!':
+            self.redirect('/error/606')
+        else:
+            try:
+                comentario.put()
+                e = comentario.get_enlace()
+                e.borrar_cache()
+                self.redirect( e.get_link() )
+            except:
+                self.redirect('/error/503')
 
 class Modificar_comentario(webapp.RequestHandler):
     def post(self):
-        try:
-            e = Enlace.get( self.request.get('id_enlace') )
-            c = Comentario.get( self.request.get('id_comentario') )
-        except:
-            e = c = None
-        
-        if e and c and self.request.get('contenido'):
-            if users.is_current_user_admin():
-                try:
-                    c.contenido = cgi.escape( self.request.get('contenido') )
-                    c.put()
-                    e.borrar_cache()
-                    logging.warning('Se ha modificado el comentario con id: ' + self.request.get('id_comentario'))
-                    self.redirect('/story/' + self.request.get('id_enlace'))
-                except:
-                    self.redirect('/error/503')
-            else:
-                self.redirect('/error/403')
+        if users.is_current_user_admin():
+            try:
+                c = Comentario.get( self.request.get('id_comentario') )
+                e = c.get_enlace()
+                c.contenido = cgi.escape( self.request.get('contenido') )
+                c.put()
+                e.borrar_cache()
+                logging.warning('Se ha modificado el comentario con id: ' + self.request.get('id_comentario'))
+                self.redirect( e.get_link() )
+            except:
+                self.redirect('/error/503')
         else:
             self.redirect('/error/403')
 
@@ -318,12 +278,11 @@ class Borrar_comentario(webapp.RequestHandler):
         if users.is_current_user_admin() and self.request.get('id') and self.request.get('c'):
             try:
                 c = Comentario.get( self.request.get('c') )
+                e = c.get_enlace()
                 c.delete()
-                e = Enlace.get( self.request.get('id') )
-                e.actualizar()
                 e.borrar_cache()
                 logging.warning('Se ha borrado el comentario con id: ' + self.request.get('c'))
-                self.redirect('/story/' + self.request.get('id'))
+                self.redirect( e.get_link() )
             except:
                 self.redirect('/error/503')
         else:

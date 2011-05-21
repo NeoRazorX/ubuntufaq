@@ -1,4 +1,20 @@
 #!/usr/bin/env python
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import logging, random
 from google.appengine.ext import db
@@ -24,12 +40,14 @@ class tags:
             if tabla == 0:
                 tags = self.tag2list( ele.tags )
                 link = '/question/' + str(ele.key())
-                title = ele.titulo
+                title = ele.titulo,
+                clics = ele.visitas
             else:
                 tags = self.tag2list( self.extraer_tags( ele.descripcion ) )
                 link = '/story/' + str(ele.key())
-                title = ele.descripcion[:249]
-            self.procesar( tags, link, title )
+                title = ele.descripcion[:249],
+                clics = ele.clicks
+            self.procesar( tags, link, title, clics )
         
         # actualizamos los datos de memcache
         self.actualizar()
@@ -43,8 +61,6 @@ class tags:
                     retorno = tag
                 else:
                     retorno += ', ' + tag
-        if retorno == '':
-            retorno = 'ubuntu, general'
         return retorno
     
     # a partir de un string de tags, devuelve una lista de cada uno de ellos
@@ -52,28 +68,56 @@ class tags:
         return tags.split(', ')
     
     # rellena pendientes con cada elemento, en funcion del tag
-    def procesar(self, tags, link, title):
-        elemento = {'link': link, 'title': title}
+    def procesar(self, tags, link, title, clics):
+        elemento = {'link': link, 'title': title, 'clics': clics}
         for t in tags:
             if t in self.pendientes:
-                self.pendientes[t].append( elemento )
+                encontrado = False
+                for p in self.pendientes[t]:
+                    if p.get('link', '')  == link:
+                        p['clics'] = clics
+                        encontrado = True
+                if not encontrado:
+                    self.pendientes[t].append( elemento )
             else:
-                self.pendientes[t] = [elemento]
+                elementos_cache = memcache.get( 'tag_' + t)
+                if elementos_cache is None:
+                    self.pendientes[t] = [elemento]
+                else:
+                    self.pendientes[t] = elementos_cache
+                    if elemento not in self.pendientes[t]:
+                        self.pendientes[t].append( elemento )
+    
+    # reducimos el numero de elementos por tag, en funcion de los clics
+    def reducir(self, elementos):
+        reducido = []
+        for i in range(9):
+            seleccionado = {'clics': -1}
+            for e in elementos:
+                if e not in reducido and e.get('clics', 0) > seleccionado.get('clics', 0):
+                    seleccionado = e
+            if seleccionado != {'clics': -1}:
+                reducido.append( seleccionado )
+        return reducido
+                    
     
     # actualiza los elementos de memcache con los nuevos resultados obtenidos
     def actualizar(self):
         for tag in self.pendientes.keys():
-            elementos = self.pendientes[tag]
-            if memcache.get( 'tag_' + tag) is None:
-                if memcache.add( 'tag_' + tag, elementos ):
-                    logging.info('Almacenados los resultados del tag ' + tag + ' en memcache')
+            elementos = self.reducir( self.pendientes[tag] )
+            if elementos:
+                if memcache.get( 'tag_' + tag) is None:
+                    if memcache.add( 'tag_' + tag, elementos ):
+                        logging.info('Almacenados los resultados del tag ' + tag + ' en memcache')
+                    else:
+                        logging.error('Fallo al almacenar los resultados del tag ' + tag + ' en memcache')
                 else:
-                    logging.error('Fallo al almacenar los resultados del tag ' + tag + ' en memcache')
+                    if memcache.replace( 'tag_' + tag, elementos ):
+                        logging.info('Reemplazados los resultados del tag ' + tag + ' en memcache')
+                    else:
+                        logging.error('Fallo al reemplazar los resultados del tag ' + tag + ' en memcache')
             else:
-                if memcache.replace( 'tag_' + tag, elementos ):
-                    logging.info('Reemplazados los resultados del tag ' + tag + ' en memcache')
-                else:
-                    logging.error('Fallo al reemplazar los resultados del tag ' + tag + ' en memcache')
+                logging.error('Para el tag: ' + tag + ' no hay elementos!')
 
 if __name__ == "__main__":
     tags()

@@ -12,7 +12,7 @@
             <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
             <span>{{ mix.estado|estado_pregunta }}</span>
         </div>
-        {{ mix.descripcion|safe|truncatewords:50 }}
+        {{ mix.descripcion|safe|truncatewords:35 }}
     {% else %}
         {{ mix.descripcion|safe|urlize }}
         {% ifequal mix.tipo 'texto' %}
@@ -22,12 +22,7 @@
     </div>
     <div class="info_respuesta_down">
         {{ mix.creado|date:"d/m/Y H:i" }} |
-    {% if mix.autor %}
-        <a href="/u/{{ mix.autor.email|urlencode }}">{{ mix.autor.nickname|cortamail }}</a>
-        {{ mix.puntos }}
-    {% else %}
-        an&oacute;nimo
-    {% endif %}
+        {{ mix.autor|autor }}
     </div>
     </td>
     <td width="110" valign="top">

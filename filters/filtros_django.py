@@ -1,4 +1,21 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# This file is part of ubuntufaq
+# Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
+# 
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+# 
+# You should have received a copy of the GNU Affero General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import hashlib, random, urllib
 from django.utils.safestring import mark_safe
@@ -8,11 +25,29 @@ from datetime import datetime
 register = webapp.template.create_template_register()
 
 @register.filter
-def cortamail(email):
+def cortamail(email=None):
     if email:
         return str(email).split('@')[0]
     else:
         return 'anonimo'
+
+@register.filter
+def autor(a=None):
+    if a:
+        try:
+            return mark_safe('<a href="/u/'+urllib.quote(a.email())+'">'+cortamail(a.nickname())+'</a>')
+        except:
+            return a
+    else:
+        return 'anónimo'
+
+@register.filter
+def traducir(fecha):
+    texto = str(fecha)
+    texto = texto.replace('hour', 'hora')
+    texto = texto.replace('minute', 'minuto')
+    texto = texto.replace('day', 'día')
+    return mark_safe(texto)
 
 @register.filter
 def menu_cabecera(vista, seleccion=''):
@@ -22,7 +57,7 @@ def menu_cabecera(vista, seleccion=''):
         return ''
 
 @register.filter
-def avatar(email, size=80):
+def avatar(email=None, size=80):
     imagen = '<img src="/img/anonymous.gif" alt="anonymous" />'
     if email:
         imagen = '<img src="http://www.gravatar.com/avatar/' + hashlib.md5(str(email)).hexdigest()
@@ -33,8 +68,8 @@ def avatar(email, size=80):
     return mark_safe(imagen)
 
 @register.filter
-def karmsg(puntos):
-    texto = 'este usuario ya dispone de su propio ej&eacute;rcito: &iexcl;' + str(puntos) + ' <a href="/ayuda#gatitos">gatitos</a>!'
+def karmsg(puntos=0):
+    texto = 'este usuario ya dispone de su propio ejército: &iexcl;' + str(puntos) + ' <a href="/ayuda#gatitos">gatitos</a>!'
     if puntos < 5:
         texto = 'usuario poco participativo...'
     elif puntos < 25:
@@ -42,14 +77,14 @@ def karmsg(puntos):
     return mark_safe(texto)
 
 @register.filter
-def puntos(puntos):
+def puntos(puntos=0):
     if puntos > 1:
         return mark_safe('<a href="/ayuda#karma">' + str(puntos) + '</a>')
     else:
         return ''
 
 @register.filter
-def estado_pregunta(estado):
+def estado_pregunta(estado=0):
     retorno = 'estado desconocido'
     if estado == 0:
         retorno = 'nueva'
@@ -62,7 +97,7 @@ def estado_pregunta(estado):
     elif estado == 10:
         retorno = 'solucionada'
     elif estado == 11:
-        retorno = 'pendiente de confirmaci&oacute;n'
+        retorno = 'pendiente de confirmación'
     elif estado == 12:
         retorno = 'duplicada'
     elif estado == 13:
@@ -72,26 +107,24 @@ def estado_pregunta(estado):
     return mark_safe(retorno)
 
 @register.filter
-def muestra_os(os):
-    salida = '<span title="' + os + '">' + os[:30] + '</span>'
-    if os.lower().find('android') != -1:
-        salida = '<span title="' + os + '">Android</span>'
-    elif os.lower().find('linux') != -1:
-        salida = '<span title="' + os + '">Linux</span>'
-    elif os.lower().find('windows') != -1:
-        salida = '<span title="' + os + '">Windows</span>'
-    elif os.lower().find('ipod') != -1:
-        salida = '<span title="' + os + '">iPod</span>'
-    elif os.lower().find('ipad') != -1:
-        salida = '<span title="' + os + '">iPad</span>'
-    elif os.lower().find('iphone') != -1:
-        salida = '<span title="' + os + '">iPhone</span>'
-    elif os.lower().find('mac') != -1:
-        salida = '<span title="' + os + '">Mac</span>'
-    return mark_safe(salida)
+def muestra_os(ua=''):
+    if ua == 'rss-scanner.py':
+        return ua
+    else:
+        os = 'unknown'
+        browser = 'unknown'
+        # detecting os
+        for aux in ['mac', 'iphone', 'ipad', 'ipod', 'windows', 'linux', 'android']:
+            if ua.lower().find( aux ) != -1:
+                os = aux
+        # detecting browser
+        for aux in ['safari', 'opera', 'chrome', 'firefox', 'explorer']:
+            if ua.lower().find( aux ) != -1:
+                browser = aux
+        return mark_safe('<span title="' + ua + '">' + os + '+' + browser + '</span>')
 
 @register.filter
-def miniatura(url):
+def miniatura(url=''):
     mini = '<img class="galeria" src="' + str(url) + '" alt="imagen"/>'
     if url[:19] == 'http://i.imgur.com/':
         aux = str(url).split('.')
@@ -142,9 +175,58 @@ def sin_solucionar(preguntas, respuestas):
         texto += '</ul></ul>'
     return mark_safe(texto)
 
+
+@register.filter
+def ultimas_respuestas(pregunta, respuestas):
+    if respuestas:
+        retorno = '<ul>'
+        for r in respuestas:
+            if r.id_pregunta == str(pregunta):
+                retorno += '<li><b>' + cortamail(r.autor) + '</b> responde - ' + r.contenido[:99] + '</li>\n'
+        return mark_safe(retorno+'</ul>')
+    else:
+        return ''
+
+
+@register.filter
+def tipo_enlace(enlace):
+    retorno = ''
+    if enlace.tipo_enlace == None:
+        if enlace.url[:23] == 'http://www.youtube.com/':
+            tipo_enlace = 'youtube'
+        elif enlace.url[:21] == 'http://www.vimeo.com/':
+            tipo_enlace = 'vimeo'
+        elif enlace.url[-4:] in ['.ogv', '.OGV', '.mp4', '.MP4'] or enlace.url[-5:] in ['.webm', '.WEBM']:
+            tipo_enlace = 'vhtml5'
+        elif enlace.url[-4:] in ['.png', '.PNG', '.jpg', '.JPG', '.gif', '.GIF'] or enlace.url[-5:] in ['.jpeg', '.JPEG']:
+            tipo_enlace = 'imagen'
+        elif enlace.url[-4:] in ['.deb', '.DEB']:
+            tipo_enlace = 'deb'
+        elif enlace.url[-4:] in ['.deb', '.DEB', '.tgz', '.TGZ', '.bz2', '.BZ2'] or enlace.url[-3:] in ['.gz', '.GZ']:
+            tipo_enlace = 'package'
+    if enlace.tipo_enlace == 'texto':
+        if enlace.autor:
+            retorno = '<div class="avatar">'+avatar(enlace.autor.email)+'<br/>'+puntos(enlace.puntos)+'</div>'
+        else:
+            retorno = '<div class="avatar">'+avatar()+'<br/>'+puntos(enlace.puntos)+'</div>'
+    elif enlace.tipo_enlace == 'youtube':
+        retorno = '<iframe title="YouTube video player" class="youtube-player" type="text/html" width="425" height="349" src="http://www.youtube.com/embed/'+enlace.url.split('?v=')[1]+'" frameborder="0"></iframe>'
+    elif enlace.tipo_enlace == 'vimeo':
+        retorno = '<iframe src="http://player.vimeo.com/video/'+enlace.url.split('/')[3]+'" width="400" height="300" frameborder="0"></iframe>'
+    elif enlace.tipo_enlace == 'vhtml5':
+        retorno = '<video src="'+enlace.url+'" controls="controls">¡Tu navegador no soporta el tag de vídeo en html5!</video>'
+    elif enlace.tipo_enlace == 'imagen':
+        retorno = '<a href="'+enlace.url+'" target="_Blank">'+miniatura(enlace.url)+'</a></center>'
+    elif enlace.tipo_enlace == 'deb':
+        retorno = '<a href="'+enlace.url+'"><img src="/img/application-x-deb.png" alt="'+enlace.descripcion+'"/></a>'
+    elif enlace.tipo_enlace == 'package':
+        retorno = '<a href="'+enlace.url+'"><img src="/img/emblem-package.png" alt="'+enlace.descripcion+'" title="clic para descargar"/></a>'
+    return mark_safe(retorno)
+
+
 @register.filter
 def paginar(datos):
-    texto = '<div class="paginacion"><span>' + str(datos[0]) + ' p&aacute;ginas</span>\n'
+    texto = '<div class="paginacion"><span>' + str(datos[0]) + ' páginas</span>\n'
     
     # primera
     if datos[1] > 0:
@@ -165,12 +247,12 @@ def paginar(datos):
     
     # ultima
     if datos[1] < (datos[0] - 1):
-        texto += '<span><a href="' + datos[2] + str(datos[0] - 1) + '">&uacute;ltima &gt;&gt;</a></span>\n'
+        texto += '<span><a href="' + datos[2] + str(datos[0] - 1) + '">última &gt;&gt;</a></span>\n'
     
     texto += '</div>'
     
     if datos[0] > 1:
         return mark_safe(texto)
     else:
-        return ''
+        return mark_safe("")
 

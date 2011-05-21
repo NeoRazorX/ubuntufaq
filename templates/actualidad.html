@@ -3,6 +3,8 @@
 
 <div class="mensaje">Comparte con nosotros enlaces de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, etc. Usa el <a href="/#nuevo-enlace">formulario</a>.</div>
 
+{{ datos_paginacion|paginar }}
+
 <table width='100%'>
 {% for enlace in enlaces %}
     <tr>
@@ -15,14 +17,10 @@
         {% endifequal %}
     </div>
     <div class="info_respuesta_down">
-        {{ enlace.clicks }} clics |
+        {{ enlace.fecha|timesince|traducir }} |
         {{ enlace.creado|date:"d/m/Y H:i" }} |
-    {% if enlace.autor %}
-        <a href="/u/{{ enlace.autor.email|urlencode }}">{{ enlace.autor.nickname|cortamail }}</a>
-        {{ enlace.puntos }}
-    {% else %}
-        an&oacute;nimo
-    {% endif %}
+        {{ enlace.clicks }} clics |
+        {{ enlace.autor|autor }}
     </div>
     </td>
     <td width="110" valign="top">
