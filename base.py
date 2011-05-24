@@ -30,7 +30,6 @@ KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', '
     'plymouth', 'kms', 'systemd', 'kernel', 'gcc', 'grub', 'wine', 'ppa', 'gallium3d',
     'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs',
     'gnu', 'linus', 'desura', 'libreoffice', 'nautilus']
-SITEMAP_CACHE_TIME = 14400
 
 import math, logging
 from google.appengine.ext import db, webapp
@@ -113,7 +112,8 @@ class Pregunta(db.Model):
     
     # borramos la cache que contenga esta pregunta
     def borrar_cache(self):
-        memcache.delete_multi([str(self.key()), 'portada', 'sin-solucionar', 'populares', 'sitemap_preguntas'])
+        memcache.delete_multi([str(self.key()), 'portada', 'sin-solucionar', 'populares',
+                               'sitemap_preguntas', 'ultimas-respuestas'])
     
     def borrar_todo(self):
         self.borrar_respuestas()
@@ -191,10 +191,11 @@ class Enlace(db.Model):
         self.borrar_cache()
         logging.warning('Se ha hundido el enlace con id: ' + str(self.key()))
     
-    # actualizamos la fecha y numero de comentarios del enlace
+    # actualizamos la fecha del enlace
     def actualizar(self):
         self.fecha = datetime.now()
         self.put()
+        self.borrar_cache()
     
     def borrar_comentarios(self):
         c = Comentario.all().filter('id_enlace =', self.key())
@@ -268,4 +269,17 @@ class Pagina(webapp.RequestHandler):
         
         # paginamos
         return query.fetch(limite, int(limite * p_actual) ), paginas, p_actual
+    
+    def get_ultimas_respuestas(self):
+        respuestas = memcache.get('ultimas-respuestas')
+        if respuestas is None:
+            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(25)
+            respuestas.reverse()
+            if memcache.add('ultimas-respuestas', respuestas):
+                logging.info('Almacenando ultimas-respuestas en memcache')
+            else:
+                logging.error("Fallo al rellenar memcache con las preguntas ultimas-respuestas")
+        else:
+            logging.info('Leyendo ultimas-respuestas de memcache')
+        return respuestas
 

@@ -41,7 +41,7 @@
             <br/><br/>
         {% endif %}
         <a href="/story/{{ enlace.key }}">#0</a> {{ enlace.descripcion|safe|urlizetrunc:30 }}
-        {% ifequal tipo_enlace 'texto' %}
+        {% ifequal enlace.tipo_enlace 'texto' %}
             - <a href="{{ enlace.url }}" target="_Blank">{{ enlace.url|slice:":37" }}</a>
         {% endifequal %}
         </div>

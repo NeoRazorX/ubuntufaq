@@ -26,8 +26,8 @@ class sitemap:
     def get_preguntas(self):
         preguntas = memcache.get('sitemap_preguntas')
         if preguntas is None:
-            preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(50)
-            if memcache.add('sitemap_preguntas', preguntas, SITEMAP_CACHE_TIME):
+            preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(20)
+            if memcache.add('sitemap_preguntas', preguntas):
                 logging.info('Almacenando sitemap_preguntas en memcache')
             else:
                 logging.error("Fallo al rellenar memcache con las preguntas del sitemap")
@@ -38,8 +38,8 @@ class sitemap:
     def get_enlaces(self):
         enlaces = memcache.get('sitemap_enlaces')
         if enlaces is None:
-            enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(50)
-            if memcache.add('sitemap_enlaces', enlaces, SITEMAP_CACHE_TIME):
+            enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(20)
+            if memcache.add('sitemap_enlaces', enlaces):
                 logging.info('Almacenando sitemap_enlaces en memcache')
             else:
                 logging.error("Fallo al rellenar memcache con los enlaces del sitemap")

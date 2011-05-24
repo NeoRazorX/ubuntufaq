@@ -47,6 +47,10 @@ def traducir(fecha):
     texto = texto.replace('hour', 'hora')
     texto = texto.replace('minute', 'minuto')
     texto = texto.replace('day', 'día')
+    texto = texto.replace('week', 'semana')
+    texto = texto.replace('months', 'meses')
+    texto = texto.replace('month', 'mes')
+    texto = texto.replace('year', 'año')
     return mark_safe(texto)
 
 @register.filter
@@ -182,7 +186,7 @@ def ultimas_respuestas(pregunta, respuestas):
         retorno = '<ul>'
         for r in respuestas:
             if r.id_pregunta == str(pregunta):
-                retorno += '<li><b>' + cortamail(r.autor) + '</b> responde - ' + r.contenido[:99] + '</li>\n'
+                retorno += '<li><b>' + cortamail(r.autor) + '</b> responde: ' + r.contenido[:99] + '...</li>\n'
         return mark_safe(retorno+'</ul>')
     else:
         return ''
@@ -206,7 +210,7 @@ def tipo_enlace(enlace):
             tipo_enlace = 'package'
     if enlace.tipo_enlace == 'texto':
         if enlace.autor:
-            retorno = '<div class="avatar">'+avatar(enlace.autor.email)+'<br/>'+puntos(enlace.puntos)+'</div>'
+            retorno = '<div class="avatar">'+avatar(enlace.autor.email())+'<br/>'+puntos(enlace.puntos)+'</div>'
         else:
             retorno = '<div class="avatar">'+avatar()+'<br/>'+puntos(enlace.puntos)+'</div>'
     elif enlace.tipo_enlace == 'youtube':

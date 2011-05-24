@@ -252,7 +252,7 @@ class Comentar(webapp.RequestHandler):
             try:
                 comentario.put()
                 e = comentario.get_enlace()
-                e.borrar_cache()
+                e.actualizar()
                 self.redirect( e.get_link() )
             except:
                 self.redirect('/error/503')

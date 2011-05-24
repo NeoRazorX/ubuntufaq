@@ -124,7 +124,7 @@ class Portada(Pagina):
             'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
             'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'mixto': self.get_portada(),
-            'urespuestas': memcache.get('ultimas-respuestas'),
+            'urespuestas': self.get_ultimas_respuestas(),
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
@@ -271,19 +271,6 @@ class Sin_solucionar(Pagina):
             logging.info('Leyendo sin-solucionar de memcache')
         return preguntas
     
-    def get_respuestas(self):
-        respuestas = memcache.get('ultimas-respuestas')
-        if respuestas is None:
-            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(25)
-            respuestas.reverse()
-            if memcache.add('ultimas-respuestas', respuestas, SITEMAP_CACHE_TIME):
-                logging.info('Almacenando ultimas-respuestas en memcache')
-            else:
-                logging.error("Fallo al rellenar memcache con las preguntas ultimas-respuestas")
-        else:
-            logging.info('Leyendo ultimas-respuestas de memcache')
-        return respuestas
-    
     def get(self, p=0):
         Pagina.get(self)
         
@@ -292,7 +279,7 @@ class Sin_solucionar(Pagina):
             'descripcion': 'Listado de preguntas sin solucionar de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
             'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'preguntas': self.get_preguntas(),
-            'respuestas': self.get_respuestas(),
+            'respuestas': self.get_ultimas_respuestas(),
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
