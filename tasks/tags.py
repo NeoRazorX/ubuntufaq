@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -41,14 +40,15 @@ class tags:
             if tabla == 0:
                 tags = self.tag2list( ele.tags )
                 link = '/question/' + str(ele.key())
-                title = ele.titulo,
+                title = ele.titulo
                 clics = ele.visitas
             else:
                 tags = self.tag2list( self.extraer_tags( ele.descripcion ) )
                 link = '/story/' + str(ele.key())
-                title = ele.descripcion[:249],
+                title = ele.descripcion
                 clics = ele.clicks
-            self.procesar( tags, link, title, clics )
+            logging.warning( title )
+            self.procesar(tags, link, title, clics)
         
         # actualizamos los datos de memcache
         self.actualizar()
@@ -71,17 +71,19 @@ class tags:
     # rellena pendientes con cada elemento, en funcion del tag
     def procesar(self, tags, link, title, clics):
         elemento = {'link': link, 'title': title, 'clics': clics}
+        logging.warning(elemento.get('title', 'None'))
         for t in tags:
             if t in self.pendientes:
                 encontrado = False
                 for p in self.pendientes[t]:
                     if p.get('link', '')  == link:
+                        p['title'] = title
                         p['clics'] = clics
                         encontrado = True
                 if not encontrado:
                     self.pendientes[t].append( elemento )
             else:
-                elementos_cache = memcache.get( 'tag_' + t)
+                elementos_cache = memcache.get('tag_' + t)
                 if elementos_cache is None:
                     self.pendientes[t] = [elemento]
                 else:
@@ -107,13 +109,13 @@ class tags:
         for tag in self.pendientes.keys():
             elementos = self.reducir( self.pendientes[tag] )
             if elementos:
-                if memcache.get( 'tag_' + tag) is None:
-                    if memcache.add( 'tag_' + tag, elementos ):
+                if memcache.get('tag_' + tag) is None:
+                    if memcache.add('tag_' + tag, elementos):
                         logging.info('Almacenados los resultados del tag ' + tag + ' en memcache')
                     else:
                         logging.error('Fallo al almacenar los resultados del tag ' + tag + ' en memcache')
                 else:
-                    if memcache.replace( 'tag_' + tag, elementos ):
+                    if memcache.replace('tag_' + tag, elementos):
                         logging.info('Reemplazados los resultados del tag ' + tag + ' en memcache')
                     else:
                         logging.error('Fallo al reemplazar los resultados del tag ' + tag + ' en memcache')

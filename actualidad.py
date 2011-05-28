@@ -115,7 +115,7 @@ class Detalle_enlace(Pagina):
             eleccion = tags[random.randint(0, len( tags ) - 1)]
         elif len(tags) == 1:
             eleccion = tags[0]
-        return memcache.get( 'tag_' + eleccion )
+        return memcache.get('tag_' + eleccion)
     
     # muestra el enlace
     def get(self, id_enlace=None):

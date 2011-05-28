@@ -19,6 +19,7 @@
 
 import hashlib, random, urllib
 from django.utils.safestring import mark_safe
+from django.template.defaultfilters import truncatewords, linebreaksbr, urlize
 from google.appengine.ext import webapp
 from datetime import datetime
 
@@ -169,7 +170,7 @@ def sin_solucionar(preguntas, respuestas):
         texto += '<ul>'
         for r in respuestas:
             if r.id_pregunta == str(p.key()):
-                texto += '<li><a href="/question/' + str(p.key()) + '#' + str(r.key()) + '">' + r.fecha.strftime("%d/%m/%Y") + '</a> <b>' + cortamail(r.autor) + '</b> responde - ' + r.contenido[:99] + '</li>\n'
+                texto += '<li><a href="/question/' + str(p.key()) + '#' + str(r.key()) + '">' + r.fecha.strftime("%d/%m/%Y") + '</a> <b>' + cortamail(r.autor) + '</b> responde - ' + truncatewords(r.contenido, 20) + '</li>\n'
         texto += '</ul>'
     
     # cerramos etiquetas
@@ -186,8 +187,23 @@ def ultimas_respuestas(pregunta, respuestas):
         retorno = '<ul>'
         for r in respuestas:
             if r.id_pregunta == str(pregunta):
-                retorno += '<li><b>' + cortamail(r.autor) + '</b> responde: ' + r.contenido[:99] + '...</li>\n'
+                retorno += '<li><b>' + cortamail(r.autor) + '</b> responde: ' + truncatewords(r.contenido, 20) + "</li>\n"
         return mark_safe(retorno+'</ul>')
+    else:
+        return ''
+
+
+@register.filter
+def respuestas_destacadas(respuestas):
+    if respuestas:
+        retorno = ''
+        for r in respuestas:
+            if r.destacada:
+                if retorno == '':
+                    retorno = '<tr><td colspan="2" valign="top"><div class="info_respuesta_up"><b>Respuestas destacadas:</b></div>'
+                retorno += '<div class="respuesta_d">' + urlize(linebreaksbr(r.contenido)) + '</div>'
+        retorno += '</td></tr><tr><td colspan="2">&nbsp;</td></tr>'
+        return mark_safe(retorno)
     else:
         return ''
 

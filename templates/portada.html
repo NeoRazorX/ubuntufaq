@@ -1,6 +1,19 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
+<div id="cse" style="width: 100%;">Cargando...</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+  google.setOnLoadCallback(function() {
+    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.setAutoComplete(true);
+    customSearchControl.draw('cse', options);
+  }, true);
+</script>
+
 <table width='100%'>
 {% for mix in mixto %}
     <tr>
@@ -62,20 +75,7 @@
 </center>
 {% endifequal %}
 
-<br/><hr/>
-
-<div id="cse" style="width: 100%;">Cargando...</div>
-<script src="http://www.google.com/jsapi" type="text/javascript"></script>
-<script type="text/javascript">
-  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
-  google.setOnLoadCallback(function() {
-    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
-    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
-    var options = new google.search.DrawOptions();
-    options.setAutoComplete(true);
-    customSearchControl.draw('cse', options);
-  }, true);
-</script>
+<br/><hr/><br/>
 
 <table width='100%'>
 <tr>
@@ -120,10 +120,6 @@
     </td>
 </tr>
 </table>
-
-<br/>
-<center><img src="http://code.google.com/appengine/images/appengine-noborder-120x30.gif" 
-alt="Con la tecnología de Google App Engine" /></center>
 
 </div>
 {% include "pie.html" %}
