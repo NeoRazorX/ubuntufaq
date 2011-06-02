@@ -108,16 +108,6 @@ class Redir_enlace(webapp.RequestHandler):
             self.redirect('/error/404')
 
 class Detalle_enlace(Pagina):
-    # devuelve las paginas relacionadas con alguno de los tags del enlace
-    def relacionadas(self, cadena):
-        tags = cadena.split(', ')
-        if len(tags) > 1:
-            eleccion = tags[random.randint(0, len( tags ) - 1)]
-        elif len(tags) == 1:
-            eleccion = tags[0]
-        return memcache.get('tag_' + eleccion)
-    
-    # muestra el enlace
     def get(self, id_enlace=None):
         Pagina.get(self)
         
@@ -144,7 +134,7 @@ class Detalle_enlace(Pagina):
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
                 'descripcion': 'Discusion sobre: ' + e.descripcion,
-                'tags': 'ubufaq, ubuntu faq, ' + self.extraer_tags(e.descripcion),
+                'tags': self.extraer_tags(e.descripcion),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
@@ -152,7 +142,7 @@ class Detalle_enlace(Pagina):
                 'enlace': e,
                 'comentarios': e.get_comentarios(self.request.remote_addr),
                 'captcha': chtml,
-                'relacionadas': self.relacionadas( self.extraer_tags(e.descripcion) ),
+                'relacionadas': self.paginas_relacionadas( self.extraer_tags(e.descripcion) ),
                 'administrador': users.is_current_user_admin(),
                 'modificar': modificar,
                 'usuario': users.get_current_user(),
@@ -253,7 +243,7 @@ class Comentar(webapp.RequestHandler):
                 comentario.put()
                 e = comentario.get_enlace()
                 e.actualizar()
-                self.redirect( e.get_link() )
+                self.redirect(e.get_link() + '#' + str(comentario.key()))
             except:
                 self.redirect('/error/503')
 

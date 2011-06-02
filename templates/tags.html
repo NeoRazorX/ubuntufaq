@@ -1,0 +1,27 @@
+{% include "cabecera.html" %}
+<div class="preguntas">
+
+<div id="cse" style="width: 100%;">Cargando...</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+  google.setOnLoadCallback(function() {
+    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.setAutoComplete(true);
+    customSearchControl.draw('cse', options);
+  }, true);
+</script>
+
+<div class="titulo">Informaci&oacute;n relacionada con el tag: {{ tag }}</div>
+<ul>
+{% for rel in relacionadas %}
+    <li><a href="{{ rel.link }}">{{ rel.title|truncatewords:30 }}</a> &nbsp;&nbsp;&nbsp; {{ rel.clics }} clics</li>
+{% empty %}
+    <li>Sin resultados.</li>
+{% endfor %}
+</ul>
+
+</div>
+{% include "pie.html" %}

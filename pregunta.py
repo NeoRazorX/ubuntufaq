@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -73,16 +74,6 @@ class Redir_pregunta(Pagina):
             self.redirect('/error/404')
 
 class Detalle_pregunta(Pagina):
-    # devuelve las paginas relacionadas con alguno de los tags de la pregunta
-    def relacionadas(self, cadena):
-        tags = cadena.split(', ')
-        if len(tags) > 1:
-            eleccion = tags[random.randint(0, len( tags ) - 1)]
-        elif len(tags) == 1:
-            eleccion = tags[0]
-        return memcache.get( 'tag_' + eleccion )
-    
-    # muestra la pregunta
     def get(self, id_p=None):
         Pagina.get(self)
         
@@ -111,12 +102,12 @@ class Detalle_pregunta(Pagina):
                     error = None)
             
             template_values = {
-                'titulo': p.titulo + ' - Ubuntu FAQ',
+                'titulo': p.titulo + ' - ' + p.get_estado(),
                 'descripcion': p.contenido,
                 'pregunta': p,
                 'tags': 'problema, duda, ayuda, ' + p.tags,
                 'respuestas': p.get_respuestas(self.request.remote_addr),
-                'relacionadas': self.relacionadas( p.tags ),
+                'relacionadas': self.paginas_relacionadas( p.tags ),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
@@ -228,7 +219,7 @@ class Responder(webapp.RequestHandler):
         if fallo == 0:
             p = r.get_pregunta()
             p.actualizar( r )
-            self.redirect( p.get_link() )
+            self.redirect(p.get_link() + '#' + str(r.key()))
         elif fallo == 1:
             self.redirect('/error/403')
         elif fallo == 2:

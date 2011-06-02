@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -18,6 +19,7 @@
 
 DEBUG_FLAG = True
 APP_NAME = 'ubuntu-faq'
+APP_DESCRIPTION = 'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 WORDPRESS_PRIVATE_EMAIL = ''
@@ -31,7 +33,7 @@ KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', '
     'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs',
     'gnu', 'linus', 'desura', 'libreoffice', 'nautilus']
 
-import math, logging
+import math, random, logging
 from google.appengine.ext import db, webapp
 from google.appengine.api import users, memcache
 from datetime import datetime
@@ -76,13 +78,35 @@ class Pregunta(db.Model):
         if cambio:
             try:
                 self.put()
-                self.borrar_cache()
+                memcache.delete( str(self.key()) )
             except:
                 logging.warning("Fallo actualizando la pregunta: " + str(self.key()) )
         return respuestas
     
     def get_link(self):
         return '/question/' + str(self.key())
+    
+    def get_estado(self):
+        retorno = 'estado desconocido'
+        if self.estado == 0:
+            retorno = 'nueva'
+        elif self.estado == 1:
+            retorno = 'incompleta'
+        elif self.estado == 2:
+            retorno = 'abierta'
+        elif self.estado == 3:
+            retorno = 'parcialmente solucionada'
+        elif self.estado == 10:
+            retorno = 'solucionada'
+        elif self.estado == 11:
+            retorno = 'pendiente de confirmación'
+        elif self.estado == 12:
+            retorno = 'duplicada'
+        elif self.estado == 13:
+            retorno = 'erronea'
+        elif self.estado == 14:
+            retorno = 'antigua'
+        return unicode(retorno, 'utf8')
     
     # actualizamos varios datos de la pregunta
     def actualizar(self, respuesta=None):
@@ -177,7 +201,7 @@ class Enlace(db.Model):
         if cambio:
             try:
                 self.put()
-                self.borrar_cache()
+                memcache.delete( str(self.key()) )
             except:
                 logging.warning("Fallo actualizando el enlace: " + str(self.key()) )
         return comentarios
@@ -273,7 +297,7 @@ class Pagina(webapp.RequestHandler):
     def get_ultimas_respuestas(self):
         respuestas = memcache.get('ultimas-respuestas')
         if respuestas is None:
-            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(25)
+            respuestas = db.GqlQuery("SELECT * FROM Respuesta ORDER BY fecha DESC").fetch(20)
             respuestas.reverse()
             if memcache.add('ultimas-respuestas', respuestas):
                 logging.info('Almacenando ultimas-respuestas en memcache')
@@ -282,4 +306,48 @@ class Pagina(webapp.RequestHandler):
         else:
             logging.info('Leyendo ultimas-respuestas de memcache')
         return respuestas
-
+    
+    # devuelve un string con todas las etiquetas de un mixto separadas por comas
+    def get_tags_from_mixto(self, mixto):
+        retorno = ''
+        listags = ['ubuntu']
+        for m in mixto:
+            tags = m.get('tags', '').split(', ')
+            for t in tags:
+                if t not in listags:
+                    listags.append(t)
+        for t in listags:
+            if retorno == '':
+                retorno = t
+            else:
+                retorno += ', ' + t
+        return retorno
+    
+    # devuelve un string con todas las etiquetas de una lista separadas por comas
+    def get_tags_from_list(self, elementos):
+        retorno = ''
+        listags = ['ubuntu']
+        for e in elementos:
+            tags = e.tags.split(', ')
+            for t in tags:
+                if t not in listags:
+                    listags.append(t)
+        for t in listags:
+            if retorno == '':
+                retorno = t
+            else:
+                retorno += ', ' + t
+        return retorno
+    
+    # devuelve las paginas relacionadas con alguno de los tags del enlace
+    def paginas_relacionadas(self, cadena):
+        retorno = None
+        tags = cadena.split(', ')
+        if len(tags) > 1:
+            intentos = 3
+            while intentos > 0 and retorno is None:
+                retorno = memcache.get('tag_' + random.choice( tags ))
+                intentos -= 1
+        elif len(tags) == 1:
+            retorno = memcache.get('tag_' + tags[0])
+        return retorno

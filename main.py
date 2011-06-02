@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -33,6 +34,7 @@ from base import *
 from pregunta import *
 from actualidad import *
 from imagenes import *
+from tags import *
 
 class Portada(Pagina):
     def mezclar(self):
@@ -51,7 +53,8 @@ class Portada(Pagina):
                             'creado': enlaces[e].creado,
                             'fecha': enlaces[e].fecha,
                             'comentarios': enlaces[e].comentarios,
-                            'link': '/story/' + str(enlaces[e].key())})
+                            'link': '/story/' + str(enlaces[e].key()),
+                            'tags': self.extraer_tags(enlaces[e].descripcion)})
                 e += 1
             elif e >= len(enlaces):
                 mixto.append({'tipo': 'pregunta',
@@ -65,7 +68,8 @@ class Portada(Pagina):
                             'comentarios': preguntas[p].respuestas,
                             'titulo': preguntas[p].titulo,
                             'estado': preguntas[p].estado,
-                            'link': '/question/' + str(preguntas[p].key())})
+                            'link': '/question/' + str(preguntas[p].key()),
+                            'tags': preguntas[p].tags})
                 p += 1
             elif preguntas[p].fecha > enlaces[e].fecha:
                 mixto.append({'tipo': 'pregunta',
@@ -79,7 +83,8 @@ class Portada(Pagina):
                             'comentarios': preguntas[p].respuestas,
                             'titulo': preguntas[p].titulo,
                             'estado': preguntas[p].estado,
-                            'link': '/question/' + str(preguntas[p].key())})
+                            'link': '/question/' + str(preguntas[p].key()),
+                            'tags': preguntas[p].tags})
                 p += 1
             else:
                 mixto.append({'tipo': enlaces[e].tipo_enlace,
@@ -91,7 +96,8 @@ class Portada(Pagina):
                             'creado': enlaces[e].creado,
                             'fecha': enlaces[e].fecha,
                             'comentarios': enlaces[e].comentarios,
-                            'link': '/story/' + str(enlaces[e].key())})
+                            'link': '/story/' + str(enlaces[e].key()),
+                            'tags': self.extraer_tags(enlaces[e].descripcion)})
                 e += 1
         return mixto
     
@@ -109,6 +115,8 @@ class Portada(Pagina):
     
     def get(self):
         Pagina.get(self)
+        mixto = self.get_portada()
+        tags = self.get_tags_from_mixto( mixto )
         
         # el captcha
         if users.get_current_user():
@@ -120,10 +128,10 @@ class Portada(Pagina):
                 error = None)
         
         template_values = {
-            'titulo': 'Ubuntu FAQ - portada',
-            'descripcion': 'Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
-            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
-            'mixto': self.get_portada(),
+            'titulo': 'Ubuntu FAQ',
+            'descripcion': APP_DESCRIPTION,
+            'tags': tags,
+            'mixto': mixto,
             'urespuestas': self.get_ultimas_respuestas(),
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -150,8 +158,8 @@ class Indice(Pagina):
         
         template_values = {
             'titulo': 'Ubuntu FAQ - ' + vista,
-            'descripcion': vista + ' - soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
-            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
+            'descripcion': vista + ' - ' + APP_DESCRIPTION,
+            'tags': self.get_tags_from_list( preguntas ),
             'preguntas': preguntas,
             'datos_paginacion': datos_paginacion,
             'url': self.url,
@@ -181,7 +189,8 @@ class Populares(Pagina):
                             'clicks': enlaces[e].clicks,
                             'creado': enlaces[e].creado,
                             'comentarios': enlaces[e].comentarios,
-                            'link': '/story/' + str(enlaces[e].key())})
+                            'link': '/story/' + str(enlaces[e].key()),
+                            'tags': self.extraer_tags(enlaces[e].descripcion)})
                 e += 1
             elif e >= len(enlaces):
                 mixto.append({'tipo': 'pregunta',
@@ -194,7 +203,8 @@ class Populares(Pagina):
                             'comentarios': preguntas[p].respuestas,
                             'titulo': preguntas[p].titulo,
                             'estado': preguntas[p].estado,
-                            'link': '/question/' + str(preguntas[p].key())})
+                            'link': '/question/' + str(preguntas[p].key()),
+                            'tags': preguntas[p].tags})
                 p += 1
             elif preguntas[p].visitas > enlaces[e].clicks:
                 mixto.append({'tipo': 'pregunta',
@@ -207,7 +217,8 @@ class Populares(Pagina):
                             'comentarios': preguntas[p].respuestas,
                             'titulo': preguntas[p].titulo,
                             'estado': preguntas[p].estado,
-                            'link': '/question/' + str(preguntas[p].key())})
+                            'link': '/question/' + str(preguntas[p].key()),
+                            'tags': preguntas[p].tags})
                 p += 1
             else:
                 mixto.append({'tipo': enlaces[e].tipo_enlace,
@@ -218,7 +229,8 @@ class Populares(Pagina):
                             'clicks': enlaces[e].clicks,
                             'creado': enlaces[e].creado,
                             'comentarios': enlaces[e].comentarios,
-                            'link': '/story/' + str(enlaces[e].key())})
+                            'link': '/story/' + str(enlaces[e].key()),
+                            'tags': self.extraer_tags(enlaces[e].descripcion)})
                 e += 1
         return mixto
     
@@ -239,12 +251,14 @@ class Populares(Pagina):
     
     def get(self):
         Pagina.get(self)
+        mixto = self.get_portada()
+        tags = self.get_tags_from_mixto( mixto )
         
         template_values = {
             'titulo': 'Ubuntu FAQ - populares',
-            'descripcion': 'Listado de preguntas y noticias populares de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
-            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
-            'mixto': self.get_portada(),
+            'descripcion': 'Listado de preguntas y noticias populares de Ubuntu FAQ. ' + APP_DESCRIPTION,
+            'tags': tags,
+            'mixto': mixto,
             'stats': self.get_stats(),
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -273,12 +287,13 @@ class Sin_solucionar(Pagina):
     
     def get(self, p=0):
         Pagina.get(self)
+        preguntas = self.get_preguntas()
         
         template_values = {
             'titulo': 'Ubuntu FAQ - sin solucionar',
-            'descripcion': 'Listado de preguntas sin solucionar de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
-            'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
-            'preguntas': self.get_preguntas(),
+            'descripcion': 'Listado de preguntas sin solucionar de Ubuntu FAQ. ' + APP_DESCRIPTION,
+            'tags': self.get_tags_from_list( preguntas ),
+            'preguntas': preguntas,
             'respuestas': self.get_ultimas_respuestas(),
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -298,7 +313,7 @@ class Ayuda(Pagina):
         
         template_values = {
             'titulo': 'Ayuda de Ubuntu FAQ',
-            'descripcion': 'Seccion de ayuda de Ubuntu FAQ. Soluciones rapidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, asi como noticias, videos, wallpapers y enlaces de interes.',
+            'descripcion': 'Sección de ayuda de Ubuntu FAQ. ' + APP_DESCRIPTION,
             'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -428,11 +443,11 @@ def main():
                                         ('/sin-solucionar', Sin_solucionar),
                                         ('/actualidad', Actualidad),
                                         (r'/actualidad/(.*)', Actualidad),
-                                        ('/add_e', Actualidad),
                                         ('/images', Imagenes),
                                         (r'/images/(.*)', Imagenes),
                                         (r'/p/(.*)', Redir_pregunta),
                                         (r'/question/(.*)', Detalle_pregunta),
+                                        ('/add_p', Nueva_pregunta),
                                         ('/mod_p', Detalle_pregunta),
                                         ('/del_p', Borrar_pregunta),
                                         ('/stop_emails/(.*)', Stop_emails),
@@ -443,15 +458,16 @@ def main():
                                         (r'/e/(.*)', Acceder_enlace),
                                         (r'/de/(.*)', Redir_enlace),
                                         (r'/story/(.*)', Detalle_enlace),
+                                        ('/add_e', Actualidad),
                                         ('/mod_e', Detalle_enlace),
                                         ('/hun_e', Hundir_enlace),
                                         ('/del_e', Borrar_enlace),
                                         ('/add_c', Comentar),
                                         ('/mod_c', Modificar_comentario),
                                         ('/del_c', Borrar_comentario),
+                                        (r'/tag/(.*)', Detalle_tag),
                                         (r'/u/(.*)', Detalle_usuario),
                                         ('/ayuda', Ayuda),
-                                        ('/add_p', Nueva_pregunta),
                                         (r'/error/(.*)', Perror),
                                         ('/.*', Perror),
                                     ],

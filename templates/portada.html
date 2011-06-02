@@ -1,6 +1,7 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
+<a name="buscador"></a>
 <div id="cse" style="width: 100%;">Cargando...</div>
 <script src="http://www.google.com/jsapi" type="text/javascript"></script>
 <script type="text/javascript">
@@ -14,6 +15,14 @@
   }, true);
 </script>
 
+{% ifequal vista '404' %}
+<center>
+    {% ifequal cerror '503' %}
+        <img src="/img/nuclear-explosion.gif" alt="explosi&oacute;n"/>
+    {% endifequal %}
+    <h1>{{ error|safe|urlize }}</h1>
+</center>
+{% else %}
 <table width='100%'>
 {% for mix in mixto %}
     <tr>
@@ -65,14 +74,6 @@
     <div class="mensaje">Sin resultados.</div>
 {% endfor %}
 </table>
-
-{% ifequal vista '404' %}
-<center>
-    {% ifequal cerror '503' %}
-        <img src="/img/nuclear-explosion.gif" alt="explosi&oacute;n"/>
-    {% endifequal %}
-    <h1>{{ error|safe|urlize }}</h1>
-</center>
 {% endifequal %}
 
 <br/><hr/><br/>

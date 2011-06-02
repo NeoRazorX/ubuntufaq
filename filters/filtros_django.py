@@ -43,6 +43,17 @@ def autor(a=None):
         return 'anónimo'
 
 @register.filter
+def tags(cadena=None):
+    retorno = ''
+    if cadena:
+        ts = cadena.split(', ')
+        for t in ts:
+            if retorno != '':
+                retorno += ', '
+            retorno += '<a href="/tag/' + t + '">' + t + '</a>'
+    return mark_safe(retorno)
+
+@register.filter
 def traducir(fecha):
     texto = str(fecha)
     texto = texto.replace('hour', 'hora')
@@ -200,7 +211,7 @@ def respuestas_destacadas(respuestas):
         for r in respuestas:
             if r.destacada:
                 if retorno == '':
-                    retorno = '<tr><td colspan="2" valign="top"><div class="info_respuesta_up"><b>Respuestas destacadas:</b></div>'
+                    retorno = '<tr><td colspan="2" valign="top"><div class="info_respuesta_d"><b>Respuestas destacadas:</b></div>'
                 retorno += '<div class="respuesta_d">' + urlize(linebreaksbr(r.contenido)) + '</div>'
         retorno += '</td></tr><tr><td colspan="2">&nbsp;</td></tr>'
         return mark_safe(retorno)

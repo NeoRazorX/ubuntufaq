@@ -75,8 +75,11 @@
         font-family: Arial, Helvetica, sans-serif;
         font-size: 30px;
         letter-spacing: 0.5em;
+        text-align: center;
         padding-left: 10px;
         padding-bottom: 5px;
+        margin-left: auto;
+        margin-right: auto;
         border-left: 1px solid #191919;
         border-right: 1px solid #191919;
     }
@@ -85,12 +88,19 @@
         color: white;
         letter-spacing: normal;
         font-size: 13px;
+        vertical-align: middle;
+    }
+    
+    div.cabecera a:hover {
+        text-decoration: none;
+        color: white;
     }
     
     div.menucabecera {
         background-color: #191919;
         color: silver;
         font-size: 14px;
+        text-align: center;
         padding-top: 5px;
         padding-left: 5px;
         padding-right: 5px;
@@ -99,6 +109,7 @@
         border-bottom-right-radius: 5px 5px;
         -moz-border-radius-bottomleft: 5px 5px;
         -moz-border-radius-bottomright: 5px 5px;
+        border-bottom: 1px solid #DD4814;
     }
     
     div.menucabecera span {
@@ -108,14 +119,26 @@
         padding-bottom: 1px;
     }
     
-    div.menucabecera span#menusel {
-        background-color: #DD4814;
+    div.menucabecera span:hover {
+        background-color: #FE6935;
+        border-bottom: 3px solid #DD4814;
         border-top-left-radius: 3px 3px;
         border-top-right-radius: 3px 3px;
     }
     
+    div.menucabecera span#menusel {
+        background-color: #DD4814;
+        border-top-left-radius: 3px 3px;
+        border-top-right-radius: 3px 3px;
+        border-bottom: 1px solid #DD4814;
+    }
+    
     div.menucabecera a {
         color: white;
+    }
+    
+    div.menucabecera a:hover {
+        text-decoration: none;
     }
     
     div.dominio {
@@ -175,6 +198,15 @@
         padding: 5px;
     }
     
+    div.info_respuesta_d {
+        font-size: 15px;
+        margin-top: 5px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 2px;
+        padding: 0px;
+    }
+    
     div.info_respuesta_up {
         font-size: 11px;
         margin-top: 5px;
@@ -207,6 +239,16 @@
     div.respuesta_d {
         background-color: #feffc0;
         border: 1px solid #e1e16e;
+        margin-top: 0px;
+        margin-left: 10px;
+        margin-right: 10px;
+        margin-bottom: 0px;
+        padding: 5px;
+    }
+    
+    div.respuesta_d2 {
+        background-color: #F7F7F7;
+        border: 3px double silver;
         margin-top: 0px;
         margin-left: 10px;
         margin-right: 10px;
@@ -312,30 +354,19 @@
     }
 
     div.pie {
-        background-color: #191919;
-        width: 800px;
         margin-top: 10px;
-        margin-left: auto;
-        margin-right: auto;
-        text-align: center;
-        font-size: 13px;
-        word-spacing: 5px;
-        color: silver;
+        font-size: 14px;
         padding-top: 5px;
         padding-bottom: 10px;
-        border-left: 1px solid #191919;
-        border-right: 1px solid #191919;
-        border-top: 1px solid #191919;
-        border-top-left-radius: 10px 10px;
-        border-top-right-radius: 10px 10px;
-        -moz-border-radius-topleft: 10px 10px;
-        -moz-border-radius-topright: 10px 10px;
+        border-top: 1px dotted #191919;
     }
     
-    div.pie a {
-        letter-spacing: 0.2em;
-        font-weight: normal;
-        color: white;
+    div.pie table {
+        width: 100%;
+    }
+    
+    div.pie table td {
+        vertical-align: top;
     }
     </style>
     <script type="text/javascript">
@@ -493,11 +524,23 @@
         }
         //-->
     </script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-417932-5']);
+      _gaq.push(['_setDomainName', 'none']);
+      _gaq.push(['_setAllowLinker', true]);
+      _gaq.push(['_trackPageview']);
+    
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
 </head>
 <body>
 <div class="cabecera">
     <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
-    <br/><span>Actualidad y soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general.</span>
 </div>
 <div class="menucabecera">
     <span {{ vista|menu_cabecera:"portada" }}><a href="/">inicio</a></span>

@@ -47,7 +47,6 @@ class tags:
                 link = '/story/' + str(ele.key())
                 title = ele.descripcion
                 clics = ele.clicks
-            logging.warning( title )
             self.procesar(tags, link, title, clics)
         
         # actualizamos los datos de memcache
@@ -94,15 +93,19 @@ class tags:
     # reducimos el numero de elementos por tag, en funcion de los clics
     def reducir(self, elementos):
         reducido = []
-        for i in range(9):
+        for i in range(10):
             seleccionado = {'clics': -1}
             for e in elementos:
                 if e not in reducido and e.get('clics', 0) > seleccionado.get('clics', 0):
                     seleccionado = e
             if seleccionado != {'clics': -1}:
-                reducido.append( seleccionado )
+                duplicado = False
+                for e in reducido:
+                    if e.get('link', '') == seleccionado.get('link', ''):
+                        duplicado = True
+                if not duplicado:
+                    reducido.append( seleccionado )
         return reducido
-                    
     
     # actualiza los elementos de memcache con los nuevos resultados obtenidos
     def actualizar(self):
