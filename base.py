@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DEBUG_FLAG = True
+DEBUG_FLAG = False
 APP_NAME = 'ubuntu-faq'
 APP_DESCRIPTION = 'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
 RECAPTCHA_PUBLIC_KEY = ''
@@ -28,10 +28,11 @@ RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
     'http://neorazorx.blogspot.com/feeds/posts/default']
 KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', 'meego', 'fedora', 'gentoo',
     'suse', 'debian', 'unix', 'canonical', 'lucid', 'maverick', 'natty', 'ocelot', 'chrome os',
-    'unity', 'gnome', 'kde', 'xfce', 'enlightment', 'x.org', 'wayland', 'compiz', 'alsa',
-    'plymouth', 'kms', 'systemd', 'kernel', 'gcc', 'grub', 'wine', 'ppa', 'gallium3d',
-    'nouveau', 'opengl', 'xfs', 'ext3', 'ext4', 'btrfs',
-    'gnu', 'linus', 'desura', 'libreoffice', 'nautilus']
+    'unity', 'gnome', 'kde', 'xfce', 'enlightment', 'x.org', 'wayland', 'compiz', 'alsa', 'gtk', 'gdk', 'qt',
+    'plymouth', 'kms', 'systemd', 'kernel', 'gcc', 'grub', 'wine', 'ppa', 'gallium3d', 'gdm',
+    'nouveau', 'opengl', 'xfs', 'ext2', 'ext3', 'ext4', 'btrfs', 'reiser', 'mysql', 'postgresql',
+    'gnu', 'linus', 'desura', 'libreoffice', 'nautilus', 'python', 'juego', 'wifi', '3g', 'windows', 'mac',
+    'bios', 'driver']
 
 import math, random, logging
 from google.appengine.ext import db, webapp
@@ -176,6 +177,7 @@ class Enlace(db.Model):
     comentarios = db.IntegerProperty(default=0)
     puntos = db.IntegerProperty(default=0)
     os = db.StringProperty(default="desconocido")
+    tags = db.StringProperty()
     
     # devuelve los comentarios del enlace
     # ademas suma un clic si se le proporciona una ip
@@ -198,6 +200,9 @@ class Enlace(db.Model):
             self.ultima_ip = ip
             self.clicks += 1
             cambio = True
+        if not self.tags:
+            self.get_tags()
+            cambio = True
         if cambio:
             try:
                 self.put()
@@ -208,6 +213,17 @@ class Enlace(db.Model):
     
     def get_link(self):
         return '/story/' + str(self.key())
+    
+    def get_tags(self):
+        self.tags = ''
+        for tag in KEYWORD_LIST:
+            if self.descripcion.lower().find(tag) != -1:
+                if self.tags == '':
+                    self.tags = tag
+                else:
+                    self.tags += ', ' + tag
+        if self.tags == '':
+            self.tags = 'ubuntu, general'
     
     def hundir(self):
         self.fecha = datetime.min
@@ -312,10 +328,13 @@ class Pagina(webapp.RequestHandler):
         retorno = ''
         listags = ['ubuntu']
         for m in mixto:
-            tags = m.get('tags', '').split(', ')
-            for t in tags:
-                if t not in listags:
-                    listags.append(t)
+            try:
+                tags = str(m.get('tags', '')).split(', ')
+                for t in tags:
+                    if t not in listags:
+                        listags.append(t)
+            except:
+                pass
         for t in listags:
             if retorno == '':
                 retorno = t
@@ -341,13 +360,20 @@ class Pagina(webapp.RequestHandler):
     
     # devuelve las paginas relacionadas con alguno de los tags del enlace
     def paginas_relacionadas(self, cadena):
-        retorno = None
-        tags = cadena.split(', ')
-        if len(tags) > 1:
-            intentos = 3
-            while intentos > 0 and retorno is None:
-                retorno = memcache.get('tag_' + random.choice( tags ))
-                intentos -= 1
-        elif len(tags) == 1:
-            retorno = memcache.get('tag_' + tags[0])
+        retorno = []
+        try:
+            tags = str(cadena).split(', ')
+            if len(tags) > 1:
+                intentos = 3
+                while intentos > 0 and len(retorno) < 10:
+                    aux = memcache.get('tag_' + random.choice( tags ))
+                    if aux:
+                        for elem in aux:
+                            if elem not in retorno:
+                                retorno.append( elem )
+                    intentos -= 1
+            elif len(tags) == 1:
+                retorno = memcache.get('tag_' + tags[0])
+        except:
+            pass
         return retorno

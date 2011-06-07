@@ -131,18 +131,20 @@ class Detalle_enlace(Pagina):
             else:
                 modificar = False
             
+            comentarios = e.get_comentarios(self.request.remote_addr)
+            
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
                 'descripcion': 'Discusion sobre: ' + e.descripcion,
-                'tags': self.extraer_tags(e.descripcion),
+                'tags': e.tags,
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
                 'formulario': self.formulario,
                 'enlace': e,
-                'comentarios': e.get_comentarios(self.request.remote_addr),
+                'comentarios': comentarios,
                 'captcha': chtml,
-                'relacionadas': self.paginas_relacionadas( self.extraer_tags(e.descripcion) ),
+                'relacionadas': self.paginas_relacionadas( e.tags ),
                 'administrador': users.is_current_user_admin(),
                 'modificar': modificar,
                 'usuario': users.get_current_user(),
@@ -161,6 +163,7 @@ class Detalle_enlace(Pagina):
                 e = Enlace.get( self.request.get('id') )
                 e.url = self.request.get('url')
                 e.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
+                e.tags = cgi.escape( self.request.get('tags') )
                 if self.request.get('tipo_enlace') in ['youtube', 'vimeo', 'vhtml5', 'imagen', 'deb', 'package', 'texto']:
                     e.tipo_enlace = self.request.get('tipo_enlace')
                 else:
@@ -236,7 +239,7 @@ class Comentar(webapp.RequestHandler):
             self.redirect('/error/403')
     
     def finalizar(self, comentario):
-        if comentario.contenido.strip() == 'Deja un comentario, es gratis!':
+        if comentario.contenido.strip().lower().find('deja un comentario, es gratis') != -1:
             self.redirect('/error/606')
         else:
             try:

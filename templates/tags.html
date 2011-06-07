@@ -14,14 +14,18 @@
   }, true);
 </script>
 
-<div class="titulo">Informaci&oacute;n relacionada con el tag: {{ tag }}</div>
-<ul>
-{% for rel in relacionadas %}
-    <li><a href="{{ rel.link }}">{{ rel.title|truncatewords:30 }}</a> &nbsp;&nbsp;&nbsp; {{ rel.clics }} clics</li>
-{% empty %}
-    <li>Sin resultados.</li>
-{% endfor %}
-</ul>
+{{ alltags|alltags }}
+
+{% if tag %}
+    <div class="titulo">Informaci&oacute;n relacionada con el tag: {{ tag }}</div>
+    <ul>
+    {% for rel in relacionadas %}
+        <li><a href="{{ rel.link }}">{{ rel.title|truncatewords:30 }}</a> &nbsp;&nbsp;&nbsp; {{ rel.clics }} clics</li>
+    {% empty %}
+        <li>Sin resultados.</li>
+    {% endfor %}
+    </ul>
+{% endif %}
 
 </div>
 {% include "pie.html" %}

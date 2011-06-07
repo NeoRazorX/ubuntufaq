@@ -54,6 +54,27 @@ def tags(cadena=None):
     return mark_safe(retorno)
 
 @register.filter
+def alltags(tags):
+    retorno = ''
+    if tags:
+        tmax = 0
+        tmin = 100
+        for t in tags:
+            tmax = max(tmax, t[1])
+            tmin = min(tmin, t[1])
+        tags.sort(key=lambda a: a[0].lower())
+        for t in tags:
+            if retorno != '':
+                retorno += ' '
+            if t[1] == tmin:
+                retorno += '<a class="min" title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
+            elif t[1] == tmax:
+                retorno += '<a class="max" title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
+            else:
+                retorno += '<a title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
+    return mark_safe('<div class="alltags">'+retorno+'</div>')
+
+@register.filter
 def traducir(fecha):
     texto = str(fecha)
     texto = texto.replace('hour', 'hora')

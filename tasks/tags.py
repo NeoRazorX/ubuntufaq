@@ -26,6 +26,14 @@ class tags:
         # diccionario que almacena todos los tags
         self.pendientes = {}
         
+        # lista general de tags
+        self.alltags = memcache.get('all-tags')
+        if self.alltags is None:
+            self.alltags = []
+            self.alltags_memcache = False
+        else:
+            self.alltags_memcache = True
+        
         # elegimos aleatoriamente una tabla
         tabla = random.randint(0, 1) == 0
         
@@ -70,7 +78,6 @@ class tags:
     # rellena pendientes con cada elemento, en funcion del tag
     def procesar(self, tags, link, title, clics):
         elemento = {'link': link, 'title': title, 'clics': clics}
-        logging.warning(elemento.get('title', 'None'))
         for t in tags:
             if t in self.pendientes:
                 encontrado = False
@@ -93,7 +100,7 @@ class tags:
     # reducimos el numero de elementos por tag, en funcion de los clics
     def reducir(self, elementos):
         reducido = []
-        for i in range(10):
+        for i in range(20):
             seleccionado = {'clics': -1}
             for e in elementos:
                 if e not in reducido and e.get('clics', 0) > seleccionado.get('clics', 0):
@@ -124,6 +131,18 @@ class tags:
                         logging.error('Fallo al reemplazar los resultados del tag ' + tag + ' en memcache')
             else:
                 logging.error('Para el tag: ' + tag + ' no hay elementos!')
+            # actualizamos la lista general de tags
+            encontrado = False
+            for t in self.alltags:
+                if t[0] == tag:
+                    t[1] = max(len(elementos), t[1])
+                    encontrado = True
+            if not encontrado:
+                self.alltags.append([tag, 0])
+        if not self.alltags_memcache:
+            memcache.add('all-tags', self.alltags)
+        else:
+            memcache.replace('all-tags', self.alltags)
 
 if __name__ == "__main__":
     tags()

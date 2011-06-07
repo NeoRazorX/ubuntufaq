@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import cgi, os, logging, random
+import cgi, os, logging, random, urllib
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp import template
 from google.appengine.api import users
@@ -27,6 +27,7 @@ from base import *
 class Detalle_tag(Pagina):
     def get(self, tag=None):
         Pagina.get(self)
+        tag = urllib.unquote( tag )
         
         template_values = {
                 'titulo': 'Ubuntu FAQ: ' + tag,
@@ -34,6 +35,7 @@ class Detalle_tag(Pagina):
                 'tag': tag,
                 'tags': 'problema, duda, ayuda, ' + tag,
                 'relacionadas': self.paginas_relacionadas( tag ),
+                'alltags': memcache.get('all-tags'),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,

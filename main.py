@@ -54,7 +54,7 @@ class Portada(Pagina):
                             'fecha': enlaces[e].fecha,
                             'comentarios': enlaces[e].comentarios,
                             'link': '/story/' + str(enlaces[e].key()),
-                            'tags': self.extraer_tags(enlaces[e].descripcion)})
+                            'tags': enlaces[e].tags})
                 e += 1
             elif e >= len(enlaces):
                 mixto.append({'tipo': 'pregunta',
@@ -97,7 +97,7 @@ class Portada(Pagina):
                             'fecha': enlaces[e].fecha,
                             'comentarios': enlaces[e].comentarios,
                             'link': '/story/' + str(enlaces[e].key()),
-                            'tags': self.extraer_tags(enlaces[e].descripcion)})
+                            'tags': enlaces[e].tags})
                 e += 1
         return mixto
     
@@ -190,7 +190,7 @@ class Populares(Pagina):
                             'creado': enlaces[e].creado,
                             'comentarios': enlaces[e].comentarios,
                             'link': '/story/' + str(enlaces[e].key()),
-                            'tags': self.extraer_tags(enlaces[e].descripcion)})
+                            'tags': enlaces[e].tags})
                 e += 1
             elif e >= len(enlaces):
                 mixto.append({'tipo': 'pregunta',
@@ -230,7 +230,7 @@ class Populares(Pagina):
                             'creado': enlaces[e].creado,
                             'comentarios': enlaces[e].comentarios,
                             'link': '/story/' + str(enlaces[e].key()),
-                            'tags': self.extraer_tags(enlaces[e].descripcion)})
+                            'tags': enlaces[e].tags})
                 e += 1
         return mixto
     
@@ -395,7 +395,7 @@ class Perror(Pagina):
             '403c': 'Permiso denegado - error en el captcha',
             '404': 'Pagina no encontrada en Ubuntu FAQ',
             '503': 'Error en Ubuntu FAQ',
-            '606': 'Gilipollas detectado'
+            '606': 'Idiota detectado'
         }
         
         merror = {
@@ -403,7 +403,7 @@ class Perror(Pagina):
             '403c': '403 - Permiso denegado: debes repetir el captcha',
             '404': '404 - P&aacute;gina no encontrada en Ubuntu FAQ',
             '503': '503 - Error en Ubuntu FAQ,<br/>consulta el estado en: http://code.google.com/status/appengine',
-            '606': '606 - Hemos detectado un gilipollas, TU!'
+            '606': '606 - ¿Por qué no pruebas a escribir algo diferente?'
         }
         
         # el captcha

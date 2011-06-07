@@ -16,6 +16,7 @@
         <input id="titulo" type="text" name="url" size="50" maxlength="100" value="{{ enlace.url }}"/>
         <textarea name="descripcion" rows="6" cols="60">{{ enlace.descripcion|safe }}</textarea>
         <br/>
+        Tags: <input type="text" name="tags" size="50" maxlength="100" value="{{ enlace.tags }}"/> &nbsp;
         Tipo enlace: <input type="text" name="tipo_enlace" size="30" maxlength="100" value="{{ enlace.tipo_enlace }}"/>
         <input type="submit" class="boton" value="modificar">
     </form>
@@ -135,7 +136,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 {% if relacionadas %}
 <tr>
     <td></td>
-    <td>
+    <td colspan="2">
     <b>Informaci&oacute;n relacionada: {{ tags|tags }}.</b>
     <ul>
     {% for rel in relacionadas %}

@@ -188,11 +188,7 @@ class Responder(webapp.RequestHandler):
         if users.get_current_user() and self.request.get('id_pregunta') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
                 r.autor = users.get_current_user()
-            try:
-                r.put()
-                r.get_pregunta().borrar_cache()
-            except:
-                fallo = 2
+            self.finalizar( r )
         elif self.request.get('id_pregunta') and self.request.get('contenido'):
             challenge = self.request.get('recaptcha_challenge_field')
             response = self.request.get('recaptcha_response_field')
@@ -202,34 +198,25 @@ class Responder(webapp.RequestHandler):
                 response,
                 RECAPTCHA_PRIVATE_KEY,
                 remoteip)
-            
-            if r.contenido.strip() == 'Utiliza un lenguaje claro y conciso.':
-                fallo = 4
-            elif cResponse.is_valid:
-                try:
-                    r.put()
-                    r.get_pregunta().borrar_cache()
-                except:
-                    fallo = 2
+            if cResponse.is_valid:
+                self.finalizar( r )
             else:
-                fallo = 3
+                self.redirect('/error/403c')
         else:
-            fallo = 1
-        
-        if fallo == 0:
-            p = r.get_pregunta()
-            p.actualizar( r )
-            self.redirect(p.get_link() + '#' + str(r.key()))
-        elif fallo == 1:
             self.redirect('/error/403')
-        elif fallo == 2:
-            self.redirect('/error/503')
-        elif fallo == 3:
-            self.redirect('/error/403c')
-        elif fallo == 4:
+    
+    def finalizar(self, respuesta):
+        if respuesta.contenido.strip().lower().find('utiliza un lenguaje claro y conciso') != -1:
             self.redirect('/error/606')
         else:
-            self.redirect('/error/503')
+            try:
+                respuesta.put()
+                respuesta.get_pregunta().borrar_cache()
+                p = respuesta.get_pregunta()
+                p.actualizar( respuesta )
+                self.redirect(p.get_link() + '#' + str(respuesta.key()))
+            except:
+                self.redirect('/error/503')
 
 # solo el autor de la preguna o un administrador puede destacar una respuesta
 class Destacar_respuesta(webapp.RequestHandler):

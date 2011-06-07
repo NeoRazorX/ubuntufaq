@@ -1,9 +1,18 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
-<div class="mensaje">Comparte con nosotros enlaces de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, etc. Usa el <a href="/#nuevo-enlace">formulario</a>.</div>
-
-{{ datos_paginacion|paginar }}
+<div id="cse" style="width: 100%;">Cargando...</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+  google.setOnLoadCallback(function() {
+    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.setAutoComplete(true);
+    customSearchControl.draw('cse', options);
+  }, true);
+</script>
 
 <table width='100%'>
 {% for enlace in enlaces %}

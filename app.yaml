@@ -25,6 +25,10 @@ handlers:
   script: tasks/enlaces.py
   login: admin
 
+- url: /tasks/memcache
+  script: tasks/memcache.py
+  login: admin
+
 - url: /tasks/karma
   script: tasks/karma.py
   login: admin

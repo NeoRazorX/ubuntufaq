@@ -1,9 +1,18 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
-<div class="mensaje">¿Tienes alg&uacute;n problema con Ubuntu? <a href="/#buscador">busca</a> o usa el formulario de <a href="/#nueva-pregunta">nueva pregunta</a>.</div>
-
-{{ datos_paginacion|paginar }}
+<div id="cse" style="width: 100%;">Cargando...</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+  google.setOnLoadCallback(function() {
+    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.setAutoComplete(true);
+    customSearchControl.draw('cse', options);
+  }, true);
+</script>
 
 <table width='100%'>
 {% for preg in preguntas %}

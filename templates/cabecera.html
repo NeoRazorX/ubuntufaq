@@ -121,7 +121,6 @@
     
     div.menucabecera span:hover {
         background-color: #FE6935;
-        border-bottom: 3px solid #DD4814;
         border-top-left-radius: 3px 3px;
         border-top-right-radius: 3px 3px;
     }
@@ -361,6 +360,21 @@
         border-top: 1px dotted #191919;
     }
     
+    div.alltags {
+        margin-bottom: 30px;
+        font-size: 20px;
+        text-align: center;
+        word-spacing: 15px;
+    }
+    
+    div.alltags a.max {
+        font-size: 28px;
+    }
+    
+    div.alltags a.min {
+        font-size: 14px;
+    }
+    
     div.pie table {
         width: 100%;
     }
@@ -551,6 +565,8 @@
     <span {{ vista|menu_cabecera:"imagenes" }}><a href="/images">im&aacute;genes</a></span>
     <span {{ vista|menu_cabecera:"ayuda" }}><a href="/ayuda">ayuda</a></span>
     <span>|</span>
+    <span><a href="/#nueva-pregunta">a&ntilde;adir</a></span>
+    <span><a href="/#buscador">buscar</a></span>
 
 {% if formulario %}
     {% ifequal vista 'mi-perfil' %}

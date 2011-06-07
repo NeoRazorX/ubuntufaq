@@ -28,6 +28,10 @@ cron:
   url: /tasks/steam
   schedule: every 8 hours
 
+- description: borrado completo de memcache
+  url: /tasks/memcache
+  schedule: every monday 02:00
+
 - description: marcado de preguntas antiguas
   url: /tasks/antiguas
   schedule: every monday of month 01:00
