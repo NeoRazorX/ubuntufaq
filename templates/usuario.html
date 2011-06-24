@@ -14,7 +14,7 @@
     <ul class="social">
         <li><g:plusone size="medium"></g:plusone></li>
         <li><a title="Publicar en Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-count" data-locale="es"></a></li>
-        <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="neorazorx" data-lang="es">Tweet</a></li>
+        <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
         <li><div class="identica" style="padding: 3px; padding-bottom: 2px;background-color: white;
 border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://identi.ca//index.php?action=bookmarklet',l=d.location,e=encodeURIComponent,g=f+'&status_textarea=%E2%80%9C'+((e(s))?e(s):e(document.title))+'%E2%80%9D%20%E2%80%94%20'+l.href;function%20a(){if(!w.open(g,'t','toolbar=0,resizable=0,scrollbars=1,status=1,width=450,height=200')){l.href=g;}}a();})()"><img src="/img/identica.png" alt="identica"/></a></div></li>
         <li><iframe src="http://www.facebook.com/plugins/like.php?href&amp;send=true&amp;layout=button_count&amp;width=150&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe></li>
@@ -26,68 +26,64 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 </tr>
 </table>
 
+<div class="titulo"><span>&Uacute;ltimas preguntas</span></div>
 {% if preguntas %}
 <ul>
-    <li>&Uacute;ltimas preguntas:</li>
-    <ul>
     {% for pregunta in preguntas %}
         <li>
-        {{ pregunta.fecha|date:"d/m/Y H:i" }} -
-        <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|safe }}</a>
+        <a href="/question/{{ pregunta.key }}">{{ pregunta.creado|timesince|traducir }}</a> -
+        {{ pregunta.titulo|safe }}
         [<b>{{ pregunta.estado|estado_pregunta }}</b>]
-        [{{ pregunta.respuestas }} respuestas]
         </li>
     {% endfor %}
-    </ul>
 </ul>
 {% else %}
 <ul><li>Sin preguntas.</li></ul>
 {% endif %}
 
+<br/>
+
+<div class="titulo"><span>&Uacute;ltimas respuestas</span></div>
 {% if respuestas %}
 <ul>
-    <li>&Uacute;ltimas respuestas:</li>
-    <ul>
     {% for respuesta in respuestas %}
         <li>
-        <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{ respuesta.fecha|date:"d/m/Y H:i" }}</a> -
+        <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{ respuesta.fecha|timesince|traducir }}</a> -
         {{ respuesta.contenido|safe|truncatewords:50 }}
         </li>
     {% endfor %}
-    </ul>
 </ul>
 {% else %}
 <ul><li>Sin respuestas.</li></ul>
 {% endif %}
 
+<br/>
+
+<div class="titulo"><span>&Uacute;ltimos enlaces</span></div>
 {% if enlaces %}
 <ul>
-    <li>&Uacute;ltimos enlaces:</li>
-    <ul>
     {% for enlace in enlaces %}
         <li>
-        {{ enlace.fecha|date:"d/m/Y H:i" }} -
-        {{ enlace.descripcion|safe }} - <a href="/story/{{ enlace.key }}">{{ enlace.url|slice:"7:37" }}</a>
-        [{{ enlace.comentarios }} comentarios]
+        <a href="/story/{{ enlace.key }}">{{ enlace.creado|timesince|traducir }}</a> -
+        {{ enlace.descripcion|safe }} - {{ enlace.url|slice:"7:37" }}
         </li>
     {% endfor %}
-    </ul>
 </ul>
 {% else %}
 <ul><li>Sin enlaces.</li></ul>
 {% endif %}
 
+<br/>
+
+<div class="titulo"><span>&Uacute;ltimos comentarios</span></div>
 {% if comentarios %}
 <ul>
-    <li>&Uacute;ltimos comentarios:</li>
-    <ul>
     {% for coment in comentarios %}
         <li>
-        <a href="/story/{{ coment.id_enlace }}#{{ coment.key }}">{{ coment.fecha|date:"d/m/Y H:i" }}</a> -
+        <a href="/story/{{ coment.id_enlace }}#{{ coment.key }}">{{ coment.fecha|timesince|traducir }}</a> -
         {{ coment.contenido|safe }}
         </li>
     {% endfor %}
-    </ul>
 </ul>
 {% else %}
 <ul><li>Sin comentarios.</li></ul>

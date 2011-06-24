@@ -1,6 +1,19 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
+<div id="cse" style="width: 100%;">Cargando...</div>
+<script src="http://www.google.com/jsapi" type="text/javascript"></script>
+<script type="text/javascript">
+  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+  google.setOnLoadCallback(function() {
+    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+    var options = new google.search.DrawOptions();
+    options.setAutoComplete(true);
+    customSearchControl.draw('cse', options);
+  }, true);
+</script>
+
 <table width='100%'>
 {% for mix in mixto %}
     <tr>
@@ -9,8 +22,8 @@
     <div class="respuesta">
     {% ifequal mix.tipo 'pregunta' %}
         <div class='titulo'>
-            <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
             <span>{{ mix.estado|estado_pregunta }}</span>
+            <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
         </div>
         {{ mix.descripcion|safe|truncatewords:35 }}
     {% else %}

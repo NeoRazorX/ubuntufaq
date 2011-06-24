@@ -50,25 +50,27 @@ def tags(cadena=None):
         for t in ts:
             if retorno != '':
                 retorno += ', '
-            retorno += '<a href="/tag/' + t + '">' + t + '</a>'
+            retorno += '<a class="tag" href="/tag/' + t + '">' + t + '</a>'
     return mark_safe(retorno)
 
 @register.filter
 def alltags(tags):
     retorno = ''
     if tags:
-        tmax = 0
-        tmin = 100
+        tmedia = 0
         for t in tags:
-            tmax = max(tmax, t[1])
-            tmin = min(tmin, t[1])
+            tmedia += t[1]
+        try:
+            tmedia = tmedia / len(tags)
+        except:
+            tmedia = 10
         tags.sort(key=lambda a: a[0].lower())
         for t in tags:
             if retorno != '':
                 retorno += ' '
-            if t[1] == tmin:
+            if t[1] < tmedia:
                 retorno += '<a class="min" title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
-            elif t[1] == tmax:
+            elif t[1] > tmedia:
                 retorno += '<a class="max" title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
             else:
                 retorno += '<a title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
@@ -155,7 +157,7 @@ def muestra_os(ua=''):
             if ua.lower().find( aux ) != -1:
                 os = aux
         # detecting browser
-        for aux in ['safari', 'opera', 'chrome', 'firefox', 'explorer']:
+        for aux in ['safari', 'opera', 'chrome', 'firefox', 'msie']:
             if ua.lower().find( aux ) != -1:
                 browser = aux
         return mark_safe('<span title="' + ua + '">' + os + '+' + browser + '</span>')
@@ -170,33 +172,30 @@ def miniatura(url=''):
 
 @register.filter
 def sin_solucionar(preguntas, respuestas):
-    texto = '<ul>'
+    texto = ''
     estado = -1
-    primera = True
     for p in preguntas:
         if p.estado != estado:
-            # agrupamos por estado
-            if primera:
-                primera = False
-            else:
+            if estado >= 0:
                 texto += '</ul><br/>'
+            
+            # agrupamos por estado
             estado = p.estado
             
             # mostramos el estado
             if estado == 0:
-                texto += '<li><b>Preguntas nuevas</b>:</li>\n'
+                texto += '<div class="titulo"><span>Preguntas nuevas</span></div>\n'
             elif estado == 1:
-                texto += '<li><b>Preguntas incompletas</b>:</li>\n'
+                texto += '<div class="titulo"><span>Preguntas incompletas</span></div>\n'
             elif estado == 2:
-                texto += '<li><b>Preguntas abiertas</b>:</li>\n'
+                texto += '<div class="titulo"><span>Preguntas abiertas</span></div>\n'
             elif estado == 3:
-                texto += '<li><b>Preguntas parcialmente solucionadas</b>:</li>\n'
+                texto += '<div class="titulo"><span>Preguntas parcialmente solucionadas</span></div>\n'
             texto += '<ul>'
         
         # titulo de la pregunta
-        texto += '<li>' + p.creado.strftime("%d/%m/%Y") + ', '
-        texto += '<b>' + cortamail(p.autor) + '</b> pregunta: '
-        texto += '<a href="/question/' + str(p.key()) + '" title="' + p.contenido + '\n\n' + str(p.respuestas) + ' respuestas">' + p.titulo + '</a></li>\n'
+        texto += '<li class="pregunta">' + p.creado.strftime("%d/%m/%Y") + ', '
+        texto += '<a href="/question/' + str(p.key()) + '" title="' + p.contenido + '\n\nAutor: ' + cortamail(p.autor) + ' | ' + str(p.respuestas) + ' respuestas">' + p.titulo + '</a></li>\n'
         
         # respuestas
         texto += '<ul>'
@@ -204,12 +203,8 @@ def sin_solucionar(preguntas, respuestas):
             if r.id_pregunta == str(p.key()):
                 texto += '<li><a href="/question/' + str(p.key()) + '#' + str(r.key()) + '">' + r.fecha.strftime("%d/%m/%Y") + '</a> <b>' + cortamail(r.autor) + '</b> responde - ' + truncatewords(r.contenido, 20) + '</li>\n'
         texto += '</ul>'
-    
-    # cerramos etiquetas
-    if primera:
+    if estado >= 0:
         texto += '</ul>'
-    else:
-        texto += '</ul></ul>'
     return mark_safe(texto)
 
 

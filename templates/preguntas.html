@@ -21,8 +21,8 @@
     <td>
     <div class="respuesta">
         <div class='titulo'>
-            <a href="/question/{{ preg.key }}">{{ preg.titulo|safe }}</a>
             <span>{{ preg.estado|estado_pregunta }}</span>
+            <a href="/question/{{ preg.key }}">{{ preg.titulo|safe }}</a>
         </div>
         {{ preg.contenido|safe|truncatewords:35 }}
     </div>

@@ -35,45 +35,56 @@ class tags:
             self.alltags_memcache = True
         
         # elegimos aleatoriamente una tabla
-        tabla = random.randint(0, 1) == 0
+        for i in range(3):
+            if self.seleccionar_tarea( random.randint(0, 2) ):
+                break;
         
-        if tabla == 0:
-            seleccion = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(25)
-            logging.info('Actualizando tags de preguntas')
-        else:
-            seleccion = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(25)
-            logging.info('Actualizando tags de enlaces')
-        
-        for ele in seleccion:
-            if tabla == 0:
-                tags = self.tag2list( ele.tags )
-                link = '/question/' + str(ele.key())
-                title = ele.titulo
-                clics = ele.visitas
-            else:
-                tags = self.tag2list( self.extraer_tags( ele.descripcion ) )
-                link = '/story/' + str(ele.key())
-                title = ele.descripcion
-                clics = ele.clicks
-            self.procesar(tags, link, title, clics)
-        
-        # actualizamos los datos de memcache
-        self.actualizar()
-    
-    # devuelve un string con los tags (encontrados en texto) separados por comas
-    def extraer_tags(self, texto):
-        retorno = ''
-        for tag in KEYWORD_LIST:
-            if texto.lower().find(tag) != -1:
-                if retorno == '':
-                    retorno = tag
+    def seleccionar_tarea(self, tabla):
+        retorno = False
+        if tabla == 0 and len(self.alltags) > 1: # all-tags
+            logging.info('Actualizando all-tags')
+            for t in range(20):
+                num = random.randint(0, len(self.alltags)-1)
+                elementos = memcache.get('tag_' + self.alltags[num][0])
+                if elementos is None:
+                    self.alltags.remove( self.alltags[num] )
                 else:
-                    retorno += ', ' + tag
+                    self.alltags[num][1] = len( elementos )
+            memcache.replace('all-tags', self.alltags)
+            retorno = True
+        else:
+            if tabla == 1:
+                query = db.GqlQuery("SELECT * FROM Pregunta")
+                logging.info('Actualizando tags de preguntas')
+            else:
+                query = db.GqlQuery("SELECT * FROM Enlace")
+                logging.info('Actualizando tags de enlaces')
+            total = query.count()
+            seleccion = query.fetch(20, random.randint(0, max(0, total-1)))
+            if len(seleccion) > 0:
+                for ele in seleccion:
+                    if tabla == 1:
+                        tags = self.tag2list( ele.tags )
+                        link = '/question/' + str(ele.key())
+                        title = ele.titulo
+                        clics = ele.visitas
+                    else:
+                        tags = self.tag2list( ele.tags )
+                        link = '/story/' + str(ele.key())
+                        title = ele.descripcion
+                        clics = ele.clicks
+                    self.procesar(tags, link, title, clics)
+                # actualizamos los datos de memcache
+                self.actualizar()
+                retorno = True
         return retorno
     
     # a partir de un string de tags, devuelve una lista de cada uno de ellos
     def tag2list(self, tags):
-        return tags.split(', ')
+        try:
+            return tags.split(', ')
+        except:
+            return ['general']
     
     # rellena pendientes con cada elemento, en funcion del tag
     def procesar(self, tags, link, title, clics):
@@ -100,7 +111,7 @@ class tags:
     # reducimos el numero de elementos por tag, en funcion de los clics
     def reducir(self, elementos):
         reducido = []
-        for i in range(20):
+        for i in range(25):
             seleccionado = {'clics': -1}
             for e in elementos:
                 if e not in reducido and e.get('clics', 0) > seleccionado.get('clics', 0):
@@ -138,7 +149,7 @@ class tags:
                     t[1] = max(len(elementos), t[1])
                     encontrado = True
             if not encontrado:
-                self.alltags.append([tag, 0])
+                self.alltags.append([tag, 1])
         if not self.alltags_memcache:
             memcache.add('all-tags', self.alltags)
         else:

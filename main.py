@@ -320,7 +320,8 @@ class Ayuda(Pagina):
             'mi_perfil': self.mi_perfil,
             'formulario': self.formulario,
             'vista': 'ayuda',
-            'error_dominio': self.error_dominio
+            'error_dominio': self.error_dominio,
+            'karmalist': memcache.get('pending-users')
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/ayuda.html')
@@ -330,7 +331,7 @@ class Detalle_usuario(Pagina):
     def get(self, email=None):
         Pagina.get(self)
         continuar = False
-        numreg = 10
+        numreg = 20
         
         if email:
             try:

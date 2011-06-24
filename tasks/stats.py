@@ -28,6 +28,7 @@ class stats:
         stats = memcache.get( 'stats' )
         if stats is None:
             stats = {'iterador': 0,
+                    'iterador2': 0,
                     'preguntas': 0,
                     'respuestas': 0,
                     'rpp': 0,
@@ -54,6 +55,7 @@ class stats:
             query = db.GqlQuery("SELECT * FROM Pregunta")
             stats['preguntas'] = query.count()
             stats['iterador'] += 1
+            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a las preguntas")
             continuar = False
@@ -65,6 +67,7 @@ class stats:
             if stats['preguntas'] > 0 and stats['respuestas'] > 0:
                 stats['rpp'] = (stats['respuestas'] / stats['preguntas'])
             stats['iterador'] += 1
+            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a las respuestas")
             continuar = False
@@ -74,6 +77,7 @@ class stats:
             query = db.GqlQuery("SELECT * FROM Enlace")
             stats['enlaces'] = query.count()
             stats['iterador'] += 1
+            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los enlaces")
             continuar = False
@@ -85,6 +89,7 @@ class stats:
             if stats['enlaces'] > 0 and stats['comentarios'] > 0:
                 stats['cpe'] = (stats['comentarios'] / stats['enlaces'])
             stats['iterador'] += 1
+            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los comentarios")
             continuar = False
@@ -92,12 +97,16 @@ class stats:
         # actualizamos el numero de clics por pregunta
         if stats['iterador'] == 4 and continuar:
             query = db.GqlQuery("SELECT * FROM Pregunta")
-            stats['clics_p'] = 0
-            for p in query:
-                stats['clics_p'] += p.visitas
-            if stats['preguntas'] > 0 and stats['clics_p'] > 0:
-                stats['clics_pp'] = (stats['clics_p'] / stats['preguntas'])
-            stats['iterador'] += 1
+            if stats['iterador2'] == 0:
+                stats['clics_p'] = 0
+                for p in query.fetch(20, stats['iterador2']):
+                    stats['clics_p'] += p.visitas
+                if stats['preguntas'] > 0 and stats['clics_p'] > 0:
+                    stats['clics_pp'] = (stats['clics_p'] / stats['preguntas'])
+                stats['iterador2'] += 20
+            elif stats['iterador2'] >= stats['preguntas']:
+                stats['iterador'] += 1
+                stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los clics por pregunta")
             continuar = False
@@ -105,17 +114,21 @@ class stats:
         # actualizamos el numero de clics por enlace
         if stats['iterador'] == 5 and continuar:
             query = db.GqlQuery("SELECT * FROM Enlace")
-            stats['clics_e'] = 0
-            for e in query:
-                stats['clics_e'] += e.clicks
-            if stats['enlaces'] > 0 and stats['clics_e'] > 0:
-                stats['clics_pe'] = (stats['clics_e'] / stats['enlaces'])
-            stats['iterador'] += 1
+            if stats['iterador2'] == 0:
+                stats['clics_e'] = 0
+                for e in query.fetch(20, stats['iterador2']):
+                    stats['clics_e'] += e.clicks
+                if stats['enlaces'] > 0 and stats['clics_e'] > 0:
+                    stats['clics_pe'] = (stats['clics_e'] / stats['enlaces'])
+                stats['iterador2'] += 20
+            elif stats['iterador2'] >= stats['enlaces']:
+                stats['iterador'] += 1
+                stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los clics por enlace")
             continuar = False
         
-        # actualizamos el numero de clics por enlace
+        # actualizamos el top de usuarios
         if stats['iterador'] == 6 and continuar:
             populares = memcache.get( 'populares' )
             stats['tu_puntos'] = 0

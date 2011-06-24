@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DEBUG_FLAG = False
+DEBUG_FLAG = True
 APP_NAME = 'ubuntu-faq'
 APP_DESCRIPTION = 'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
 RECAPTCHA_PUBLIC_KEY = ''
@@ -71,6 +71,7 @@ class Pregunta(db.Model):
         cambio = False
         if self.respuestas != len( respuestas ):
             self.respuestas = len( respuestas )
+            memcache.delete( str(self.key()) )
             cambio = True
         if ip and self.ultima_ip != ip:
             self.ultima_ip = ip
@@ -79,7 +80,6 @@ class Pregunta(db.Model):
         if cambio:
             try:
                 self.put()
-                memcache.delete( str(self.key()) )
             except:
                 logging.warning("Fallo actualizando la pregunta: " + str(self.key()) )
         return respuestas
@@ -195,6 +195,7 @@ class Enlace(db.Model):
         cambio = False
         if self.comentarios != len( comentarios ):
             self.comentarios = len( comentarios )
+            memcache.delete( str(self.key()) )
             cambio = True
         if ip and self.ultima_ip != ip:
             self.ultima_ip = ip
@@ -206,7 +207,6 @@ class Enlace(db.Model):
         if cambio:
             try:
                 self.put()
-                memcache.delete( str(self.key()) )
             except:
                 logging.warning("Fallo actualizando el enlace: " + str(self.key()) )
         return comentarios

@@ -31,8 +31,8 @@
     <div class="respuesta">
     {% ifequal mix.tipo 'pregunta' %}
         <div class='titulo'>
-            <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
             <span>{{ mix.estado|estado_pregunta }}</span>
+            <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
         </div>
         {{ mix.descripcion|safe|truncatewords:35 }}
         {{ mix.key|ultimas_respuestas:urespuestas }}
