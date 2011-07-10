@@ -9,567 +9,15 @@
     <meta name="google-site-verification" content="iOvEYOOuoC2LJSxEWiDjlqENTzguoMg4LFLK_R4ZjTk" />
     <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss" />
     <style type="text/css">
-    body {
-        background-color: white;
-        font-size: 13px;
-        margin: 0px;
-        margin-left: 30px;
-        margin-right: 30px;
-    }
-    
-    a {
-        color: #DD4814;
-        font-weight: bold;
-        text-decoration: none;
-    }
-    
-    a:hover {
-        text-decoration: underline;
-    }
-    
-    a.comentario {
-        margin-right: 10px;
-    }
-    
-    a.tag {
-        background-color: #DD4814;
-        color: white;
-        padding-left: 2px;
-        padding-right: 2px;
-        border-top-left-radius: 2px 2px;
-        border-top-right-radius: 2px 2px;
-        border-bottom-left-radius: 2px 2px;
-        border-bottom-right-radius: 2px 2px;
-    }
-    
-    textarea {
-        width: 99%;
-        border: 1px solid #191919;
-    }
-    
-    input {
-        border: 1px solid #191919;
-    }
-    
-    input.boton {
-        background-color: #191919;
-        color: white;
-        font-weight: bold;
-        border: 2px outset #696969;
-    }
-    
-    input#titulo {
-        width: 99%;
-    }
-    
-    img {
-        vertical-align: middle;
-        border-width: 0;
-    }
-    
-    img.galeria {
-        border: 3px double #191919;
-        max-width: 200px;
-        max-height: 200px;
-    }
-    
-    h3 {
-        text-align: center;
-    }
-    
-    hr {
-        border: 0px solid white;
-        border-bottom: 2px dashed #191919;
-    }
-    
-    div.cabecera {
-        background-color: #191919;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 30px;
-        letter-spacing: 0.5em;
-        text-align: center;
-        padding-left: 10px;
-        padding-bottom: 5px;
-        margin-left: auto;
-        margin-right: auto;
-        border-left: 1px solid #191919;
-        border-right: 1px solid #191919;
-    }
-    
-    div.cabecera span {
-        color: white;
-        letter-spacing: normal;
-        font-size: 13px;
-        vertical-align: middle;
-    }
-    
-    div.cabecera a:hover {
-        text-decoration: none;
-        color: white;
-    }
-    
-    div.menucabecera {
-        background-color: #191919;
-        color: silver;
-        font-size: 14px;
-        text-align: center;
-        padding-top: 5px;
-        padding-left: 5px;
-        padding-right: 5px;
-        padding-bottom: 1px;
-        border-bottom-left-radius: 5px 5px;
-        border-bottom-right-radius: 5px 5px;
-        -moz-border-radius-bottomleft: 5px 5px;
-        -moz-border-radius-bottomright: 5px 5px;
-        border-bottom: 1px solid #DD4814;
-    }
-    
-    div.menucabecera span {
-        margin: 3px;
-        padding-left: 3px;
-        padding-right: 3px;
-        padding-bottom: 1px;
-    }
-    
-    div.menucabecera span:hover {
-        background-color: #FE6935;
-        border-top-left-radius: 3px 3px;
-        border-top-right-radius: 3px 3px;
-    }
-    
-    div.menucabecera span#menusel {
-        background-color: #DD4814;
-        padding-top: 5px;
-        padding-left: 5px;
-        padding-right: 5px;
-        border-top-left-radius: 3px 3px;
-        border-top-right-radius: 3px 3px;
-        border-bottom: 1px solid #DD4814;
-    }
-    
-    div.menucabecera a {
-        color: white;
-    }
-    
-    div.menucabecera a:hover {
-        text-decoration: none;
-    }
-    
-    div.dominio {
-        background-color: #FFD5AD;
-        border-top: 1px solid #EEB27A;
-        border-bottom: 1px solid #EEB27A;
-        margin: 5px;
-        padding: 5px;
-        font-size: 15px;
-        text-align: center;
-    }
-    
-    div.preguntas {
-        background-color: white;
-        padding: 10px;
-        padding-bottom: 20px;
-        min-height: 764px;
-        font-size: 13px;
-    }
-    
-    td.avatar {
-        vertical-align: top;
-        width: 44px;
-        text-align: center;
-    }
-    
-    td.clics {
-        vertical-align: top;
-    }
-    
-    div.clics {
-        text-align: center;
-        color: white;
-        background-color: #FF6400;
-        border: 2px outset #FF6400;
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-    
-    div.pregunta {
-        border: 1px dotted white;
-        padding: 5px;
-    }
-    
-    div.pregunta:hover {
-        background-color: #EEEEEE;
-        border: 1px outset #E4E4E4;
-    }
-    
-    div.pregunta div.bottom {
-        margin-top: 5px;
-        font-size: 12px;
-        color: #DD4814;
-    }
-    
-    div.formulario {
-        margin: 10px;
-        padding: 5px;
-    }
-    
-    div.info_respuesta_d {
-        font-size: 15px;
-        margin-top: 5px;
-        margin-left: 10px;
-        margin-right: 10px;
-        margin-bottom: 2px;
-        padding: 0px;
-    }
-    
-    div.info_respuesta_up {
-        font-size: 11px;
-        margin-top: 5px;
-        margin-left: 10px;
-        margin-right: 10px;
-        margin-bottom: 2px;
-        padding: 0px;
-    }
-    
-    div.info_respuesta_down {
-        text-align: right;
-        font-size: 11px;
-        margin-top: 0px;
-        margin-left: 10px;
-        margin-right: 15px;
-        margin-bottom: 5px;
-        padding: 0px;
-    }
-    
-    div.respuesta {
-        background-color: #F7F7F7;
-        border: 1px outset #E4E4E4;
-        margin-top: 0px;
-        margin-left: 10px;
-        margin-right: 10px;
-        margin-bottom: 0px;
-        padding: 5px;
-    }
-    
-    div.respuesta_d {
-        background-color: #feffc0;
-        border: 1px solid #e1e16e;
-        margin-top: 0px;
-        margin-left: 10px;
-        margin-right: 10px;
-        margin-bottom: 0px;
-        padding: 5px;
-    }
-    
-    div.respuesta_d2 {
-        background-color: #F7F7F7;
-        border: 3px double silver;
-        margin-top: 0px;
-        margin-left: 10px;
-        margin-right: 10px;
-        margin-bottom: 0px;
-        padding: 5px;
-    }
-    
-    div.respuesta ul {
-        margin-top: 5px;
-        margin-bottom: 2px;
-    }
-    
-    div.comentario {
-        background-color: #EFEFEF;
-        border: 2px outset #DEDEDE;
-        margin-top: 0px;
-        margin-left: 10px;
-        margin-right: 10px;
-        margin-bottom: 0px;
-        padding: 5px;
-        font-size: 17px;
-    }
-    
-    div.mensaje {
-        background-color: #feffc0;
-        border-top: 1px solid #e1e16e;
-        border-bottom: 1px solid #e1e16e;
-        margin-top: 5px;
-        margin-bottom: 5px;
-        padding: 5px;
-        font-size: 15px;
-    }
-    
-    div.titulo {
-        font-weight: bold;
-        font-size: 15px;
-        letter-spacing: 0.12em;
-    }
-    
-    div.titulo span {
-        background-color: #393939;
-        color: white;
-        font-size: 14px;
-        letter-spacing: normal;
-        margin-right: 10px;
-        padding-left: 5px;
-        padding-right: 5px;
-        border-top-left-radius: 2px 2px;
-        border-top-right-radius: 2px 2px;
-        border-bottom-left-radius: 2px 2px;
-        border-bottom-right-radius: 2px 2px;
-    }
-    
-    div.avatar {
-        text-align: center;
-        font-size: 15px;
-        padding: 2px;
-        padding-bottom: 0px;
-        margin: 0px;
-    }
-    
-    div.avatar img {
-        margin-bottom: 2px;
-    }
-    
-    div.avatar a {
-        color: #191919;
-    }
-    
-    li.pregunta {
-        font-size: 15px;
-        letter-spacing: 0.12em;
-    }
-    
-    div.paginacion {
-        margin-top: 10px;
-        margin-bottom: 10px;
-        font-size: 14px;
-    }
-    
-    div.paginacion span {
-        background-color: #F7F7F7;
-        border: 1px outset #E4E4E4;
-        margin-right: 5px;
-        padding-top: 2px;
-        padding-left: 5px;
-        padding-right: 5px;
-        padding-bottom: 2px;
-    }
-    
-    div.paginacion span#actual {
-        background-color: #DD4814;
-        border: 1px outset #DD4814;
-    }
-    
-    div.paginacion span#actual a {
-        color: white;
-    }
-    
-    ul.social {
-        list-style: none;
-        height: 20px;
-        margin-top: 5px;
-        padding-left: 5px;
-    }
-    
-    ul.social li {
-        float: left;
-        margin-right: 5px;
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-
-    div.pie {
-        margin-top: 10px;
-        font-size: 14px;
-        padding-top: 5px;
-        padding-bottom: 10px;
-        border-top: 1px dotted #191919;
-    }
-    
-    div.alltags {
-        margin-bottom: 30px;
-        font-size: 20px;
-        text-align: center;
-        word-spacing: 15px;
-    }
-    
-    div.alltags a.max {
-        font-size: 28px;
-    }
-    
-    div.alltags a.min {
-        font-size: 14px;
-    }
-    
-    div.pie table {
-        width: 100%;
-    }
-    
-    div.pie table td {
-        vertical-align: top;
-    }
+      {% include "base.css" %}
     </style>
     <script type="text/javascript">
-        <!--
-        function cambio_publicar()
-        {
-            if( document.publicar.tipo[0].checked )
-            {
-                document.publicar.titulo.value = "Título de la pregunta";
-                document.publicar.contenido.value = "Descripción de la pregunta.";
-            }
-            else
-            {
-                document.publicar.titulo.value = 'http://';
-                document.publicar.contenido.value = "Descripción del enlace (450 caracteres max.).";
-            }
-        }
-        
-        function enviar_publicar()
-        {
-            var titulo = document.publicar.titulo.value;
-            var contenido = document.publicar.contenido.value;
-            var mensaje;
-            var continuar = true;
-            
-            if(titulo == '' || titulo == 'http://' || titulo == "Título de la pregunta")
-            {
-                continuar = false;
-                if( document.publicar.tipo[0].checked )
-                {
-                    mensaje = "¡Debes modificar el título!";
-                }
-                else
-                {
-                    mensaje = "¡Debes modificar la URL del enlace!";
-                }
-                document.publicar.titulo.focus();
-                document.publicar.titulo.select();
-            }
-            
-            if(contenido == '' || contenido == "Descripción de la pregunta." || contenido == "Descripción del enlace (450 caracteres max.).")
-            {
-                continuar = false;
-                mensaje = "¡Debes modificar la descripción!";
-                document.publicar.contenido.focus();
-                document.publicar.contenido.select();
-            }
-            
-            if(document.publicar.tipo[1].checked && contenido.length > 450)
-            {
-                continuar = false;
-                mensaje = "¡La descripción del enlace es demasiado larga! Max. 450 caracteres, actual=" + contenido.length;
-                document.publicar.contenido.focus();
-                document.publicar.contenido.select();
-            }
-            
-            if( !document.publicar.tipo[0].checked && !document.publicar.tipo[1].checked )
-            {
-                continuar = false;
-                mensaje = "¡Debes elegir un tipo de publicación! Pregunta o enlace.";
-                document.publicar.tipo[0].focus();
-            }
-            
-            if(continuar)
-            {
-                if( document.publicar.tipo[0].checked )
-                {
-                    document.publicar.action = '/add_p';
-                }
-                else
-                {
-                    document.publicar.url.value = titulo;
-                    document.publicar.descripcion.value = contenido;
-                    document.publicar.action = '/add_e';
-                }
-                document.publicar.submit();
-            }
-            else
-            {
-                alert( mensaje );
-            }
-        }
-        
-        function enviar_respuesta()
-        {
-            var respuesta = document.respuesta.contenido.value;
-            
-            if(respuesta != '' && respuesta != 'Utiliza un lenguaje claro y conciso.') {
-                document.respuesta.submit();
-            }
-            else
-            {
-                alert('Debes modificar la respuesta');
-                document.respuesta.contenido.focus();
-                document.respuesta.contenido.select();
-            }
-        }
-        
-        function enviar_comentario()
-        {
-            var contenido = document.comentario.contenido.value;
-            var mensaje;
-            var continuar = false;
-            
-            if(contenido != '' && contenido != 'Deja un comentario, es gratis!') { continuar = true; }
-            else
-            {
-                mensaje = '¡Debes escribir algo!';
-                document.comentario.contenido.focus();
-                document.comentario.contenido.select();
-            }
-            
-            if(continuar) { document.comentario.submit(); }
-            else { alert( mensaje ); }
-        }
-        
-        function hundir_enlace(id)
-        {
-            if( confirm('¿Realmente desea hundir el enlace?') )
-            {
-                window.location.href = '/hun_e?id=' + id;
-            }
-        }
-        
-        function borrar_pregunta(id)
-        {
-            if( confirm('¿Realmente desea eliminar la pregunta?') )
-            {
-                window.location.href = '/del_p?id=' + id;
-            }
-        }
-        
-        function borrar_respuesta(id, r)
-        {
-            if( confirm('¿Realmente desea eliminar la respuesta?') )
-            {
-                window.location.href = '/del_r?id=' + id + '&r=' + r;
-            }
-        }
-        
-        function borrar_enlace(id)
-        {
-            if( confirm('¿Realmente desea eliminar el enlace?') )
-            {
-                window.location.href = '/del_e?id=' + id;
-            }
-        }
-        
-        function borrar_comentario(id, c)
-        {
-            if( confirm('¿Realmente desea eliminar el comentario?') )
-            {
-                window.location.href = '/del_c?id=' + id + '&c=' + c;
-            }
-        }
-        //-->
-    </script>
-    <script type="text/javascript">
+      {% include "base.js" %}
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-417932-5']);
       _gaq.push(['_setDomainName', 'none']);
       _gaq.push(['_setAllowLinker', true]);
       _gaq.push(['_trackPageview']);
-    
       (function() {
         var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
         ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
@@ -578,30 +26,68 @@
     </script>
 </head>
 <body>
-<div class="cabecera">
-    <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
-</div>
-<div class="menucabecera">
-    <span {{ vista|menu_cabecera:"portada" }}><a href="/">inicio</a></span>
-    <span {{ vista|menu_cabecera:"preguntas" }}><a href="/preguntas">preguntas</a></span>
-    <span {{ vista|menu_cabecera:"actualidad" }}><a href="/actualidad">actualidad</a></span>
-    <span {{ vista|menu_cabecera:"populares" }}><a href="/populares">populares</a></span>
-    <span {{ vista|menu_cabecera:"sin-solucionar" }}><a href="/sin-solucionar">sin solucionar</a></span>
-    <span {{ vista|menu_cabecera:"imagenes" }}><a href="/images">im&aacute;genes</a></span>
-    <span {{ vista|menu_cabecera:"ayuda" }}><a href="/ayuda">ayuda</a></span>
-    <span>|</span>
-    <span><a href="/#nueva-pregunta">a&ntilde;adir</a></span>
 
+<div class="cabecera">
+<div class="menucabecera">
+    <a id="titulo" title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
+    <span id="menupregunta" class="menusel"><a href="#" onclick="menu_cabecera('pregunta')">pregunta</a></span>
+    <span id="menuenlace"><a href="#" onclick="menu_cabecera('enlace')">enlace</a></span>
+    <span id="menubuscar"><a href="#" onclick="menu_cabecera('buscar')">buscar</a></span>
+    <span id="menumapa"><a href="#" onclick="menu_cabecera('mapa')">más...</a></span> |
 {% if formulario %}
-    {% ifequal vista 'mi-perfil' %}
-    <span id="menusel"><a href="{{ mi_perfil|urlencode }}">mi perfil</a></span>
+    {% if notis %}
+        <span><a class="notificacion" href="{{ mi_perfil|urlencode }}">{{ notis|length }}</a> <a href="{{ mi_perfil|urlencode }}">{{ usuario }}</a></span>
     {% else %}
-    <span><a href="{{ mi_perfil|urlencode }}">mi perfil</a></span>
-    {% endifequal %}
+        <span><a href="{{ mi_perfil|urlencode }}">{{ usuario }}</a></span>
+    {% endif %}
 {% endif %}
-    
     <span><a href="{{ url }}">{{ url_linktext }}</a></span>
 </div>
+<div class="formcabecera">
+    <div id="pregunta">
+        <form name="pregunta" action="/nueva" method="post">
+            <input type="hidden" name="tipo" value="pregunta"/>
+            <input type="text" name="contenido" size="70" maxlength="500" value="¡Haz tu pregunta!" onclick="this.select()"/>
+            <input type="submit" class="boton" value="continuar"/> <a href="/ayuda">Ayuda</a>
+        </form>
+    </div>
+    <div id="enlace">
+        <form name="enlace" action="/nueva" method="post">
+            <input type="hidden" name="tipo" value="enlace"/>
+            <input type="text" name="url" size="60" maxlength="150" value="http://" onclick="this.select()"/>
+            <input type="submit" class="boton" value="continuar"/> <a href="/ayuda">Ayuda</a>
+        </form>
+    </div>
+    <div id="buscar">
+        <div id="cse" style="width: 100%;">Loading</div>
+        <script src="http://www.google.com/jsapi" type="text/javascript"></script>
+        <script type="text/javascript"> 
+          google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
+          google.setOnLoadCallback(function() {
+            var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
+            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
+            var options = new google.search.DrawOptions();
+            options.setAutoComplete(true);    
+            customSearchControl.draw('cse', options);
+          }, true);
+        </script>
+    </div>
+    <div id="mapa">
+        Preguntas: &nbsp;
+        <a href="/preguntas">Todas</a>
+        <a href="/populares">Populares</a>
+        <a href="/sin-solucionar">Sin solucionar</a>
+        | &nbsp;
+        <a href="/actualidad">Actualidad</a>
+        <a href="/images">Imágenes</a>
+        <a href="/tag/">Tags</a>
+        | &nbsp;
+        <a href="/ayuda">Ayuda</a>
+    </div>
+</div>
+</div>
+
+<div id="espacio" class="espacio"></div>
 
 {% if error_dominio %}
 <div class="dominio">Por favor, usa el dominio <a href="http://www.ubufaq.com">ubufaq.com</a> para acceder a esta web.</div>

@@ -17,11 +17,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import cgi, os, logging, random, urllib
-from google.appengine.ext import db, webapp
+import os, logging, cgi, urllib
+
+# cargamos django 1.2
+os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
+from google.appengine.dist import use_library
+use_library('django', '1.2')
 from google.appengine.ext.webapp import template
-from google.appengine.api import users
-from recaptcha.client import captcha
+
+from google.appengine.ext import db, webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api import users, memcache
 from base import *
 
 class Detalle_tag(Pagina):
@@ -39,8 +45,18 @@ class Detalle_tag(Pagina):
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
+                'formulario' : self.formulario,
                 'usuario': users.get_current_user(),
+                'notis': self.get_notificaciones(),
                 'error_dominio': self.error_dominio
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/tags.html')
         self.response.out.write(template.render(path, template_values))
+
+def main():
+    application = webapp.WSGIApplication( [(r'/tag/(.*)', Detalle_tag)], debug=DEBUG_FLAG )
+    template.register_template_library('filters.filtros_django')
+    run_wsgi_app(application)
+
+if __name__ == "__main__":
+    main()

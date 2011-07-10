@@ -24,6 +24,68 @@ from google.appengine.api import users
 from recaptcha.client import captcha
 from base import *
 
+# clase para listar las preguntas
+class Todas_preguntas(Pagina):
+    def get(self, p=0):
+        Pagina.get(self)
+        
+        # paginamos
+        p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC")
+        preguntas, paginas, p_actual = self.paginar(p_query, 20, p)
+        datos_paginacion = [paginas, p_actual, '/preguntas/']
+        
+        template_values = {
+            'titulo': 'Todas la preguntas de Ubuntu FAQ',
+            'descripcion': 'Todas la preguntas de Ubuntu FAQ. ' + APP_DESCRIPTION,
+            'tags': self.get_tags_from_list( preguntas ),
+            'preguntas': preguntas,
+            'datos_paginacion': datos_paginacion,
+            'url': self.url,
+            'url_linktext': self.url_linktext,
+            'mi_perfil': self.mi_perfil,
+            'usuario': users.get_current_user(),
+            'notis': self.get_notificaciones(),
+            'formulario' : self.formulario,
+            'error_dominio': self.error_dominio,
+            'stats': memcache.get( 'stats' )
+        }
+        path = os.path.join(os.path.dirname(__file__), 'templates/preguntas.html')
+        self.response.out.write( template.render(path, template_values) )
+
+class Sin_solucionar(Pagina):
+    def get_preguntas(self):
+        preguntas = memcache.get('sin-solucionar')
+        if preguntas is None:
+            preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE estado < 10 ORDER BY estado ASC").fetch(100)
+            if memcache.add('sin-solucionar', preguntas):
+                logging.info('Almacenando sin-solucionar en memcache')
+            else:
+                logging.error("Fallo al rellenar memcache con las preguntas de sin-solucionar")
+        else:
+            logging.info('Leyendo sin-solucionar de memcache')
+        return preguntas
+    
+    def get(self, p=0):
+        Pagina.get(self)
+        preguntas = self.get_preguntas()
+        
+        template_values = {
+            'titulo': 'Ubuntu FAQ - sin solucionar',
+            'descripcion': 'Listado de preguntas sin solucionar de Ubuntu FAQ. ' + APP_DESCRIPTION,
+            'tags': self.get_tags_from_list( preguntas ),
+            'preguntas': preguntas,
+            'respuestas': self.get_ultimas_respuestas(),
+            'url': self.url,
+            'url_linktext': self.url_linktext,
+            'mi_perfil': self.mi_perfil,
+            'formulario' : self.formulario,
+            'usuario': users.get_current_user(),
+            'notis': self.get_notificaciones(),
+            'error_dominio': self.error_dominio
+        }
+        path = os.path.join(os.path.dirname(__file__), 'templates/sin-solucionar.html')
+        self.response.out.write( template.render(path, template_values) )
+
 class Nueva_pregunta(Pagina):
     # crea la pregunta
     def post(self):
@@ -117,9 +179,9 @@ class Detalle_pregunta(Pagina):
                 'modificar': modificar,
                 'captcha': chtml,
                 'usuario': users.get_current_user(),
+                'notis': self.get_notificaciones(),
                 'error_dominio': self.error_dominio
-                }
-            
+            }
             path = os.path.join(os.path.dirname(__file__), 'templates/pregunta.html')
             self.response.out.write(template.render(path, template_values))
         else:
@@ -206,7 +268,7 @@ class Responder(webapp.RequestHandler):
             self.redirect('/error/403')
     
     def finalizar(self, respuesta):
-        if respuesta.contenido.strip().lower().find('utiliza un lenguaje claro y conciso') != -1:
+        if respuesta.contenido.strip() == '':
             self.redirect('/error/606')
         else:
             try:

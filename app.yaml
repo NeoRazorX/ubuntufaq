@@ -1,9 +1,9 @@
 application: ubuntu-faq
-version: 43
+version: 44
 runtime: python
 api_version: 1
 
-default_expiration: "5d"
+default_expiration: "3d"
 
 handlers:
 - url: /img
@@ -69,6 +69,17 @@ handlers:
 
 - url: /steam4linux
   script: steam4linux.py
+
+- url: /tag/.*
+  script: tags.py
+
+- url: /u/.*
+  script: usuarios.py
+  login: required
+
+- url: /noti/.*
+  script: notificaciones.py
+  login: required
 
 - url: .*
   script: main.py

@@ -43,7 +43,7 @@ class tags:
         retorno = False
         if tabla == 0 and len(self.alltags) > 1: # all-tags
             logging.info('Actualizando all-tags')
-            for t in range(20):
+            for t in range(30):
                 num = random.randint(0, len(self.alltags)-1)
                 elementos = memcache.get('tag_' + self.alltags[num][0])
                 if elementos is None:

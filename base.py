@@ -25,7 +25,8 @@ RECAPTCHA_PRIVATE_KEY = ''
 WORDPRESS_PRIVATE_EMAIL = ''
 STEAM_ENLACE_KEY = ''
 RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
-    'http://neorazorx.blogspot.com/feeds/posts/default']
+    'http://neorazorx.blogspot.com/feeds/posts/default',
+    'http://ubuntulife.wordpress.com/feed/']
 KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', 'meego', 'fedora', 'gentoo',
     'suse', 'debian', 'unix', 'canonical', 'lucid', 'maverick', 'natty', 'ocelot', 'chrome os',
     'unity', 'gnome', 'kde', 'xfce', 'enlightment', 'x.org', 'wayland', 'compiz', 'alsa', 'gtk', 'gdk', 'qt',
@@ -73,6 +74,8 @@ class Pregunta(db.Model):
             self.respuestas = len( respuestas )
             memcache.delete( str(self.key()) )
             cambio = True
+            det = Detector_respuestas()
+            det.detectar(respuestas, self.get_link())
         if ip and self.ultima_ip != ip:
             self.ultima_ip = ip
             self.visitas += 1
@@ -124,8 +127,19 @@ class Pregunta(db.Model):
             elif self.estado == 0:
                 self.estado = 2
             # volvemos a marcar la pregunta para enviar un email hasta que se solucione o stop_emails == True
-            if self.autor and not self.stop_emails and self.estado < 10:
+            if self.autor and self.autor != respuesta.autor and not self.stop_emails and self.estado < 10:
                 self.enviar_email = True
+            # añadimos una notificación
+            if self.autor and self.autor != respuesta.autor:
+                n = Notificacion()
+                n.usuario = self.autor
+                n.link = self.get_link()
+                if respuesta.autor:
+                    n.mensaje = "El usuario " + respuesta.autor.nickname() + " ha contestado a tu pregunta."
+                else:
+                    n.mensaje = "Un anonimo ha contestado a tu pregunta."
+                n.put()
+                n.rm_cache()
         
         # guardamos los cambios
         self.put()
@@ -197,6 +211,17 @@ class Enlace(db.Model):
             self.comentarios = len( comentarios )
             memcache.delete( str(self.key()) )
             cambio = True
+            # añadimos las notificaciones pertinentes
+            if self.autor and self.comentarios == 1:
+                n = Notificacion()
+                n.usuario = self.autor
+                n.link = self.get_link()
+                n.mensaje = "Han comentado tu enlace."
+                n.put()
+                n.rm_cache()
+            else:
+                det = Detector_respuestas()
+                det.detectar(comentarios, self.get_link())
         if ip and self.ultima_ip != ip:
             self.ultima_ip = ip
             self.clicks += 1
@@ -263,6 +288,34 @@ class Comentario(db.Model):
             return Enlace.get( self.id_enlace )
         except:
             return None
+
+class Notificacion(db.Model):
+    fecha = db.DateTimeProperty(auto_now_add=True)
+    usuario = db.UserProperty()
+    link = db.StringProperty(default="/")
+    mensaje = db.StringProperty(default="Notificación vacía.")
+    
+    def rm_cache(self):
+        memcache.delete('notificaciones_' + str(self.usuario))
+
+class Detector_respuestas():
+    def detectar(self, conjunto=[], link='/'):
+        num = len(conjunto)
+        if num > 1:
+            i = num - 1
+            while i >= 0:
+                if conjunto[num-1].contenido.find('@' + str(i) + ' ') != -1:
+                    if conjunto[i-1].autor:
+                        n = Notificacion()
+                        n.usuario = conjunto[i-1].autor
+                        n.link = link + '#' + str(i)
+                        if conjunto[num-1].autor:
+                            n.mensaje = "El usuario " + conjunto[num-1].autor.nickname() + " te ha contestado."
+                        else:
+                            n.mensaje = "Un anonimo te ha contestado."
+                        n.put()
+                        n.rm_cache()
+                i -= 1
 
 # clase base
 class Pagina(webapp.RequestHandler):
@@ -364,7 +417,7 @@ class Pagina(webapp.RequestHandler):
         try:
             tags = str(cadena).split(', ')
             if len(tags) > 1:
-                intentos = 3
+                intentos = 4
                 while intentos > 0 and len(retorno) < 10:
                     aux = memcache.get('tag_' + random.choice( tags ))
                     if aux:
@@ -377,3 +430,16 @@ class Pagina(webapp.RequestHandler):
         except:
             pass
         return retorno
+    
+    def get_notificaciones(self):
+        if users.get_current_user():
+            usuario = users.get_current_user()
+            notis = memcache.get('notificaciones_' + str(usuario))
+            if notis is None:
+                notis = db.GqlQuery("SELECT * FROM Notificacion WHERE usuario = :1 ORDER BY fecha DESC", usuario).fetch(20)
+                memcache.add('notificaciones_' + str(usuario), notis)
+            else:
+                logging.info('Leyendo notificaciones_' + str(usuario) + ' de memcache')
+            return notis
+        else:
+            return []

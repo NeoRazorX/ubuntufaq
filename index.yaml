@@ -29,7 +29,7 @@ indexes:
 - kind: Enlace
   properties:
   - name: autor
-  - name: fecha
+  - name: creado
     direction: desc
 
 - kind: Enlace
@@ -43,10 +43,16 @@ indexes:
   - name: fecha
     direction: desc
 
+- kind: Notificacion
+  properties:
+  - name: usuario
+  - name: fecha
+    direction: desc
+
 - kind: Pregunta
   properties:
   - name: autor
-  - name: fecha
+  - name: creado
     direction: desc
 
 - kind: Pregunta

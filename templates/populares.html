@@ -1,63 +1,50 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
-<div id="cse" style="width: 100%;">Cargando...</div>
-<script src="http://www.google.com/jsapi" type="text/javascript"></script>
-<script type="text/javascript">
-  google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
-  google.setOnLoadCallback(function() {
-    var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
-    customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
-    var options = new google.search.DrawOptions();
-    options.setAutoComplete(true);
-    customSearchControl.draw('cse', options);
-  }, true);
-</script>
-
 <table width='100%'>
 {% for mix in mixto %}
     <tr>
     <td class="clics"><div class="clics"><b>{{ mix.clicks }}</b> clics</a></td>
     <td>
     <div class="respuesta">
-    {% ifequal mix.tipo 'pregunta' %}
+        {% ifequal mix.tipo 'imagen' %}
+            <a href="{{ mix.link }}"><img src="/img/photo.png" alt="imagen"/></a>
+        {% endifequal %}
+        {% ifequal mix.tipo 'youtube' %}
+            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
+        {% endifequal %}
+        {% ifequal mix.tipo 'vimeo' %}
+            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
+        {% endifequal %}
+        {% ifequal mix.tipo 'vhtml5' %}
+            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
+        {% endifequal %}
+        
+        {% ifequal mix.tipo 'pregunta' %}
         <div class='titulo'>
             <span>{{ mix.estado|estado_pregunta }}</span>
             <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
         </div>
         {{ mix.descripcion|safe|truncatewords:35 }}
-    {% else %}
+        {% else %}
         {{ mix.descripcion|safe|urlize }}
-        {% ifequal mix.tipo 'texto' %}
-            - <a href="/e/{{ mix.key }}" target="_Blank">fuente original</a>.
+            {% ifequal mix.tipo 'texto' %}
+                - <a href="/e/{{ mix.key }}" target="_Blank">fuente original</a>.
+            {% endifequal %}
         {% endifequal %}
-    {% endifequal %}
     </div>
     <div class="info_respuesta_down">
         {{ mix.creado|date:"d/m/Y H:i" }} |
         {{ mix.autor|autor }}
     </div>
     </td>
-    <td width="110" valign="top">
-    {% ifequal mix.tipo 'imagen' %}
-        <img src="/img/photo.png" alt="imagen"/>
-    {% endifequal %}
-    {% ifequal mix.tipo 'youtube' %}
-        <img src="/img/video.png" alt="v&iacute;deo"/>
-    {% endifequal %}
-    {% ifequal mix.tipo 'vimeo' %}
-        <img src="/img/video.png" alt="v&iacute;deo"/>
-    {% endifequal %}
-    {% ifequal mix.tipo 'vhtml5' %}
-        <img src="/img/video.png" alt="v&iacute;deo"/>
-    {% endifequal %}
-    
+    <td class="col_info_mix">
     {% if mix.comentarios %}
-        <a href="{{ mix.link }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
-        {{ mix.comentarios }}
+        <a class="comentarios" href="{{ mix.link }}" title="comentarios">{{ mix.comentarios }}</a>
     {% else %}
-        <a href="{{ mix.link }}"><img src="/img/comment.png" alt="comentarios" title="deja un comentario"/></a>
+        <a class="no-comentarios" href="{{ mix.link }}" title="comentarios">{{ mix.comentarios }}</a>
     {% endif %}
+    </td>
     </tr>
 {% empty %}
     <div class="mensaje">Sin resultados.</div>

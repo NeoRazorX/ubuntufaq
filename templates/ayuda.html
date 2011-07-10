@@ -16,17 +16,22 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <li><iframe src="http://www.facebook.com/plugins/like.php?href&amp;send=true&amp;layout=button_count&amp;width=150&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe></li>
 </ul>
 
-<div class="titulo">La web</div>
-<div>
+<div class="pregunta">
+    <div class="titulo">La web</div>
     Esta es una web de <b>respuestas r&aacute;pidas</b> para ofrecer soporte a la
-    comunidad al rededor de <a href="http://www.ubuntu.com">Ubuntu Linux</a>.
-    Aunque no tiene ninguna relaci&oacute;n con
-    <a href="http://www.canonical.com">Canonical</a>.
+    comunidad Linux, está enfocada en Ubuntu, pero son bienvenidas las preguntas
+    y noticias sobre cualquier otra distribución Linux.
+    <br/>
+    Esta web no tiene ninguna relaci&oacute;n con <a href="http://www.canonical.com">Canonical</a>.
     <ul>
-        <li>Si tienes cualquier duda o problema con Ubuntu, no dudes en <a href="/#nueva-pregunta">a&ntilde;adir tu pregunta</a>, la contestaremos lo antes posible.</li>
-        <li>Para estar al d&iacute;a de las noticias en torno a Ubuntu tienes las secci&oacute;n <a href="/actualidad">actualidad</a>.</li>
-        <li>Puedes compartir con nosotros cualquier contenido en la web que sea de inter&eacute;s: un v&iacute;deo, una foto, un art&iacute;culo, un blog, etc. Usa el <a href="/#nuevo-enlace">formulario</a>!</li>
-        <li>Si lo que deseas es ponerte en <b>contacto</b> con alg&uacute;n administrador de este sitio web, puedes hacerlo a trav&eacute;s de <a href="mailto:contacto@ubufaq.com">esta direcci&oacute;n de correo electr&oacute;nico</a>.</li>
+        <li>Si tienes cualquier duda o problema con Linux, no dudes en
+         <a href="#" onclick="menu_cabecera('pregunta');document.pregunta.contenido.focus()">a&ntilde;adir tu pregunta</a>,
+         la contestaremos lo antes posible.</li>
+        <li>Para estar al d&iacute;a de las noticias en torno a Linux tienes las secci&oacute;n <a href="/actualidad">actualidad</a>.</li>
+        <li>Puedes compartir con nosotros cualquier contenido en la web que sea de inter&eacute;s: un v&iacute;deo, una foto,
+        un art&iacute;culo, un blog, etc. Usa el <a href="#" onclick="menu_cabecera('enlace');document.enlace.url.focus()">formulario</a>!</li>
+        <li>Si lo que deseas es ponerte en <b>contacto</b> con alg&uacute;n administrador de este sitio web, puedes hacerlo a trav&eacute;s de
+        <a href="mailto:contacto@ubufaq.com">esta direcci&oacute;n de correo electr&oacute;nico</a>.</li>
     </ul>
     Adem&aacute;s esta web corre sobre <a href="http://appengine.google.com">Google App Engine</a>,
     as&iacute; que si tienes alg&uacute;n <a href="http://code.google.com/status/appengine">problema</a> ...
@@ -35,12 +40,13 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 alt="Con la tecnología de Google App Engine" />
 </div>
 
-<br/><br/>
+<br/>
 
-<div class="titulo">
-    <a name="rss">¿C&oacute;mo puedo estar al d&iacute;a de las &uacute;ltimas preguntas y noticias de Ubuntu FAQ sin necesidad de entrar en la web todos los d&iacute;as?</a>
-</div>
-<div>
+<div class="pregunta">
+    <div class="titulo">
+        <a name="rss">¿C&oacute;mo puedo estar al d&iacute;a de las &uacute;ltimas preguntas y noticias de Ubuntu FAQ
+        sin necesidad de entrar en la web todos los d&iacute;as?</a>
+    </div>
     Para eso existen los RSS, solo necesitas un lector como <a href="http://reader.google.com">Google Reader</a>. Esta web dispone de dos RSS:
     <ul>
         <li>El <a href="/rss">RSS principal</a> que recoge las &uacute;ltimas preguntas y noticias de la web.</li>
@@ -48,12 +54,32 @@ alt="Con la tecnología de Google App Engine" />
     </ul>
 </div>
 
-<br/><br/>
+<br/>
 
-<div class="titulo">
-    <a name="karma">¿Qu&eacute; es ese n&uacute;mero que aparece debajo de mi avatar o junto a mi nombre?</a>
+<div class="pregunta">
+    <div class="titulo">
+        <a name="avatar">¿C&oacute;mo cambio mi avatar?</a>
+    </div>
+    En esta web usamos el servicio web <a href="http://www.gravatar.com" target="_Blank">gravatar</a> para asociar un avatar a una cuenta de correo.<br/>
+    Si deseas cambiar tu avatar entra en <a href="http://www.gravatar.com" target="_Blank">http://www.gravatar.com</a>.
+    <ul>
+        <li>Si no tienes cuenta:</li>
+        <ul>
+            <li>Clic en <b>get your gravatar today</b>.</li>
+        </ul>
+        <li>Si ya tienes cuenta:</li>
+        <ul>
+            <li>Entra con tu nombre de usuario y contraseña.</li>
+        </ul>
+    </ul>
 </div>
-<div>
+
+<br/>
+
+<div class="pregunta">
+    <div class="titulo">
+        <a name="karma">¿Qu&eacute; es ese n&uacute;mero que aparece debajo de mi avatar o junto a mi nombre?</a>
+    </div>
     Se llama karma ¿Para qu&eacute; sirve? bueno, eso lo eliges t&uacute;:
     <ul>
         <li>Para motivar a la gente mediante un sistema de status basado en la colaboraci&oacute;n.</li>
@@ -65,11 +91,11 @@ alt="Con la tecnología de Google App Engine" />
 </div>
 
 {% if karmalist %}
-<br/><br/>
-<div class="titulo">
-    <a name="karmalist">Usuarios pendientes de actualizaci&oacute;n de karma:</a>
-</div>
-<div>
+<br/>
+<div class="pregunta">
+    <div class="titulo">
+        <a name="karmalist">Usuarios pendientes de actualizaci&oacute;n de karma:</a>
+    </div>
     <ul>
     {% for kuser in karmalist %}
         <li>{{ kuser|autor }}</li>
@@ -80,6 +106,6 @@ alt="Con la tecnología de Google App Engine" />
 
 <br/><br/>
 
-<div><a name="gatitos"></a><center><img src="/img/dios_mata_gatitos.png" alt="gatitos"/></center></div>
+<div><a name="gatitos"></a><center><a href="/sin-solucionar"><img src="/img/dios_mata_gatitos.png" alt="gatitos"/></a></center></div>
 </div>
 {% include "pie.html" %}

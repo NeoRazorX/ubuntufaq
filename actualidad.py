@@ -47,7 +47,9 @@ class Actualidad(Pagina):
             'enlaces': enlaces,
             'datos_paginacion': datos_paginacion,
             'usuario': users.get_current_user(),
-            'error_dominio': self.error_dominio
+            'notis': self.get_notificaciones(),
+            'error_dominio': self.error_dominio,
+            'stats': memcache.get( 'stats' )
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/actualidad.html')
@@ -148,6 +150,7 @@ class Detalle_enlace(Pagina):
                 'administrador': users.is_current_user_admin(),
                 'modificar': modificar,
                 'usuario': users.get_current_user(),
+                'notis': self.get_notificaciones(),
                 'error_dominio': self.error_dominio
                 }
             
@@ -239,7 +242,7 @@ class Comentar(webapp.RequestHandler):
             self.redirect('/error/403')
     
     def finalizar(self, comentario):
-        if comentario.contenido.strip().lower().find('deja un comentario, es gratis') != -1:
+        if comentario.contenido.strip() == '':
             self.redirect('/error/606')
         else:
             try:

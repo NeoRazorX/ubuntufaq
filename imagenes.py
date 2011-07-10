@@ -47,7 +47,9 @@ class Imagenes(Pagina):
             'imagenes': imagenes,
             'datos_paginacion': datos_paginacion,
             'usuario': users.get_current_user(),
-            'error_dominio': self.error_dominio
+            'notis': self.get_notificaciones(),
+            'error_dominio': self.error_dominio,
+            'stats': memcache.get( 'stats' )
             }
         
         path = os.path.join(os.path.dirname(__file__), 'templates/imagenes.html')

@@ -120,7 +120,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <div class="formulario">
     <form name="comentario" action="/add_c" method="post">
     <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
-    <textarea name="contenido" rows="6" cols="60">Deja un comentario, es gratis!</textarea>
+    <textarea name="contenido" rows="6" cols="60"></textarea>
     <br/>{{ captcha|safe }}
 {% if formulario %}
     <input type="checkbox" name="anonimo"/>An&oacute;nimo
@@ -129,8 +129,14 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     </form>
     </div>
 </td>
-<td width="250" valign="top">
-    <br/><div class="mensaje">Comparte con nosotros enlaces de inter&eacute;s: un art&iacute;culo, un v&iacute;deo, una foto, etc. Usa el <a href="/#nuevo-enlace">formulario</a>.</div>
+<td valign="top">
+    <ul>
+        <li>Respeta a los demás.</li>
+        <li>Repasa la ortografía.</li>
+        <li>Para contestar al comentario #1 escribre @1 en el tuyo.</li>
+        <li>Para contestar al comentario #2 escribre @2 en el tuyo.</li>
+        <li>...</li>
+    </ul>
 </td>
 </tr>
 {% if relacionadas %}

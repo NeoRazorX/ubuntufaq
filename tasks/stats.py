@@ -101,12 +101,16 @@ class stats:
                 stats['clics_p'] = 0
                 for p in query.fetch(20, stats['iterador2']):
                     stats['clics_p'] += p.visitas
-                if stats['preguntas'] > 0 and stats['clics_p'] > 0:
-                    stats['clics_pp'] = (stats['clics_p'] / stats['preguntas'])
                 stats['iterador2'] += 20
             elif stats['iterador2'] >= stats['preguntas']:
+                if stats['preguntas'] > 0 and stats['clics_p'] > 0:
+                    stats['clics_pp'] = (stats['clics_p'] / stats['preguntas'])
                 stats['iterador'] += 1
                 stats['iterador2'] = 0
+            else:
+                for p in query.fetch(20, stats['iterador2']):
+                    stats['clics_p'] += p.visitas
+                stats['iterador2'] += 20
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los clics por pregunta")
             continuar = False
@@ -118,12 +122,16 @@ class stats:
                 stats['clics_e'] = 0
                 for e in query.fetch(20, stats['iterador2']):
                     stats['clics_e'] += e.clicks
-                if stats['enlaces'] > 0 and stats['clics_e'] > 0:
-                    stats['clics_pe'] = (stats['clics_e'] / stats['enlaces'])
                 stats['iterador2'] += 20
             elif stats['iterador2'] >= stats['enlaces']:
+                if stats['enlaces'] > 0 and stats['clics_e'] > 0:
+                    stats['clics_pe'] = (stats['clics_e'] / stats['enlaces'])
                 stats['iterador'] += 1
                 stats['iterador2'] = 0
+            else:
+                for e in query.fetch(20, stats['iterador2']):
+                    stats['clics_e'] += e.clicks
+                stats['iterador2'] += 20
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los clics por enlace")
             continuar = False

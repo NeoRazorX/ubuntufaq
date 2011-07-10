@@ -74,7 +74,9 @@ def alltags(tags):
                 retorno += '<a class="max" title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
             else:
                 retorno += '<a title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
-    return mark_safe('<div class="alltags">'+retorno+'</div>')
+        return mark_safe('<div class="alltags">'+retorno+'</div>')
+    else:
+        return mark_safe('<div class="mensaje">Sin resultados.</div>')
 
 @register.filter
 def traducir(fecha):
@@ -87,13 +89,6 @@ def traducir(fecha):
     texto = texto.replace('month', 'mes')
     texto = texto.replace('year', 'año')
     return mark_safe(texto)
-
-@register.filter
-def menu_cabecera(vista, seleccion=''):
-    if vista == seleccion:
-        return mark_safe('id="menusel"')
-    else:
-        return ''
 
 @register.filter
 def avatar(email=None, size=80):
@@ -238,19 +233,21 @@ def respuestas_destacadas(respuestas):
 @register.filter
 def tipo_enlace(enlace):
     retorno = ''
-    if enlace.tipo_enlace == None:
+    if enlace.tipo_enlace is None:
         if enlace.url[:23] == 'http://www.youtube.com/':
-            tipo_enlace = 'youtube'
+            enlace.tipo_enlace = 'youtube'
         elif enlace.url[:21] == 'http://www.vimeo.com/':
-            tipo_enlace = 'vimeo'
+            enlace.tipo_enlace = 'vimeo'
         elif enlace.url[-4:] in ['.ogv', '.OGV', '.mp4', '.MP4'] or enlace.url[-5:] in ['.webm', '.WEBM']:
-            tipo_enlace = 'vhtml5'
+            enlace.tipo_enlace = 'vhtml5'
         elif enlace.url[-4:] in ['.png', '.PNG', '.jpg', '.JPG', '.gif', '.GIF'] or enlace.url[-5:] in ['.jpeg', '.JPEG']:
-            tipo_enlace = 'imagen'
+            enlace.tipo_enlace = 'imagen'
         elif enlace.url[-4:] in ['.deb', '.DEB']:
-            tipo_enlace = 'deb'
+            enlace.tipo_enlace = 'deb'
         elif enlace.url[-4:] in ['.deb', '.DEB', '.tgz', '.TGZ', '.bz2', '.BZ2'] or enlace.url[-3:] in ['.gz', '.GZ']:
-            tipo_enlace = 'package'
+            enlace.tipo_enlace = 'package'
+        else:
+            enlace.tipo_enlace = 'texto'
     if enlace.tipo_enlace == 'texto':
         if enlace.autor:
             retorno = '<div class="avatar">'+avatar(enlace.autor.email())+'<br/>'+puntos(enlace.puntos)+'</div>'
