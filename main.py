@@ -105,10 +105,8 @@ class Portada(Pagina):
         mixto = memcache.get( 'portada' )
         if mixto is None:
             mixto = self.mezclar()
-            if memcache.add('portada', mixto):
-                logging.info('Almacenando en memcache la portada')
-            else:
-                logging.error("Fallo almacenando en memcache la portada")
+            if not memcache.add('portada', mixto):
+                logging.warning("Fallo almacenando en memcache la portada")
         else:
             logging.info('Leyendo de memcache para la portada')
         return mixto
@@ -117,7 +115,6 @@ class Portada(Pagina):
         Pagina.get(self)
         mixto = self.get_portada()
         tags = self.get_tags_from_mixto( mixto )
-        
         template_values = {
             'titulo': 'Ubuntu FAQ',
             'descripcion': APP_DESCRIPTION,
@@ -201,10 +198,8 @@ class Populares(Pagina):
         mixto = memcache.get( 'populares' )
         if mixto is None:
             mixto = self.mezclar()
-            if memcache.add('populares', mixto):
-                logging.info('Almacenando en memcache populares')
-            else:
-                logging.error("Fallo almacenando en memcache populares")
+            if not memcache.add('populares', mixto):
+                logging.warning("Fallo almacenando en memcache populares")
         else:
             logging.info('Leyendo de memcache para populares')
         return mixto
@@ -213,9 +208,8 @@ class Populares(Pagina):
         Pagina.get(self)
         mixto = self.get_portada()
         tags = self.get_tags_from_mixto( mixto )
-        
         template_values = {
-            'titulo': 'Ubuntu FAQ - populares',
+            'titulo': 'Populares - Ubuntu FAQ',
             'descripcion': 'Listado de preguntas y noticias populares de Ubuntu FAQ. ' + APP_DESCRIPTION,
             'tags': tags,
             'mixto': mixto,
@@ -234,10 +228,9 @@ class Populares(Pagina):
 class Ayuda(Pagina):
     def get(self):
         Pagina.get(self)
-        
         template_values = {
             'titulo': 'Ayuda de Ubuntu FAQ',
-            'descripcion': 'Sección de ayuda de Ubuntu FAQ. ' + APP_DESCRIPTION,
+            'descripcion': u'Sección de ayuda de Ubuntu FAQ. ' + APP_DESCRIPTION,
             'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -253,9 +246,6 @@ class Ayuda(Pagina):
 
 class Nueva_publicacion(Pagina):
     def get(self):
-        self.redirect('/')
-    
-    def post(self):
         Pagina.get(self)
         
         # el captcha
@@ -269,7 +259,7 @@ class Nueva_publicacion(Pagina):
         
         template_values = {
             'titulo': 'Publicar...',
-            'descripcion': 'Formulario de publicacion de Ubuntu FAQ. ' + APP_DESCRIPTION,
+            'descripcion': u'Formulario de publicación de Ubuntu FAQ. ' + APP_DESCRIPTION,
             'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -281,7 +271,7 @@ class Nueva_publicacion(Pagina):
             'captcha': chtml,
             'tipo': self.request.get('tipo'),
             'contenido': self.request.get('contenido'),
-            'url': self.request.get('url')
+            'url2': self.request.get('url')
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/nueva.html')
         self.response.out.write(template.render(path, template_values))
@@ -293,18 +283,23 @@ class Perror(Pagina):
         derror = {
             '403': 'Permiso denegado',
             '403c': 'Permiso denegado - error en el captcha',
-            '404': 'Pagina no encontrada en Ubuntu FAQ',
+            '404': u'Página no encontrada en Ubuntu FAQ',
             '503': 'Error en Ubuntu FAQ',
             '606': 'Idiota detectado'
         }
         
         merror = {
             '403': '403 - Permiso denegado',
-            '403c': '<img src="/img/fuuu_face.png" alt="fuuu"/><br/><br/>403 - Permiso denegado: debes repetir el captcha.<br/>Evita los captchas haciendo login.',
-            '404': '404 - P&aacute;gina no encontrada en Ubuntu FAQ',
+            '403c': u'<img src="/img/fuuu_face.png" alt="fuuu"/><br/><br/>403 - Permiso denegado: debes repetir el captcha.<br/>Evita los captchas iniciando sesión.',
+            '404': u'404 - Página no encontrada en Ubuntu FAQ',
             '503': '<img src="/img/fuuu_face.png" alt="explosi&oacute;n"/><br/><br/>503 - Error en Ubuntu FAQ,<br/>consulta el estado en: http://code.google.com/status/appengine',
-            '606': '<img src="/img/troll_face.png" alt="troll"/><br/><br/>606 - ¿Por qué no pruebas a escribir algo diferente?'
+            '606': u'<img src="/img/troll_face.png" alt="troll"/><br/><br/>606 - ¿Por qué no pruebas a escribir algo diferente?'
         }
+        
+        if cerror == '503':
+            logging.error( '503' )
+        else:
+            logging.warning( cerror )
         
         template_values = {
             'titulo': str(cerror) + ' - Ubuntu FAQ',
@@ -340,9 +335,7 @@ def main():
                                         ('/add_p', Nueva_pregunta),
                                         ('/mod_p', Detalle_pregunta),
                                         ('/del_p', Borrar_pregunta),
-                                        ('/stop_emails/(.*)', Stop_emails),
                                         ('/add_r', Responder),
-                                        ('/dest_r', Destacar_respuesta),
                                         ('/mod_r', Modificar_respuesta),
                                         ('/del_r', Borrar_respuesta),
                                         (r'/e/(.*)', Acceder_enlace),

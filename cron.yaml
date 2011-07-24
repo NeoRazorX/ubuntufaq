@@ -18,6 +18,10 @@ cron:
 
 - description: gestion de emails
   url: /tasks/emails
+  schedule: every 10 minutes
+
+- description: gestion de seguimientos
+  url: /tasks/seguimientos
   schedule: every 30 minutes
 
 - description: RSS scanner

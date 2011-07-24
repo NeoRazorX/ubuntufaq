@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -37,7 +38,7 @@ class Actualidad(Pagina):
         
         template_values = {
             'titulo': 'Actualidad de Ubuntu FAQ',
-            'descripcion': 'Noticias, blogs, videos, imagenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general. Comparte con nosotros!',
+            'descripcion': u'Noticias, blogs, vídeos, imágenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general. Comparte con nosotros!',
             'tags': 'ubufaq, ubuntu faq, noticias ubuntu, actualidad ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -65,7 +66,7 @@ class Actualidad(Pagina):
                 self.redirect('/story/' + str( enlaces[0].key() ))
             else:
                 enl = Enlace()
-                enl.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
+                enl.descripcion = cgi.escape(self.request.get('descripcion')[:450].replace("\n", ' '), True)
                 enl.url = url
                 enl.os = self.request.environ['HTTP_USER_AGENT']
                 
@@ -137,7 +138,7 @@ class Detalle_enlace(Pagina):
             
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
-                'descripcion': 'Discusion sobre: ' + e.descripcion,
+                'descripcion': u'Discusión sobre: ' + e.descripcion,
                 'tags': e.tags,
                 'url': self.url,
                 'url_linktext': self.url_linktext,
@@ -165,15 +166,15 @@ class Detalle_enlace(Pagina):
             try:
                 e = Enlace.get( self.request.get('id') )
                 e.url = self.request.get('url')
-                e.descripcion = cgi.escape( self.request.get('descripcion').replace("\n", ' ') )
-                e.tags = cgi.escape( self.request.get('tags') )
+                e.descripcion = cgi.escape(self.request.get('descripcion').replace("\n", ' '), True)
+                e.tags = cgi.escape(self.request.get('tags'), True)
                 if self.request.get('tipo_enlace') in ['youtube', 'vimeo', 'vhtml5', 'imagen', 'deb', 'package', 'texto']:
                     e.tipo_enlace = self.request.get('tipo_enlace')
                 else:
                     e.tipo_enlace = None
                 e.put()
                 e.borrar_cache()
-                logging.warning('Se ha modificado el enlace con id: ' + self.request.get('id'))
+                logging.info('Se ha modificado el enlace con id: ' + self.request.get('id'))
                 self.redirect( e.get_link() )
             except:
                 self.redirect('/error/503')
@@ -216,7 +217,7 @@ class Borrar_enlace(webapp.RequestHandler):
 class Comentar(webapp.RequestHandler):
     def post(self):
         c = Comentario()
-        c.contenido = cgi.escape( self.request.get('contenido') )
+        c.contenido = cgi.escape(self.request.get('contenido'), True)
         c.id_enlace = self.request.get('id_enlace')
         c.os = self.request.environ['HTTP_USER_AGENT']
         
@@ -259,10 +260,9 @@ class Modificar_comentario(webapp.RequestHandler):
             try:
                 c = Comentario.get( self.request.get('id_comentario') )
                 e = c.get_enlace()
-                c.contenido = cgi.escape( self.request.get('contenido') )
+                c.contenido = cgi.escape(self.request.get('contenido'), True)
                 c.put()
                 e.borrar_cache()
-                logging.warning('Se ha modificado el comentario con id: ' + self.request.get('id_comentario'))
                 self.redirect( e.get_link() )
             except:
                 self.redirect('/error/503')

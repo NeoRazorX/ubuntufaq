@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -33,10 +34,8 @@ class rss:
         preguntas = memcache.get('sitemap_preguntas')
         if preguntas is None:
             preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(20)
-            if memcache.add('sitemap_preguntas', preguntas):
-                logging.info('Almacenando sitemap_preguntas en memcache')
-            else:
-                logging.error("Fallo al rellenar memcache con las preguntas del sitemap")
+            if not memcache.add('sitemap_preguntas', preguntas):
+                logging.warning("Fallo al rellenar memcache con las preguntas del sitemap")
         else:
             logging.info('Leyendo sitemap_preguntas de memcache')
         return preguntas
@@ -45,10 +44,8 @@ class rss:
         enlaces = memcache.get('sitemap_enlaces')
         if enlaces is None:
             enlaces = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC").fetch(20)
-            if memcache.add('sitemap_enlaces', enlaces):
-                logging.info('Almacenando sitemap_enlaces en memcache')
-            else:
-                logging.error("Fallo al rellenar memcache con los enlaces del sitemap")
+            if not memcache.add('sitemap_enlaces', enlaces):
+                logging.warning("Fallo al rellenar memcache con los enlaces del sitemap")
         else:
             logging.info('Leyendo sitemap_enlaces de memcache')
         return enlaces
@@ -58,9 +55,7 @@ class rss:
             'preguntas': self.get_preguntas(),
             'enlaces': self.get_enlaces()
         }
-        
         path = os.path.join(os.path.dirname(__file__), 'templates/rss.html')
-        
         print 'Content-Type: text/xml; charset=utf-8'
         print ''
         print template.render(path, template_values).encode('utf-8')

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -16,50 +17,64 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import logging
+import logging, random, urllib, base64
 from google.appengine.ext import db
 from google.appengine.api import users, mail
 from base import *
 
 class emails:
     def __init__(self):
-        preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE enviar_email = True").fetch(5)
-        for p in preguntas:
-            self.comprobar(p)
+        query = db.GqlQuery("SELECT * FROM Usuario")
+        usuarios = query.fetch(20, random.randint(0, max(0, query.count()-20)))
+        for u in usuarios:
+            if self.comprobar(u):
+                break;
     
-    def comprobar(self, p):
-        if p.autor:
-            respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1", str( p.key() )).fetch(10)
-            if len(respuestas) == 1:
-                if respuestas[0].autor != p.autor:
-                    self.enviar(p)
-            elif len(respuestas) > 1:
-                for r in respuestas:
-                    if r.autor != p.autor:
-                        self.enviar(p)
-                        break
-        else: # es una pregunta anonima
-            p.enviar_email = False
-            p.stop_emails = True
-            p.put()
+    def comprobar(self, u):
+        retorno = False
+        logging.info('Comprobando notificaciones para el usuario: ' + u.usuario.email())
+        notis = db.GqlQuery("SELECT * FROM Notificacion WHERE usuario = :1 ORDER BY fecha DESC", u.usuario).fetch(20)
+        if notis:
+            if u.emails:
+                enviar = False
+                for n in notis:
+                    if n.email:
+                        enviar = True
+                if enviar:
+                    retorno = self.enviar(u, notis)
+            else:
+                logging.info('No quiere recibir emails')
+                for n in notis:
+                    try:
+                        n.email = False
+                        n.put()
+                    except:
+                        logging.warning('Imposible modificar notificación: ' + str(n.key()))
+        else:
+            logging.info('No tiene notificaciones')
+        return retorno
     
-    def enviar(self, p):
-        subject = "Han contestado a tu pregunta en Ubuntu FAQ"
-        valores = {
-            't': p.titulo,
-            'l': "http://www.ubufaq.com/question/" + str(p.key()),
-            'l2': "http://www.ubufaq.com/stop_emails/" + str(p.key())
-            }
-        
-        body = """El motivo de este mensaje es informarte que han contestado a tu pregunta: "%(t)s".\nPuedes ver la respuesta en el siguiente enlace -> %(l)s\nSi no deseas recivir mas mensajes, haz clic en el siguiente enlace -> %(l2)s\n\nAtentamente,\nEl Cron de Ubuntu FAQ.""" % valores
-        
+    def enviar(self, u, notis):
+        subject = "Notificación de Ubuntu FAQ"
+        body = ''
+        for n in notis:
+            if n.email:
+                try:
+                    body += '- ' + n.mensaje + "\n"
+                    n.email = False
+                    n.put()
+                except:
+                    logging.warning('Imposible modificar notificación: ' + str(n.key()))
+        body += "\nAccede a tu perfil desde: http://www.ubufaq.com/u/" + urllib.quote( base64.b64encode( u.usuario.email() ) )
+        body += "\n\nAtentamente,\nEl cron de Ubuntu FAQ."
         try:
-            mail.send_mail("contacto@ubufaq.com", p.autor.email(), subject, body)
-            p.enviar_email = False
-            p.put()
-            logging.info('Enviado email para la pregunta: ' + str(p.key()))
+            mail.send_mail("contacto@ubufaq.com", u.usuario.email(), subject, body)
+            logging.info('Enviado email para el usuario: ' + u.usuario.email())
+            logging.info(body)
+            return True
         except:
-            logging.error('Error al enviar el email para la pregunta: ' + str(p.key()))
+            logging.warning('Error al enviar el email para el usuario: ' + u.usuario.email())
+            return False
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -16,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
+import os, logging, cgi, urllib, base64
 
 # cargamos django 1.2
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
@@ -24,16 +25,30 @@ from google.appengine.dist import use_library
 use_library('django', '1.2')
 from google.appengine.ext.webapp import template
 
-from google.appengine.ext import db
+from google.appengine.ext import db, webapp
+from google.appengine.ext.webapp.util import run_wsgi_app
+from google.appengine.api import users
 from base import *
 
-template_values = {
-    'enlaces': db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC LIMIT 25")
-}
+class Stop_emails(webapp.RequestHandler):
+    def get(self):
+        try:
+            query = db.GqlQuery("SELECT * FROM Usuario WHERE usuario = :1", users.get_current_user()).fetch(1)
+            if query:
+                u = query[0]
+            else:
+                u = Usuario()
+                u.usuario = users.get_current_user()
+            u.emails = not u.emails
+            u.put()
+            self.redirect('/u/' + urllib.quote( base64.b64encode( users.get_current_user().email() ) ) )
+        except:
+            self.redirect('/error/503')
 
-path = os.path.join(os.path.dirname(__file__), 'templates/pingbacks.html')
+def main():
+    application = webapp.WSGIApplication( [('/stop_emails', Stop_emails)], debug=DEBUG_FLAG )
+    template.register_template_library('filters.filtros_django')
+    run_wsgi_app(application)
 
-print 'Content-Type: text/xml'
-print ''
-print template.render(path, template_values)
-
+if __name__ == "__main__":
+    main()

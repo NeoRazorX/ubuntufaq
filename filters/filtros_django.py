@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import hashlib, random, urllib
+import hashlib, random, urllib, base64
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import truncatewords, linebreaksbr, urlize
 from google.appengine.ext import webapp
@@ -36,7 +36,7 @@ def cortamail(email=None):
 def autor(a=None):
     if a:
         try:
-            return mark_safe('<a href="/u/'+urllib.quote(a.email())+'">'+cortamail(a.nickname())+'</a>')
+            return mark_safe('<a href="/u/'+urllib.quote(base64.b64encode(a.email()))+'">'+cortamail(a.nickname())+'</a>')
         except:
             return a
     else:
@@ -103,19 +103,27 @@ def avatar(email=None, size=80):
 
 @register.filter
 def karmsg(puntos=0):
-    texto = 'este usuario ya dispone de su propio ejército: &iexcl;' + str(puntos) + ' <a href="/ayuda#gatitos">gatitos</a>!'
-    if puntos < 5:
-        texto = 'usuario poco participativo...'
-    elif puntos < 25:
-        texto = '&iexcl;Ha salvado a ' + str(puntos) + ' <a href="/ayuda#gatitos">gatitos</a>!'
+    texto = 'usuario poco participativo ... ¿Un zombi quizás?'
+    if puntos >= 19:
+        texto = 'fuente ilimitada de karma, máquina insaciable de conocimientos ... ojalá todos os parecieseis a él ¿Qué? ¿Lo he dicho en voz alta?'
+    elif puntos >= 15:
+        texto = 'cerebro incansable, a ' + str(20 - puntos) + ' puntos de la perfección.'
+    elif puntos >= 10:
+        texto = 'mente despierta ... ¡Despierta! ¡Tienes que enviar más enlaces! Esta web no se mantiene sola ¿O si?'
+    elif puntos >= 6:
+        texto = 'lee, escribe, piensa ... ¿Cuándo piensa enviar algún enlace interesante?'
+    elif puntos >= 2:
+        texto = 'necesita mejorar.'
+    elif puntos > 0:
+        texto = 'este usuario sabe leer y escribir ... pero no le pidas mucho más.'
     return mark_safe(texto)
 
 @register.filter
 def puntos(puntos=0):
-    if puntos > 1:
-        return mark_safe('<a href="/ayuda#karma">' + str(puntos) + '</a>')
-    else:
+    if puntos <= 0:
         return ''
+    else:
+        return mark_safe('<a href="/ayuda#karma">' + str(puntos) + '</a>')
 
 @register.filter
 def estado_pregunta(estado=0):
@@ -219,12 +227,18 @@ def ultimas_respuestas(pregunta, respuestas):
 def respuestas_destacadas(respuestas):
     if respuestas:
         retorno = ''
+        i = 1
+        media = 0
         for r in respuestas:
-            if r.destacada:
+            media += r.valoracion
+        media = float(media)/len(respuestas)
+        for r in respuestas:
+            if r.valoracion > media:
                 if retorno == '':
-                    retorno = '<tr><td colspan="2" valign="top"><div class="info_respuesta_d"><b>Respuestas destacadas:</b></div>'
-                retorno += '<div class="respuesta_d">' + urlize(linebreaksbr(r.contenido)) + '</div>'
-        retorno += '</td></tr><tr><td colspan="2">&nbsp;</td></tr>'
+                    retorno = '<tr><td colspan="3" valign="top"><div class="respuesta_d">Respuestas destacadas: '
+                retorno += '<a href="#' + str(i) + '">#' + str(i) + '</a> '
+            i += 1
+        retorno += '</div></td></tr><tr><td colspan="3">&nbsp;</td></tr>'
         return mark_safe(retorno)
     else:
         return ''
@@ -274,12 +288,12 @@ def paginar(datos):
     
     # primera
     if datos[1] > 0:
-        texto += '<span><a href="' + datos[2] + '0">&lt;&lt; primera</a></span>\n'
+        texto += '<a href="' + datos[2] + '0">&lt;&lt; primera</a>\n'
     
     # anteriores
     for pag in range(datos[1] - 5, datos[1]):
         if pag >= 0:
-            texto += '<span><a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a></span>\n'
+            texto += '<a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a>\n'
     
     # actual
     texto += '<span id="actual"><a href="' + datos[2] + str(datos[1]) + '">' + str(datos[1]) + '</a></span>\n'
@@ -287,11 +301,11 @@ def paginar(datos):
     # siguientes
     for pag in range(datos[1] + 1, datos[1] + 6):
         if pag < datos[0]:
-            texto += '<span><a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a></span>\n'
+            texto += '<a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a>\n'
     
     # ultima
     if datos[1] < (datos[0] - 1):
-        texto += '<span><a href="' + datos[2] + str(datos[0] - 1) + '">última &gt;&gt;</a></span>\n'
+        texto += '<a href="' + datos[2] + str(datos[0] - 1) + '">última &gt;&gt;</a>\n'
     
     texto += '</div>'
     

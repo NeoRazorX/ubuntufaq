@@ -2,30 +2,69 @@
 <div class="preguntas">
 <table width="100%">
 <tr>
-<td valign="top" width="120">
+<td valign="top" width="165">
     <div class="avatar">
-        <a href="/ayuda#avatar">cambiar</a>
-        <br/>
+        {% if usuario == tusuario %}
+            <a href="/ayuda#avatar">cambiar</a><br/>
+        {% endif %}
         {{ tusuario.email|avatar }}
         <br/>
-        {{ karma|puntos }}
+        {{ karma.puntos|puntos }}
+        {% if karma.iterador < 7 %}
+            calculando...
+        {% endif %}
     </div>
+    <br/><br/>
+    Desde: {{ karma.fecha|date:"d/m/Y H:i" }}
+    {% if usuario == tusuario %}
+        {% if karma.emails %}
+            <a href="/stop_emails">No recibir más emails</a>
+        {% else %}
+            <a href="/stop_emails">Recibir emails</a>
+        {% endif %}
+    {% endif %}
+    <br/><br/>
+    Preguntas: {{ karma.preguntas }}
+    <br/>
+    Respuestas: {{ karma.respuestas }}
+    <br/>
+    Enlaces: {{ karma.enlaces }}
+    <br/>
+    Comentarios: {{ karma.comentarios }}
+    <br/>
+    <a href="{{ mi_perfil }}?rld=True">Actualizar!</a>
 </td>
 <td valign="top">
-    <div class="comentario">Perfil de {{ tusuario.email|cortamail }} - {{ karma|karmsg }}</div>
+    <div class="comentario">
+        Perfil de {{ tusuario.email|cortamail }} - {{ karma.puntos|karmsg }}
+    </div>
     
     <br/>
     
-    {% if notificaciones %}
-    <div class="titulo"><a class="notificacion" href="#">Notificaciones</a></div>
-    <ul>
-    {% for noti in notificaciones %}
-        <li>
-        <a href="/noti/{{ noti.key }}">{{ noti.fecha|timesince|traducir }}</a> -
-        {{ noti.mensaje|safe }}
-        </li>
-    {% endfor %}
-    </ul>
+    {% if usuario == tusuario %}
+        {% if notis %}
+        <div class="titulo"><a class="notificacion" href="#">Notificaciones</a></div>
+        <ul>
+        {% for noti in notis %}
+            <li>
+            <a href="/noti/{{ noti.key }}">{{ noti.fecha|timesince|traducir }}</a> -
+            {{ noti.mensaje|safe }}
+            </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% else %}
+        <div class="titulo"><span>Dejar un mensaje privado</span></div>
+        {% if privado %}
+            <div class="mensaje">Mensaje privado guardado correctamente.</div>
+        {% endif %}
+        <div class="formulario">
+            <form name="privado" action="/noti/" method="POST">
+            <input type="hidden" name="destinatario" value="{{ tusuario.email }}"/>
+            <textarea name="texto"></textarea>
+            <input type="button" class="boton" name="enviar" value="guardar" onclick="enviar_privado()"/>
+            </form>
+        </div>
     {% endif %}
     
     <br/>

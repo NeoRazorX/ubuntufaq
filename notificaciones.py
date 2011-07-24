@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, logging, cgi, urllib
+import os, logging, cgi, urllib, base64
 
 # cargamos django 1.2
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
@@ -27,35 +27,36 @@ from google.appengine.ext.webapp import template
 
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.api import users, memcache
+from google.appengine.api import users
 from base import *
 
-class Detalle_tag(Pagina):
-    def get(self, tag=None):
-        Pagina.get(self)
-        Tags() # procesamos tags
-        tag = urllib.unquote( tag )
-        
-        template_values = {
-                'titulo': 'Ubuntu FAQ: ' + tag,
-                'descripcion': 'Páginas relacionadas con ' + tag,
-                'tag': tag,
-                'tags': 'problema, duda, ayuda, ' + tag,
-                'relacionadas': self.paginas_relacionadas( tag ),
-                'alltags': memcache.get('all-tags'),
-                'url': self.url,
-                'url_linktext': self.url_linktext,
-                'mi_perfil': self.mi_perfil,
-                'formulario' : self.formulario,
-                'usuario': users.get_current_user(),
-                'notis': self.get_notificaciones(),
-                'error_dominio': self.error_dominio
-        }
-        path = os.path.join(os.path.dirname(__file__), 'templates/tags.html')
-        self.response.out.write(template.render(path, template_values))
+class Redir_notificacion(webapp.RequestHandler):
+    def get(self, keyn=None):
+        try:
+            n = Notificacion.get( keyn )
+            n.rm_cache()
+            n.delete()
+            self.redirect( n.link )
+        except:
+            self.redirect('/error/503')
+    
+    def post(self, keyn=None):
+        if self.request.get('destinatario') and self.request.get('texto'):
+            try:
+                n = Notificacion()
+                n.usuario = users.User( self.request.get('destinatario') )
+                n.link = '/u/' + urllib.quote( base64.b64encode( users.get_current_user().email() ) )
+                n.mensaje = users.get_current_user().nickname() + ' te dice: ' + cgi.escape( self.request.get('texto')[:450].replace("\n", ' ') )
+                n.put()
+                n.rm_cache()
+                self.redirect('/u/' + urllib.quote( base64.b64encode( self.request.get('destinatario') ) ) + '?priv=True')
+            except:
+                self.redirect('/error/503')
+        else:
+            self.redirect('/error/403')
 
 def main():
-    application = webapp.WSGIApplication( [(r'/tag/(.*)', Detalle_tag)], debug=DEBUG_FLAG )
+    application = webapp.WSGIApplication( [(r'/noti/(.*)', Redir_notificacion)], debug=DEBUG_FLAG )
     template.register_template_library('filters.filtros_django')
     run_wsgi_app(application)
 

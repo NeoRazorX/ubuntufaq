@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -94,8 +95,35 @@ class stats:
             logging.info("Actualizado stats en base a los comentarios")
             continuar = False
         
-        # actualizamos el numero de clics por pregunta
+        # actualizamos el top de usuarios
         if stats['iterador'] == 4 and continuar:
+            # probamos con populares
+            populares = memcache.get( 'populares' )
+            stats['tu_puntos'] = 0
+            if populares:
+                for p in populares:
+                    if p['puntos'] > stats['tu_puntos']:
+                        stats['top_user'] = p['autor']
+                        stats['tu_puntos'] = p['puntos']
+            else:
+                logging.info("Populares no encontrada")
+            # probamos con la portada
+            portada = memcache.get( 'portada' )
+            if portada:
+                for p in portada:
+                    if p['puntos'] > stats['tu_puntos']:
+                        stats['top_user'] = p['autor']
+                        stats['tu_puntos'] = p['puntos']
+            else:
+                logging.info("Portada no encontrada")
+            stats['iterador'] += 1
+            stats['iterador2'] = 0
+            memcache.replace('stats', stats)
+            logging.info("Actualizado stats en base al top_user")
+            continuar = False
+        
+        # actualizamos el numero de clics por pregunta
+        if stats['iterador'] == 5 and continuar:
             query = db.GqlQuery("SELECT * FROM Pregunta")
             if stats['iterador2'] == 0:
                 stats['clics_p'] = 0
@@ -104,7 +132,7 @@ class stats:
                 stats['iterador2'] += 20
             elif stats['iterador2'] >= stats['preguntas']:
                 if stats['preguntas'] > 0 and stats['clics_p'] > 0:
-                    stats['clics_pp'] = (stats['clics_p'] / stats['preguntas'])
+                    stats['clics_pp'] = (float(stats['clics_p']) / stats['preguntas'])
                 stats['iterador'] += 1
                 stats['iterador2'] = 0
             else:
@@ -116,7 +144,7 @@ class stats:
             continuar = False
         
         # actualizamos el numero de clics por enlace
-        if stats['iterador'] == 5 and continuar:
+        if stats['iterador'] == 6 and continuar:
             query = db.GqlQuery("SELECT * FROM Enlace")
             if stats['iterador2'] == 0:
                 stats['clics_e'] = 0
@@ -125,8 +153,8 @@ class stats:
                 stats['iterador2'] += 20
             elif stats['iterador2'] >= stats['enlaces']:
                 if stats['enlaces'] > 0 and stats['clics_e'] > 0:
-                    stats['clics_pe'] = (stats['clics_e'] / stats['enlaces'])
-                stats['iterador'] += 1
+                    stats['clics_pe'] = (float(stats['clics_e']) / stats['enlaces'])
+                stats['iterador'] = 0
                 stats['iterador2'] = 0
             else:
                 for e in query.fetch(20, stats['iterador2']):
@@ -136,19 +164,7 @@ class stats:
             logging.info("Actualizado stats en base a los clics por enlace")
             continuar = False
         
-        # actualizamos el top de usuarios
-        if stats['iterador'] == 6 and continuar:
-            populares = memcache.get( 'populares' )
-            stats['tu_puntos'] = 0
-            if populares is not None:
-                for p in populares:
-                    if p['puntos'] > stats['tu_puntos']:
-                        stats['top_user'] = p['autor']
-                        stats['tu_puntos'] = p['puntos']
-            stats['iterador'] = 0
-            memcache.replace('stats', stats)
-            logging.info("Actualizado stats en base al top_user")
-            continuar = False
+        
 
 if __name__ == "__main__":
     stats()

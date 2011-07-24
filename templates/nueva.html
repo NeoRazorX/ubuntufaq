@@ -2,20 +2,31 @@
 <div class="preguntas">
 
 {% if tipo = 'pregunta' %}
+    <center><a href="/ayuda#ayuda_preguntas"><img class="portada" src="/img/banner.png" alt="¿Necesitas ayuda?"/></a></center>
     <div class="titulo">Nueva pregunta:</div>
     <ul>
         <li>Comprueba que la pregunta que quieres hacer no haya sido publicada previamente.</li>
         <li>Utiliza un <b>t&iacute;tulo</b> descriptivo.</li>
         <li>Cuanto m&aacute;s detallada sea la <b>descripci&oacute;n</b> de la pregunta,
         m&aacute;s f&aacute;cil y r&aacute;pido te contestar&aacute;n. No olvides decir qu&eacute;
-        <b>versi&oacute;n de Ubuntu</b> est&aacute;s usando.</li>
+        <b>versi&oacute;n de Linux</b> est&aacute;s usando.</li>
+        <li>¿Quieres adjuntar una imagen? usa <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.</li>
         <li>Repasa la ortograf&iacute;a.</li>
-        <li>Se te notificar&aacute; por email la primera respuesta (si haces login).</li>
+        {% if formulario %}
+            <li>Se te notificarán por email las respuestas.</li>
+        {% endif %}
     </ul>
+    
+    {% if not formulario %}
+    <div class="mensaje">
+        Puedes hacer un seguimiento más completo de tus preguntas si <a href="/ayuda#ayuda_sesion">inicias sesión</a>.
+        Así podremos notificarte las respuestas. Tan solo necesitas una cuenta google.
+    </div>
+    {% endif %}
     
     <form name="publicar" action="/nueva" method="post">
     <b>Título:</b><br/>
-    <input id="titulo" type="text" name="titulo" size="50" maxlength="100" value="{{ contenido|capfirst|truncatewords:15 }}"/>
+    <input class="titulo" type="text" name="titulo" size="50" maxlength="100" value="{{ contenido|capfirst|truncatewords:15 }}"/>
     <br/><br/>
     <b>Descripción:</b><br/>
     <textarea name="contenido" rows="6" cols="60">{{ contenido }}</textarea>
@@ -39,7 +50,7 @@
     
     <form name="publicar" action="/nueva" method="post">
     <b>URL del enlace:</b><br/>
-    <input id="titulo" type="text" name="url" size="50" maxlength="100" value="{{ url }}"/>
+    <input class="titulo" type="text" name="url" size="50" maxlength="100" value="{{ url2 }}"/>
     <br/><br/>
     <b>Descripción:</b><br/>
     <textarea name="descripcion" rows="6" cols="60">Descripción del enlace (450 caracteres max.).</textarea>

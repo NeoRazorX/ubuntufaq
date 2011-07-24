@@ -10,16 +10,13 @@
     <td>
     <div class="comentario">
         {{ imagen.autor.email|avatar:40 }}
-        <a href="/story/{{ imagen.key }}"><img src="/img/comments.png" alt="comentarios" title="deja un comentario"/></a>
         {% if imagen.comentarios %}
-            {{ imagen.comentarios }}
+            <a class="comentarios" href="/story/{{ imagen.key }}" title="comentarios">{{ imagen.comentarios }}</a>
+        {% else %}
+            <a class="no-comentarios" href="/story/{{ imagen.key }}" title="comentarios">{{ imagen.comentarios }}</a>
         {% endif %}
         <br/>
-        {% if imagen.autor %}
-            <a href="/u/{{ imagen.autor.email|urlencode }}">{{ imagen.autor.nickname|cortamail }}</a> {{ imagen.puntos }}
-        {% else %}
-            an&oacute;nimo
-        {% endif %}
+        {{ imagen.autor|autor }}
         <br/>
         {{ imagen.creado|date:"d/m/Y H:i" }} | {{ imagen.clicks }} clics
         <br/>

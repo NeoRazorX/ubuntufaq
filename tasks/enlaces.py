@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -18,7 +19,6 @@
 
 import logging
 from google.appengine.ext import db
-from google.appengine.api import mail, urlfetch
 from base import *
 
 class enlaces:
@@ -27,21 +27,8 @@ class enlaces:
         for e in enlaces:
             self.comprobar( e )
     
-    def acortar_url(self, url):
-        try:
-            result = urlfetch.fetch("http://is.gd/api.php?longurl=" + url)
-            if result.status_code == 200:
-                return result.content
-            else:
-                return url
-        except:
-            return url
-    
     def comprobar(self, enlace):
         tipo_enlace = 'texto'
-        url_corta = self.acortar_url('http://www.ubufaq.com/e/' + str(enlace.key()) )
-        # no asignar la url_corta a enlace.url, porque esto hace que el script rss-scanner publique duplicados
-        
         if enlace.url[:23] == 'http://www.youtube.com/':
             tipo_enlace = 'youtube'
         elif enlace.url[:21] == 'http://www.vimeo.com/':
@@ -62,25 +49,6 @@ class enlaces:
                 enlace.borrar_cache()
             except:
                 logging.error('Imposible modificar el enlace!')
-        
-        # enviamos un mail a wordpress
-        if WORDPRESS_PRIVATE_EMAIL != '' and enlace.os != 'rss-scanner.py':
-            if len(enlace.descripcion) < 50:
-                subject = body = enlace.descripcion
-            else:
-                subject = enlace.descripcion[:50] + '...'
-                body = enlace.descripcion
-            
-            if tipo_enlace == 'texto':
-                body += ' - Fuente: ' + url_corta
-                body += ' m&aacute;s en Ubuntu FAQ: ' + self.acortar_url('http://www.ubufaq.com/story/' + str(enlace.key()) )
-            else:
-                body += ' - ' + self.acortar_url('http://www.ubufaq.com/story/' + str(enlace.key()) )
-            
-            try:
-                mail.send_mail("contacto@ubufaq.com", WORDPRESS_PRIVATE_EMAIL, subject, body)
-            except:
-                logging.error('Error al enviar el email a wordpress para el enlace: ' + str(enlace.key()))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -23,6 +24,10 @@ from base import *
 
 class antiguas:
     def __init__(self):
+        self.marcar_preguntas()
+        self.borrar_enlaces()
+    
+    def marcar_preguntas(self):
         preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE fecha < :1 ORDER BY fecha ASC LIMIT 50",
                                 datetime.today() - timedelta(days= 90))
         for p in preguntas:
@@ -32,7 +37,18 @@ class antiguas:
                     p.put()
                     logging.info('Marcada como antigua la pregunta: ' + str(p.key()))
                 except:
-                    logging.error('Imposible marcar como antigua la pregunta: ' + str(p.key()))
+                    logging.warning('Imposible marcar como antigua la pregunta: ' + str(p.key()))
+    
+    def borrar_enlaces(self):
+        enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE fecha < :1 ORDER BY fecha ASC LIMIT 50",
+                                datetime.today() - timedelta(days= 90))
+        for e in enlaces:
+            if e.comentarios == 0:
+                try:
+                    e.borrar_todo()
+                    logging.info('Borrado en enlace: ' + str(e.key()) + ' por antiguo.')
+                except:
+                    logging.warning('Imposible borrar el enlace: ' + str(e.key()) + ' por antiguo.')
 
 if __name__ == "__main__":
     antiguas()

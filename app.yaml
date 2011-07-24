@@ -1,5 +1,5 @@
 application: ubuntu-faq
-version: 44
+version: 45
 runtime: python
 api_version: 1
 
@@ -37,6 +37,10 @@ handlers:
   script: tasks/rss-scanner.py
   login: admin
 
+- url: /tasks/seguimientos
+  script: tasks/seguimientos.py
+  login: admin
+
 - url: /tasks/stats
   script: tasks/stats.py
   login: admin
@@ -64,14 +68,18 @@ handlers:
 - url: /robots.txt
   script: robots.py
 
-- url: /pingbacks
-  script: pingbacks.py
-
 - url: /steam4linux
   script: steam4linux.py
 
+- url: /stop_emails
+  script: stop_emails.py
+  login: required
+
 - url: /tag/.*
   script: tags.py
+
+- url: /votar/.*
+  script: votar.py
 
 - url: /u/.*
   script: usuarios.py
@@ -79,6 +87,10 @@ handlers:
 
 - url: /noti/.*
   script: notificaciones.py
+  login: required
+
+- url: /seguir/.*
+  script: seguimiento.py
   login: required
 
 - url: .*

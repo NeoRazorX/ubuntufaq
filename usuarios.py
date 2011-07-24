@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -16,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os, logging, cgi, urllib
+import os, logging, cgi, urllib, base64
 
 # cargamos django 1.2
 os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
@@ -26,7 +27,7 @@ from google.appengine.ext.webapp import template
 
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.api import users
+from google.appengine.api import users, memcache
 from base import *
 
 class Detalle_usuario(Pagina):
@@ -71,11 +72,13 @@ class Detalle_usuario(Pagina):
         continuar = False
         if email:
             try:
-                tusuario = users.User( urllib.unquote( email ) )
-                if tusuario == users.get_current_user():
-                    n = self.get_notificaciones()
-                else:
-                    n = []
+                tusuario = users.User( base64.b64decode( urllib.unquote( email ) ) )
+                # ¿Borramos la cache?
+                if self.request.get('rld') == 'True':
+                    memcache.delete_multi(['preguntas_de_' + tusuario.nickname(),
+                                           'respuestas_de_' + tusuario.nickname(),
+                                           'enlaces_de_' + tusuario.nickname(),
+                                           'comentarios_de_' + tusuario.nickname()])
                 p = self.get_preguntas(tusuario, 20)
                 r = self.get_respuestas(tusuario, 10)
                 e = self.get_enlaces(tusuario, 10)
@@ -84,24 +87,25 @@ class Detalle_usuario(Pagina):
             except:
                 pass
         if continuar:
-            karma = 0
-            if p:
-                for col in p:
-                    karma = max(col.puntos, karma)
-            elif r:
-                for col in r:
-                    karma = max(col.puntos, karma)
-            elif e:
-                for col in e:
-                    karma = max(col.puntos, karma)
-            elif c:
-                for col in c:
-                    karma = max(col.puntos, karma)
+            query = db.GqlQuery("SELECT * FROM Usuario WHERE usuario = :1", tusuario).fetch(1)
+            if query:
+                karma = query[0]
+            else:
+                karma = Usuario()
+                karma.usuario = tusuario
+                karma.put()
+            # añadimos el usuario a la lista para recalcular el karma
+            pending_users = memcache.get('pending-users')
+            if pending_users is None:
+                pending_users = [ tusuario ]
+                memcache.add('pending-users', pending_users)
+            elif tusuario not in pending_users:
+                pending_users.append( tusuario )
+                memcache.replace('pending-users', pending_users)
             template_values = {
                     'titulo': 'Perfil de ' + tusuario.nickname(),
                     'descripcion': 'Resumen del historial del usuario ' + tusuario.nickname() + ' en Ubuntu FAQ',
                     'tags': 'ubuntu, kubuntu, xubuntu, lubuntu, problema, ayuda, linux, karmic, lucid, maverick, natty, ocelot, ' + tusuario.nickname(),
-                    'notificaciones': n,
                     'preguntas': p,
                     'respuestas': r,
                     'enlaces': e,
@@ -114,7 +118,8 @@ class Detalle_usuario(Pagina):
                     'usuario': users.get_current_user(),
                     'notis': self.get_notificaciones(),
                     'formulario' : self.formulario,
-                    'error_dominio': self.error_dominio
+                    'error_dominio': self.error_dominio,
+                    'privado': self.request.get('priv')
             }
             path = os.path.join(os.path.dirname(__file__), 'templates/usuario.html')
             self.response.out.write(template.render(path, template_values))

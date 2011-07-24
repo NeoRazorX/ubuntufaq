@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 #
 # This file is part of ubuntufaq
 # Copyright (C) 2011  Carlos Garcia Gomez  neorazorx@gmail.com
@@ -37,7 +38,7 @@ class Imagenes(Pagina):
         
         template_values = {
             'titulo': 'Imagenes de Ubuntu FAQ',
-            'descripcion': 'Wallpapers, screenshots, fotos e imagenes de toda la actualidad en torno a Ubuntu Linux, comparte con nosotros las tuyas!',
+            'descripcion': u'Wallpapers, screenshots, fotos e imágenes de toda la actualidad en torno a Ubuntu Linux, comparte con nosotros las tuyas!',
             'tags': 'ubufaq, ubuntu faq, imagenes ubuntu, wallpapers ubuntu, screenshots ubuntu, linux, lucid, maverick, natty',
             'url': self.url,
             'url_linktext': self.url_linktext,
@@ -50,8 +51,6 @@ class Imagenes(Pagina):
             'notis': self.get_notificaciones(),
             'error_dominio': self.error_dominio,
             'stats': memcache.get( 'stats' )
-            }
-        
+        }
         path = os.path.join(os.path.dirname(__file__), 'templates/imagenes.html')
         self.response.out.write(template.render(path, template_values))
-

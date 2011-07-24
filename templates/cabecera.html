@@ -28,38 +28,59 @@
 <body>
 
 <div class="cabecera">
-<div class="menucabecera">
-    <a id="titulo" title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
-    <span id="menupregunta" class="menusel"><a href="#" onclick="menu_cabecera('pregunta')">pregunta</a></span>
-    <span id="menuenlace"><a href="#" onclick="menu_cabecera('enlace')">enlace</a></span>
-    <span id="menubuscar"><a href="#" onclick="menu_cabecera('buscar')">buscar</a></span>
-    <span id="menumapa"><a href="#" onclick="menu_cabecera('mapa')">más...</a></span> |
+<table class="menucabecera">
+<tr>
+    <td>
+        <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
+        <a id="menupregunta" class="menusel" href="#" onclick="menu_cabecera('pregunta')">pregunta</a>
+        <a id="menuenlace" href="#" onclick="menu_cabecera('enlace')">enlace</a>
+        <a id="menubuscar" href="#" onclick="menu_cabecera('buscar')">buscar</a>
+        <a id="menumapa" href="#" onclick="menu_cabecera('mapa')">más...</a>
+    </td>
+    <td id="right">
 {% if formulario %}
     {% if notis %}
-        <span><a class="notificacion" href="{{ mi_perfil|urlencode }}">{{ notis|length }}</a> <a href="{{ mi_perfil|urlencode }}">{{ usuario }}</a></span>
+        <a class="notificacion" href="{{ mi_perfil }}">{{ notis|length }}</a>
+        <a href="{{ mi_perfil }}">{{ usuario }}</a>
     {% else %}
-        <span><a href="{{ mi_perfil|urlencode }}">{{ usuario }}</a></span>
+        <a href="{{ mi_perfil }}">{{ usuario }}</a>
     {% endif %}
+{% else %}
+    <a href="/ayuda#ayuda_sesion">?</a>
 {% endif %}
-    <span><a href="{{ url }}">{{ url_linktext }}</a></span>
-</div>
+        <a href="{{ url }}">{{ url_linktext }}</a>
+    </td>
+</tr>
+</table>
 <div class="formcabecera">
     <div id="pregunta">
-        <form name="pregunta" action="/nueva" method="post">
+        <form name="pregunta" action="/nueva" method="get">
+        <table>
+        <tr>
+        <td>
             <input type="hidden" name="tipo" value="pregunta"/>
-            <input type="text" name="contenido" size="70" maxlength="500" value="¡Haz tu pregunta!" onclick="this.select()"/>
-            <input type="submit" class="boton" value="continuar"/> <a href="/ayuda">Ayuda</a>
+            <input class="titulo" type="text" name="contenido" size="70" maxlength="500" value="¡Haz tu pregunta!" onclick="this.select()"/>
+        </td>
+        <td><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_preguntas">Ayuda</a></td>
+        </tr>
+        </table>
         </form>
     </div>
     <div id="enlace">
-        <form name="enlace" action="/nueva" method="post">
+        <form name="enlace" action="/nueva" method="get">
+        <table>
+        <tr>
+        <td>
             <input type="hidden" name="tipo" value="enlace"/>
-            <input type="text" name="url" size="60" maxlength="150" value="http://" onclick="this.select()"/>
-            <input type="submit" class="boton" value="continuar"/> <a href="/ayuda">Ayuda</a>
+            <input class="titulo" type="text" name="url" size="70" maxlength="150" value="http://" onclick="this.select()"/>
+        </td>
+        <td><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_enlaces">Ayuda</a></td>
+        </tr>
+        </table>
         </form>
     </div>
     <div id="buscar">
-        <div id="cse" style="width: 100%;">Loading</div>
+        <div id="cse-search-form" style="width: 100%;">Loading</div>
         <script src="http://www.google.com/jsapi" type="text/javascript"></script>
         <script type="text/javascript"> 
           google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
@@ -67,6 +88,7 @@
             var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
             customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
             var options = new google.search.DrawOptions();
+            options.setSearchFormRoot('cse-search-form');
             options.setAutoComplete(true);    
             customSearchControl.draw('cse', options);
           }, true);
@@ -87,8 +109,8 @@
 </div>
 </div>
 
-<div id="espacio" class="espacio"></div>
-
 {% if error_dominio %}
 <div class="dominio">Por favor, usa el dominio <a href="http://www.ubufaq.com">ubufaq.com</a> para acceder a esta web.</div>
 {% endif %}
+
+<div id="buscar2"><div id="cse"></div></div>

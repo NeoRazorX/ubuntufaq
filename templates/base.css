@@ -1,5 +1,8 @@
+
 body {
-    background-color: white;
+    background-color: #333333;
+    font-family: Arial, Helvetica, sans-serif;
+    color: white;
     font-size: 13px;
     margin: 0px;
 }
@@ -8,10 +11,6 @@ a {
     color: #DD4814;
     font-weight: bold;
     text-decoration: none;
-}
-
-a:hover {
-    text-decoration: underline;
 }
 
 a.comentario {
@@ -54,14 +53,29 @@ a.tag {
 }
 
 a.notificacion {
-    background-color: red;
+    background-color: #E20000;
     color: white;
-    padding-left: 2px;
-    padding-right: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
     border-top-left-radius: 2px 2px;
     border-top-right-radius: 2px 2px;
     border-bottom-left-radius: 2px 2px;
     border-bottom-right-radius: 2px 2px;
+}
+
+a.negativo {
+    margin-left: 30px;
+    background-color: #E20000;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+a.positivo {
+    background-color: green;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
 }
 
 textarea {
@@ -86,7 +100,7 @@ input.boton {
     border-bottom-right-radius: 3px 3px;
 }
 
-input#titulo {
+input.titulo {
     width: 99%;
 }
 
@@ -101,8 +115,8 @@ img.galeria {
     max-height: 200px;
 }
 
-h3 {
-    text-align: center;
+img.portada {
+    margin-bottom: 5px;
 }
 
 hr {
@@ -111,67 +125,55 @@ hr {
 }
 
 div.cabecera {
-    position: fixed;
-    width: 100%;
-}
-
-div.espacio {
-    min-height: 80px;
-}
-
-div.menucabecera {
-    background-color: #333333;
-    color: white;
     font-size: 14px;
-    padding-top: 10px;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-bottom: 1px;
 }
 
-div.menucabecera a#titulo {
-    font-size: 18px;
-    margin-left: 10px;
-    margin-right: 10px;
+table.menucabecera td {
+    padding: 4px;
 }
 
-div.menucabecera span {
-    margin: 3px;
-    padding-top: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-bottom: 2px;
-    border-top-left-radius: 3px 3px;
-    border-top-right-radius: 3px 3px;
+table.menucabecera td#apptitle {
+    width: 150px;
 }
 
-div.menucabecera span:hover {
-    background-color: #999999;
+table.menucabecera td#right {
+    text-align: right;
 }
 
-div.menucabecera span.menusel {
-    background-color: #DD4814;
-    padding-bottom: 3px;
-}
-
-div.menucabecera a {
+table.menucabecera a {
     color: white;
+    padding: 5px;
 }
 
-div.menucabecera a:hover {
+table.menucabecera a.menusel {
+    background-color: #DD4814;
+}
+
+table.menucabecera a:hover {
+    background-color: #555555;
+    color: white;
     text-decoration: none;
 }
 
 div.formcabecera {
-    background-color: #DD4814;
+    background-color: #F1F1F1;
     color: black;
-    font-size: 14px;
     padding: 3px;
-    border-bottom: 2px outset #DD4814;
+    border-bottom: 1px solid #333333;
 }
 
 div.formcabecera a {
+    color: black;
+    padding: 3px;
+}
+
+div.formcabecera a:hover {
+    background-color: #DD4814;
     color: white;
+    border-top-left-radius: 3px 3px;
+    border-top-right-radius: 3px 3px;
+    border-bottom-right-radius: 3px 3px;
+    border-bottom-left-radius: 3px 3px;
 }
 
 div.formcabecera div#pregunta {
@@ -181,8 +183,25 @@ div.formcabecera div#enlace {
     display: none;
 }
 
+table.menucabecera,
+div.formcabecera div#pregunta table,
+div.formcabecera div#enlace table {
+    width: 100%;
+}
+
 div.formcabecera div#buscar {
     display: none;
+    padding-right: 10px;
+}
+
+div#buscar2 {
+    display: none;
+    background-color: white;;
+    color: black;
+    margin: 0px;
+    padding: 0px;
+    padding-left: 30px;
+    padding-right: 30px;
 }
 
 div.formcabecera div#mapa {
@@ -196,22 +215,21 @@ div.formcabecera div#mapa a {
 
 div.dominio {
     background-color: #FFD5AD;
-    border-top: 1px solid #EEB27A;
     border-bottom: 1px solid #EEB27A;
-    margin: 5px;
     padding: 5px;
     font-size: 15px;
     text-align: center;
+    color: black;
 }
 
 div.preguntas {
     background-color: white;
+    color: black;
     font-size: 13px;
-    min-height: 600px;
-    margin-left: 30px;
-    margin-right: 30px;
     padding: 10px;
-    padding-bottom: 20px;
+    padding-left: 30px;
+    padding-right: 30px;
+    min-height: 400px;
 }
 
 td.col_info_mix {
@@ -228,6 +246,13 @@ td.avatar {
 
 td.clics {
     vertical-align: top;
+}
+
+td.votar {
+    vertical-align: top;
+    width: 50px;
+    font-size: 20px;
+    font-weight: bold;
 }
 
 div.clics {
@@ -264,15 +289,6 @@ div.formulario {
     padding: 5px;
 }
 
-div.info_respuesta_d {
-    font-size: 15px;
-    margin-top: 5px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 2px;
-    padding: 0px;
-}
-
 div.info_respuesta_up {
     font-size: 11px;
     margin-top: 5px;
@@ -307,6 +323,15 @@ div.respuesta img {
     margin-right: 10px;
 }
 
+div.respuesta a:hover {
+    background-color: #DD4814;
+    color: white;
+    border-top-left-radius: 3px 3px;
+    border-top-right-radius: 3px 3px;
+    border-bottom-right-radius: 3px 3px;
+    border-bottom-left-radius: 3px 3px;
+}
+
 div.respuesta_d {
     background-color: #feffc0;
     border: 1px solid #e1e16e;
@@ -315,16 +340,7 @@ div.respuesta_d {
     margin-right: 10px;
     margin-bottom: 0px;
     padding: 5px;
-}
-
-div.respuesta_d2 {
-    background-color: #F7F7F7;
-    border: 3px double silver;
-    margin-top: 0px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 0px;
-    padding: 5px;
+    font-weight: bold;
 }
 
 div.respuesta ul {
@@ -357,6 +373,7 @@ div.titulo {
     font-weight: bold;
     font-size: 15px;
     letter-spacing: 0.12em;
+    margin-bottom: 3px;
 }
 
 div.titulo span {
@@ -402,17 +419,20 @@ div.paginacion {
 
 div.paginacion span {
     background-color: #F7F7F7;
-    border: 1px outset #E4E4E4;
+    border: 1px solid #E4E4E4;
     margin-right: 5px;
-    padding-top: 2px;
-    padding-left: 5px;
-    padding-right: 5px;
-    padding-bottom: 2px;
+    padding: 3px;
+}
+
+div.paginacion a {
+    padding: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 div.paginacion span#actual {
     background-color: #DD4814;
-    border: 1px outset #DD4814;
+    border: 1px solid #DD4814;
 }
 
 div.paginacion span#actual a {
@@ -449,13 +469,24 @@ div.alltags a.min {
 }
 
 div.pie {
-    margin-top: 10px;
-    margin-left: 30px;
-    margin-right: 30px;
     font-size: 14px;
-    padding-top: 5px;
-    padding-bottom: 10px;
-    border-top: 1px dotted #333333;
+    padding: 5px;
+    border-top: 1px solid black;
+}
+
+div.pie a {
+    padding-left: 3px;
+    padding-right: 3px;
+    color: white;
+}
+
+div.pie a:hover {
+    background-color: #DD4814;
+    color: white;
+    border-top-left-radius: 3px 3px;
+    border-top-right-radius: 3px 3px;
+    border-bottom-right-radius: 3px 3px;
+    border-bottom-left-radius: 3px 3px;
 }
 
 div.pie table {

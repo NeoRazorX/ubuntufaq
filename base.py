@@ -19,14 +19,14 @@
 
 DEBUG_FLAG = True
 APP_NAME = 'ubuntu-faq'
-APP_DESCRIPTION = 'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
+APP_DESCRIPTION = u'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
+APP_DOMAIN = 'http://www.ubufaq.com'
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
-WORDPRESS_PRIVATE_EMAIL = ''
-STEAM_ENLACE_KEY = ''
+STEAM_ENLACE_KEY = 'agp1YnVudHUtZmFxcg4LEgZFbmxhY2UYyvYkDA'
 RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
-    'http://neorazorx.blogspot.com/feeds/posts/default',
-    'http://ubuntulife.wordpress.com/feed/']
+    'http://hipersimple.com/feed',
+    'http://neorazorx.blogspot.com/feeds/posts/default']
 KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', 'meego', 'fedora', 'gentoo',
     'suse', 'debian', 'unix', 'canonical', 'lucid', 'maverick', 'natty', 'ocelot', 'chrome os',
     'unity', 'gnome', 'kde', 'xfce', 'enlightment', 'x.org', 'wayland', 'compiz', 'alsa', 'gtk', 'gdk', 'qt',
@@ -35,26 +35,25 @@ KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', '
     'gnu', 'linus', 'desura', 'libreoffice', 'nautilus', 'python', 'juego', 'wifi', '3g', 'windows', 'mac',
     'bios', 'driver']
 
-import math, random, logging
+import math, random, logging, urllib, base64
 from google.appengine.ext import db, webapp
 from google.appengine.api import users, memcache
 from datetime import datetime
 
 class Pregunta(db.Model):
     autor = db.UserProperty()
-    titulo = db.StringProperty()
     contenido = db.TextProperty()
-    fecha = db.DateTimeProperty(auto_now_add=True)
     creado = db.DateTimeProperty(auto_now_add=True)
-    respuestas = db.IntegerProperty(default=0)
-    tags = db.StringProperty()
-    visitas = db.IntegerProperty(default=0)
-    ultima_ip = db.StringProperty(default="0.0.0.0")
-    enviar_email = db.BooleanProperty(default=False)
-    stop_emails = db.BooleanProperty(default=True)
     estado = db.IntegerProperty(default=0)
+    fecha = db.DateTimeProperty(auto_now_add=True)
+    os = db.StringProperty(default='desconocido')
     puntos = db.IntegerProperty(default=0)
-    os = db.StringProperty(default="desconocido")
+    respuestas = db.IntegerProperty(default=0)
+    seguimientos = db.IntegerProperty(default=0)
+    tags = db.StringProperty()
+    titulo = db.StringProperty()
+    ultima_ip = db.StringProperty(default='0.0.0.0')
+    visitas = db.IntegerProperty(default=0)
     
     # devuelve las respuesta a esta pregunta
     # ademas suma una visita si se le proporciona una ip
@@ -63,19 +62,18 @@ class Pregunta(db.Model):
         if respuestas is None:
             query = db.GqlQuery("SELECT * FROM Respuesta WHERE id_pregunta = :1 ORDER BY fecha ASC", str(self.key()))
             respuestas = query.fetch( query.count() )
-            if memcache.add( str(self.key()), respuestas ):
-                logging.info('Almacenando en memcache: ' + str(self.key()) )
-            else:
-                logging.warning("Fallo almacenando en memcache: " + str(self.key()) )
+            if not memcache.add( str(self.key()), respuestas ):
+                logging.warning('Imposible almacenar en memcache las respuestas de: ' + str(self.key()) )
         else:
-            logging.info('Leyendo de memcache para: ' + str(self.key()) )
+            logging.info('Leyendo de memcache las respuestas para: ' + str(self.key()) )
         cambio = False
         if self.respuestas != len( respuestas ):
+            if len( respuestas ) > self.respuestas:
+                det = Detector_respuestas()
+                det.detectar(respuestas, self.get_link())
             self.respuestas = len( respuestas )
             memcache.delete( str(self.key()) )
             cambio = True
-            det = Detector_respuestas()
-            det.detectar(respuestas, self.get_link())
         if ip and self.ultima_ip != ip:
             self.ultima_ip = ip
             self.visitas += 1
@@ -84,8 +82,48 @@ class Pregunta(db.Model):
             try:
                 self.put()
             except:
-                logging.warning("Fallo actualizando la pregunta: " + str(self.key()) )
+                logging.warning('Imposible actualizar la pregunta: ' + str(self.key()) )
         return respuestas
+    
+    # devuelve los datos de seguimiento de esta pregunta
+    def get_seguimiento(self):
+        seguimiento = memcache.get('seguimiento_' + str(self.key()))
+        if seguimiento is None:
+            query = db.GqlQuery("SELECT * FROM Seguimiento WHERE id_pregunta = :1", str(self.key()))
+            seguimiento = query.fetch( query.count() )
+            if not memcache.add('seguimiento_' + str(self.key()), seguimiento):
+                logging.warning('Imposible almacenar en memcache el seguimiento de: ' + str(self.key()) )
+        else:
+            logging.info('Leyendo de memcache el seguimiento de: ' + str(self.key()) )
+        cambio = False
+        if not seguimiento:
+            if self.seguimientos != 0:
+                self.seguimientos = 0
+                cambio = True
+        elif self.seguimientos != len( seguimiento[0].usuarios ):
+            self.seguimientos = len( seguimiento[0].usuarios )
+            memcache.delete('seguimiento_' + str(self.key()))
+            cambio = True
+        if cambio:
+            try:
+                self.put()
+            except:
+                logging.warning('Imposible actualizar la pregunta: ' + str(self.key()) )
+        if len( seguimiento ) == 0:
+            return None
+        else:
+            return seguimiento[0]
+    
+    def es_seguidor(self, usuario):
+        s = self.get_seguimiento()
+        if usuario == self.autor:
+            return True
+        elif not s:
+            return False
+        elif usuario in s.usuarios:
+            return True
+        else:
+            return False
     
     def get_link(self):
         return '/question/' + str(self.key())
@@ -103,70 +141,97 @@ class Pregunta(db.Model):
         elif self.estado == 10:
             retorno = 'solucionada'
         elif self.estado == 11:
-            retorno = 'pendiente de confirmación'
+            retorno = u'pendiente de confirmación'
         elif self.estado == 12:
             retorno = 'duplicada'
         elif self.estado == 13:
             retorno = 'erronea'
         elif self.estado == 14:
             retorno = 'antigua'
-        return unicode(retorno, 'utf8')
+        return retorno
     
     # actualizamos varios datos de la pregunta
     def actualizar(self, respuesta=None):
         self.fecha = datetime.now()
-        
         if respuesta:
             # cambiamos el estado de la pregunta en funcion de la respuesta
-            if respuesta.autor:
-                if respuesta.autor == self.autor:
-                    if respuesta.contenido.lower().find('solucionad') != -1:
-                        self.estado = 10
-                elif self.estado == 0:
-                    self.estado = 2
+            if respuesta.autor and respuesta.autor == self.autor and respuesta.contenido.lower().find('solucionad') != -1:
+                self.estado = 10
+                self.marcar_solucionada()
             elif self.estado == 0:
                 self.estado = 2
-            # volvemos a marcar la pregunta para enviar un email hasta que se solucione o stop_emails == True
-            if self.autor and self.autor != respuesta.autor and not self.stop_emails and self.estado < 10:
-                self.enviar_email = True
             # añadimos una notificación
             if self.autor and self.autor != respuesta.autor:
-                n = Notificacion()
-                n.usuario = self.autor
-                n.link = self.get_link()
-                if respuesta.autor:
-                    n.mensaje = "El usuario " + respuesta.autor.nickname() + " ha contestado a tu pregunta."
-                else:
-                    n.mensaje = "Un anonimo ha contestado a tu pregunta."
-                n.put()
-                n.rm_cache()
-        
+                try:
+                    n = Notificacion()
+                    n.usuario = self.autor
+                    n.link = self.get_link()
+                    if respuesta.autor:
+                        n.mensaje = 'El usuario ' + respuesta.autor.nickname() + ' ha contestado a tu pregunta "' + self.titulo[:99] + '".'
+                    else:
+                        n.mensaje = u'Un anónimo ha contestado a tu pregunta "' + self.titulo[:99] + '".'
+                    n.put()
+                    n.borrar_cache()
+                except:
+                    logging.error('Imposible guardar la notificación')
         # guardamos los cambios
         self.put()
         self.borrar_cache()
+    
+    def marcar_pendiente(self):
+        if self.autor:
+            # añadimos una notificación
+            try:
+                n = Notificacion()
+                n.usuario = self.autor
+                n.link = self.get_link()
+                n.mensaje = u'Un administrador te solicita que confirmes la solución a tu pregunta "' + self.titulo[:99] + '".'
+                n.put()
+                n.borrar_cache()
+            except:
+                logging.error('Imposible guardar la notificación')
+    
+    def marcar_solucionada(self):
+        if self.autor:
+            # añadimos una notificación
+            try:
+                n = Notificacion()
+                n.usuario = self.autor
+                n.link = self.get_link()
+                n.mensaje = 'Tu pregunta "' + self.titulo[:99] + '" ha sido marcada como solucionada.'
+                n.put()
+                n.borrar_cache()
+            except:
+                logging.error('Imposible guardar la notificación')
     
     def borrar_respuestas(self):
         r = Respuesta.all().filter('id_pregunta =', self.key())
         db.delete(r)
     
+    def borrar_seguimiento(self):
+        s = db.GqlQuery("SELECT * FROM Seguimiento WHERE id_pregunta = :1", str(self.key()))
+        db.delete(s)
+    
     # borramos la cache que contenga esta pregunta
     def borrar_cache(self):
-        memcache.delete_multi([str(self.key()), 'portada', 'sin-solucionar', 'populares',
-                               'sitemap_preguntas', 'ultimas-respuestas'])
+        memcache.delete_multi([str(self.key()), 'seguimiento_' + str(self.key()), 'portada',
+                               'sin-solucionar', 'populares', 'sitemap_preguntas', 'ultimas-respuestas'])
     
     def borrar_todo(self):
         self.borrar_respuestas()
+        self.borrar_seguimiento()
         self.borrar_cache()
         self.delete()
 
 class Respuesta(db.Model):
     autor = db.UserProperty()
-    id_pregunta = db.StringProperty()
     contenido = db.TextProperty()
     fecha = db.DateTimeProperty(auto_now_add=True)
-    destacada = db.BooleanProperty(default=False)
-    puntos = db.IntegerProperty(default=0)
-    os = db.StringProperty(default="desconocido")
+    id_pregunta = db.StringProperty()
+    ips = db.StringListProperty()
+    os = db.StringProperty(default='desconocido')
+    puntos = db.IntegerProperty(default=0) # del autor
+    valoracion = db.IntegerProperty(default=0)
     
     def get_pregunta(self):
         try:
@@ -174,24 +239,22 @@ class Respuesta(db.Model):
         except:
             return None
     
-    def destacar(self):
-        self.destacada = not(self.destacada)
-        self.put()
+    def borrar_cache(self):
         memcache.delete( self.id_pregunta )
 
 class Enlace(db.Model):
     autor = db.UserProperty()
-    fecha = db.DateTimeProperty(auto_now_add=True)
+    clicks = db.IntegerProperty(default=0)
+    comentarios = db.IntegerProperty(default=0)
     creado = db.DateTimeProperty(auto_now_add=True)
     descripcion = db.StringProperty()
-    url = db.LinkProperty()
-    tipo_enlace = db.StringProperty()
-    clicks = db.IntegerProperty(default=0)
-    ultima_ip = db.StringProperty(default="0.0.0.0")
-    comentarios = db.IntegerProperty(default=0)
+    fecha = db.DateTimeProperty(auto_now_add=True)
+    os = db.StringProperty(default='desconocido')
     puntos = db.IntegerProperty(default=0)
-    os = db.StringProperty(default="desconocido")
     tags = db.StringProperty()
+    tipo_enlace = db.StringProperty()
+    url = db.LinkProperty()
+    ultima_ip = db.StringProperty(default='0.0.0.0')
     
     # devuelve los comentarios del enlace
     # ademas suma un clic si se le proporciona una ip
@@ -200,28 +263,30 @@ class Enlace(db.Model):
         if comentarios is None:
             query = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha ASC", str(self.key()))
             comentarios = query.fetch( query.count() )
-            if memcache.add( str(self.key()), comentarios):
-                logging.info('Almacenando en memcache: ' + str(self.key()) )
-            else:
-                logging.warning("Fallo almacenando en memcache: " + str(self.key()) )
+            if not memcache.add( str(self.key()), comentarios):
+                logging.warning('Imposible almacenar en memcache: ' + str(self.key()) )
         else:
             logging.info('Leyendo de memcache para: ' + str(self.key()))
         cambio = False
         if self.comentarios != len( comentarios ):
+            if len( comentarios ) > self.comentarios:
+                # añadimos las notificaciones pertinentes
+                if self.autor and len( comentarios ) == 1:
+                    try:
+                        n = Notificacion()
+                        n.usuario = self.autor
+                        n.link = self.get_link()
+                        n.mensaje = 'Han comentado tu enlace ' + self.descripcion[:99] + '...'
+                        n.put()
+                        n.borrar_cache()
+                    except:
+                        logging.error('Imposible guardar la notificación')
+                else:
+                    det = Detector_respuestas()
+                    det.detectar(comentarios, self.get_link())
             self.comentarios = len( comentarios )
             memcache.delete( str(self.key()) )
             cambio = True
-            # añadimos las notificaciones pertinentes
-            if self.autor and self.comentarios == 1:
-                n = Notificacion()
-                n.usuario = self.autor
-                n.link = self.get_link()
-                n.mensaje = "Han comentado tu enlace."
-                n.put()
-                n.rm_cache()
-            else:
-                det = Detector_respuestas()
-                det.detectar(comentarios, self.get_link())
         if ip and self.ultima_ip != ip:
             self.ultima_ip = ip
             self.clicks += 1
@@ -233,7 +298,7 @@ class Enlace(db.Model):
             try:
                 self.put()
             except:
-                logging.warning("Fallo actualizando el enlace: " + str(self.key()) )
+                logging.warning('Imposible actualizar el enlace: ' + str(self.key()) )
         return comentarios
     
     def get_link(self):
@@ -277,11 +342,11 @@ class Enlace(db.Model):
 
 class Comentario(db.Model):
     autor = db.UserProperty()
-    id_enlace = db.StringProperty()
     contenido = db.TextProperty()
     fecha = db.DateTimeProperty(auto_now_add=True)
-    puntos = db.IntegerProperty(default=0)
+    id_enlace = db.StringProperty()
     os = db.StringProperty(default="desconocido")
+    puntos = db.IntegerProperty(default=0)
     
     def get_enlace(self):
         try:
@@ -290,12 +355,13 @@ class Comentario(db.Model):
             return None
 
 class Notificacion(db.Model):
+    email = db.BooleanProperty(default=True) # ¿Enviar email?
     fecha = db.DateTimeProperty(auto_now_add=True)
+    link = db.StringProperty(default='/')
+    mensaje = db.StringProperty(default=u'Notificación vacía.')
     usuario = db.UserProperty()
-    link = db.StringProperty(default="/")
-    mensaje = db.StringProperty(default="Notificación vacía.")
     
-    def rm_cache(self):
+    def borrar_cache(self):
         memcache.delete('notificaciones_' + str(self.usuario))
 
 class Detector_respuestas():
@@ -304,18 +370,167 @@ class Detector_respuestas():
         if num > 1:
             i = num - 1
             while i >= 0:
-                if conjunto[num-1].contenido.find('@' + str(i) + ' ') != -1:
-                    if conjunto[i-1].autor:
+                if conjunto[num-1].contenido.find('@' + str(i) + ' ') != -1 and conjunto[i-1].autor:
+                    try:
                         n = Notificacion()
                         n.usuario = conjunto[i-1].autor
                         n.link = link + '#' + str(i)
                         if conjunto[num-1].autor:
-                            n.mensaje = "El usuario " + conjunto[num-1].autor.nickname() + " te ha contestado."
+                            n.mensaje = 'El usuario ' + conjunto[num-1].autor.nickname() + ' te ha contestado.'
                         else:
-                            n.mensaje = "Un anonimo te ha contestado."
+                            n.mensaje = u'Un anónimo te ha contestado.'
                         n.put()
-                        n.rm_cache()
+                        n.borrar_cache()
+                    except:
+                        logging.error('Imposible guardar la notificación')
                 i -= 1
+
+class Tags:
+    def __init__(self):
+        # diccionario que almacena todos los tags
+        self.pendientes = {}
+        # lista general de tags
+        self.alltags = memcache.get('all-tags')
+        if self.alltags is None:
+            self.alltags = []
+            self.alltags_memcache = False
+        else:
+            self.alltags_memcache = True
+        # elegimos aleatoriamente una tabla
+        for i in range(2):
+            if self.seleccionar_tarea( random.randint(0, 1) ):
+                break;
+    
+    def seleccionar_tarea(self, tabla):
+        retorno = False
+        if tabla == 0:
+            query = db.GqlQuery("SELECT * FROM Pregunta")
+            logging.info('Actualizando tags de preguntas')
+        else:
+            query = db.GqlQuery("SELECT * FROM Enlace")
+            logging.info('Actualizando tags de enlaces')
+        total = query.count()
+        seleccion = query.fetch(20, random.randint(0, max(0, total-20)))
+        if len(seleccion) > 0:
+            for ele in seleccion:
+                if tabla == 0:
+                    tags = self.tag2list( ele.tags )
+                    link = '/question/' + str(ele.key())
+                    title = ele.titulo
+                    clics = ele.visitas
+                else:
+                    tags = self.tag2list( ele.tags )
+                    link = '/story/' + str(ele.key())
+                    title = ele.descripcion
+                    clics = ele.clicks
+                self.procesar(tags, link, title, clics)
+            # actualizamos los datos de memcache
+            self.actualizar()
+            retorno = True
+        return retorno
+    
+    # a partir de un string de tags, devuelve una lista de cada uno de ellos
+    def tag2list(self, tags):
+        try:
+            return tags.split(', ')
+        except:
+            return ['general']
+    
+    # rellena pendientes con cada elemento, en funcion del tag
+    def procesar(self, tags, link, title, clics):
+        elemento = {'link': link, 'title': title, 'clics': clics}
+        for t in tags:
+            if t in self.pendientes:
+                encontrado = False
+                for p in self.pendientes[t]:
+                    if p.get('link', '')  == link:
+                        p['title'] = title
+                        p['clics'] = clics
+                        encontrado = True
+                if not encontrado:
+                    self.pendientes[t].append( elemento )
+            else:
+                elementos_cache = memcache.get('tag_' + t)
+                if elementos_cache is None:
+                    self.pendientes[t] = [elemento]
+                else:
+                    self.pendientes[t] = elementos_cache
+                    if elemento not in self.pendientes[t]:
+                        self.pendientes[t].append( elemento )
+    
+    # reducimos el numero de elementos por tag, en funcion de los clics
+    def reducir(self, elementos):
+        reducido = []
+        for i in range(25):
+            seleccionado = {'clics': -1}
+            for e in elementos:
+                if e not in reducido and e.get('clics', 0) > seleccionado.get('clics', 0):
+                    seleccionado = e
+            if seleccionado != {'clics': -1}:
+                duplicado = False
+                for e in reducido:
+                    if e.get('link', '') == seleccionado.get('link', ''):
+                        duplicado = True
+                if not duplicado:
+                    reducido.append( seleccionado )
+        return reducido
+    
+    # actualiza los elementos de memcache con los nuevos resultados obtenidos
+    def actualizar(self):
+        for tag in self.pendientes.keys():
+            elementos = self.reducir( self.pendientes[tag] )
+            if elementos:
+                if memcache.get('tag_' + tag) is None:
+                    if memcache.add('tag_' + tag, elementos):
+                        logging.info('Almacenados los resultados del tag ' + tag + ' en memcache')
+                    else:
+                        logging.warning('Fallo al almacenar los resultados del tag ' + tag + ' en memcache')
+                else:
+                    if memcache.replace('tag_' + tag, elementos):
+                        logging.info('Reemplazados los resultados del tag ' + tag + ' en memcache')
+                    else:
+                        logging.warning('Fallo al reemplazar los resultados del tag ' + tag + ' en memcache')
+            else:
+                logging.error('Para el tag: ' + tag + ' no hay elementos!')
+            # actualizamos la lista general de tags
+            encontrado = False
+            for t in self.alltags:
+                if t[0] == tag:
+                    t[1] = max(len(elementos), t[1])
+                    encontrado = True
+            if not encontrado:
+                self.alltags.append([tag, 1])
+        if not self.alltags_memcache:
+            memcache.add('all-tags', self.alltags)
+        else:
+            memcache.replace('all-tags', self.alltags)
+
+# clase para gestionar el siguimiento de preguntas
+class Seguimiento(db.Model):
+    estado = db.IntegerProperty(default=0)
+    id_pregunta = db.StringProperty()
+    respuestas = db.IntegerProperty(default=0)
+    usuarios = db.ListProperty( users.User )
+    
+    def get_pregunta(self):
+        try:
+            return Pregunta.get( self.id_pregunta )
+        except:
+            return None
+    
+    def borrar_cache(self):
+        memcache.delete('seguimiento_' + self.id_pregunta)
+
+class Usuario(db.Model):
+    comentarios = db.IntegerProperty(default=0)
+    emails = db.BooleanProperty(default=True) # ¿Enviar emails?
+    enlaces = db.IntegerProperty(default=0)
+    iterador = db.IntegerProperty(default=0)
+    fecha = db.DateTimeProperty(auto_now_add=True)
+    preguntas = db.IntegerProperty(default=0)
+    puntos = db.FloatProperty(default=0.0)
+    respuestas = db.IntegerProperty(default=0)
+    usuario = db.UserProperty()
 
 # clase base
 class Pagina(webapp.RequestHandler):
@@ -333,7 +548,7 @@ class Pagina(webapp.RequestHandler):
     
     def get(self):
         # comprobamo que no hayan accedido a la web por appspot
-        if self.request.uri[7:29] == APP_NAME + '.appspot.com':
+        if self.request.uri[:21] != APP_DOMAIN and self.request.uri[:16] != 'http://localhost':
             self.error_dominio = True
         else:
             self.error_dominio = False
@@ -342,10 +557,10 @@ class Pagina(webapp.RequestHandler):
             self.url = users.create_logout_url( self.request.uri )
             self.url_linktext = 'salir'
             self.formulario = True
-            self.mi_perfil = '/u/' + users.get_current_user().email()
+            self.mi_perfil = '/u/' + urllib.quote( base64.b64encode( users.get_current_user().email() ) )
         else:
             self.url = users.create_login_url( self.request.uri )
-            self.url_linktext = 'login'
+            self.url_linktext = 'iniciar sesión'
             self.formulario = False
             self.mi_perfil = '/'
     
@@ -371,7 +586,7 @@ class Pagina(webapp.RequestHandler):
             if memcache.add('ultimas-respuestas', respuestas):
                 logging.info('Almacenando ultimas-respuestas en memcache')
             else:
-                logging.error("Fallo al rellenar memcache con las preguntas ultimas-respuestas")
+                logging.error('Fallo al rellenar memcache con las preguntas ultimas-respuestas')
         else:
             logging.info('Leyendo ultimas-respuestas de memcache')
         return respuestas

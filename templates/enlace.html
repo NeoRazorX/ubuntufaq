@@ -13,7 +13,7 @@
     <div class="titulo">Editar enlace:</div>
     <form name="enlace" action="/mod_e" method="post">
         <input type="hidden" name="id" value="{{ enlace.key }}"/>
-        <input id="titulo" type="text" name="url" size="50" maxlength="100" value="{{ enlace.url }}"/>
+        <input class="titulo" type="text" name="url" size="50" maxlength="100" value="{{ enlace.url }}"/>
         <textarea name="descripcion" rows="6" cols="60">{{ enlace.descripcion|safe }}</textarea>
         <br/>
         Tags: <input type="text" name="tags" size="50" maxlength="100" value="{{ enlace.tags }}"/> &nbsp;

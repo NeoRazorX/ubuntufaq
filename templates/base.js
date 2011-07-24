@@ -8,8 +8,8 @@ function menu_cabecera(eleccion)
     document.getElementById('pregunta').style.display = 'none';
     document.getElementById('enlace').style.display = 'none';
     document.getElementById('buscar').style.display = 'none';
+    document.getElementById('buscar2').style.display = 'none';
     document.getElementById('mapa').style.display = 'none';
-    document.getElementById('espacio').style.height = '80px';
     
     switch( eleccion )
     {
@@ -21,7 +21,7 @@ function menu_cabecera(eleccion)
         case 'buscar':
             document.getElementById('menubuscar').setAttribute("class", "menusel");
             document.getElementById('buscar').style.display = 'block';
-            document.getElementById('espacio').style.height = '160px';
+            document.getElementById('buscar2').style.display = 'block';
             break;
         
         case 'mapa':
@@ -50,8 +50,7 @@ function enviar_pregunta()
         document.publicar.titulo.focus();
         document.publicar.titulo.select();
     }
-    
-    if(contenido == '' || contenido == "¡Haz tu pregunta!")
+    else if(contenido == '' || contenido == "¡Haz tu pregunta!")
     {
         continuar = false;
         mensaje = "¡Debes modificar la descripción!";
@@ -84,16 +83,14 @@ function enviar_enlace()
         document.publicar.url.focus();
         document.publicar.url.select();
     }
-    
-    if(descripcion == '' || descripcion == "Descripción del enlace (450 caracteres max.).")
+    else if(descripcion == '' || descripcion == "Descripción del enlace (450 caracteres max.).")
     {
         continuar = false;
         mensaje = "¡Debes modificar la descripción!";
         document.publicar.descripcion.focus();
         document.publicar.descripcion.select();
     }
-    
-    if(descripcion.length > 450)
+    else if(descripcion.length > 450)
     {
         continuar = false;
         mensaje = "¡La descripción del enlace es demasiado larga! Max. 450 caracteres, actual=" + descripcion.length;
@@ -176,5 +173,36 @@ function borrar_comentario(id, c)
     if( confirm('¿Realmente desea eliminar el comentario?') )
     {
         window.location.href = '/del_c?id=' + id + '&c=' + c;
+    }
+}
+
+function enviar_privado()
+{
+    var texto = document.privado.texto.value;
+    var mensaje;
+    var continuar = true;
+    
+    if(texto == '')
+    {
+        continuar = false;
+        mensaje = "¡Escribe algo!";
+        document.privado.texto.focus();
+        document.privado.texto.select();
+    }
+    else if(texto.length > 450)
+    {
+        continuar = false;
+        mensaje = "¡El texto es demasiado larga! Max. 450 caracteres, actual=" + texto.length;
+        document.privado.texto.focus();
+        document.privado.texto.select();
+    }
+    
+    if(continuar)
+    {
+        document.privado.submit();
+    }
+    else
+    {
+        alert( mensaje );
     }
 }

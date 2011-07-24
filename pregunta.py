@@ -90,16 +90,14 @@ class Nueva_pregunta(Pagina):
     # crea la pregunta
     def post(self):
         p = Pregunta()
-        p.titulo = cgi.escape( self.request.get('titulo') )
-        p.contenido = cgi.escape( self.request.get('contenido') )
+        p.titulo = cgi.escape(self.request.get('titulo'), True)
+        p.contenido = cgi.escape(self.request.get('contenido'), True)
         p.tags = self.extraer_tags( self.request.get('titulo') + self.request.get('contenido') )
         p.os = self.request.environ['HTTP_USER_AGENT']
         
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
                 p.autor = users.get_current_user()
-                p.enviar_email = True
-                p.stop_emails = False
             try:
                 p.put()
                 p.borrar_cache()
@@ -164,7 +162,7 @@ class Detalle_pregunta(Pagina):
                     error = None)
             
             template_values = {
-                'titulo': p.titulo + ' - ' + p.get_estado(),
+                'titulo': p.titulo + ' [ ' + p.get_estado() + ' ]',
                 'descripcion': p.contenido,
                 'pregunta': p,
                 'tags': 'problema, duda, ayuda, ' + p.tags,
@@ -180,7 +178,8 @@ class Detalle_pregunta(Pagina):
                 'captcha': chtml,
                 'usuario': users.get_current_user(),
                 'notis': self.get_notificaciones(),
-                'error_dominio': self.error_dominio
+                'error_dominio': self.error_dominio,
+                'es_seguidor': p.es_seguidor( users.get_current_user() )
             }
             path = os.path.join(os.path.dirname(__file__), 'templates/pregunta.html')
             self.response.out.write(template.render(path, template_values))
@@ -198,13 +197,18 @@ class Detalle_pregunta(Pagina):
         if p and self.request.get('titulo') and self.request.get('contenido') and self.request.get('tags') and self.request.get('estado'):
             if (users.get_current_user() == p.autor) or users.is_current_user_admin():
                 try:
-                    p.titulo = cgi.escape( self.request.get('titulo') )
-                    p.contenido = cgi.escape( self.request.get('contenido') )
-                    p.tags = cgi.escape( self.request.get('tags') )
-                    p.estado = int( self.request.get('estado') )
+                    p.titulo = cgi.escape(self.request.get('titulo'), True)
+                    p.contenido = cgi.escape(self.request.get('contenido'), True)
+                    p.tags = cgi.escape(self.request.get('tags'), True)
+                    n_estado = int( self.request.get('estado') )
+                    if n_estado == 10 and p.estado != n_estado:
+                        p.marcar_solucionada()
+                    elif n_estado == 11 and p.estado != n_estado:
+                        p.marcar_pendiente()
+                    p.estado = n_estado
                     p.put()
                     p.borrar_cache()
-                    logging.warning("Se ha modificado la pregunta con id: " + self.request.get('id'))
+                    logging.info("Se ha modificado la pregunta con id: " + self.request.get('id'))
                     self.redirect( p.get_link() )
                 except:
                     self.redirect('/error/503')
@@ -225,27 +229,14 @@ class Borrar_pregunta(webapp.RequestHandler):
         else:
             self.redirect('/error/403')
 
-class Stop_emails(webapp.RequestHandler):
-    def get(self, id_p=None):
-        try:
-            p = Pregunta.get( id_p )
-            if users.get_current_user() == p.autor:
-                p.enviar_email = False
-                p.stop_emails = True
-                p.put()
-                self.redirect( p.get_link() )
-            else:
-                self.redirect('/error/403')
-        except:
-            self.redirect('/error/404')
-
 class Responder(webapp.RequestHandler):
     def post(self):
         fallo = 0
         r = Respuesta()
-        r.contenido = cgi.escape( self.request.get('contenido') )
+        r.contenido = cgi.escape(self.request.get('contenido'), True)
         r.id_pregunta = self.request.get('id_pregunta')
         r.os = self.request.environ['HTTP_USER_AGENT']
+        r.ips = [self.request.remote_addr]
         
         if users.get_current_user() and self.request.get('id_pregunta') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
@@ -273,26 +264,11 @@ class Responder(webapp.RequestHandler):
         else:
             try:
                 respuesta.put()
-                respuesta.get_pregunta().borrar_cache()
                 p = respuesta.get_pregunta()
                 p.actualizar( respuesta )
                 self.redirect(p.get_link() + '#' + str(respuesta.key()))
             except:
                 self.redirect('/error/503')
-
-# solo el autor de la preguna o un administrador puede destacar una respuesta
-class Destacar_respuesta(webapp.RequestHandler):
-    def get(self):
-        try:
-            r = Respuesta.get( self.request.get('r') )
-            p = r.get_pregunta()
-            if (users.get_current_user() == p.autor) or users.is_current_user_admin():
-                r.destacar()
-                self.redirect( p.get_link() )
-            else:
-                self.redirect('/error/403')
-        except:
-            self.redirect('/error/503')
 
 # solo el autor de la preguna o un administrador puede destacar una respuesta
 class Modificar_respuesta(webapp.RequestHandler):
@@ -301,7 +277,7 @@ class Modificar_respuesta(webapp.RequestHandler):
             try:
                 r = Respuesta.get( self.request.get('id_respuesta') )
                 p = r.get_pregunta()
-                r.contenido = cgi.escape( self.request.get('contenido') )
+                r.contenido = cgi.escape(self.request.get('contenido'), True)
                 r.put()
                 p.borrar_cache()
                 self.redirect( p.get_link() )
