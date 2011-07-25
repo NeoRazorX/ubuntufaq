@@ -17,12 +17,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DEBUG_FLAG = False
+DEBUG_FLAG = True
 APP_NAME = 'ubuntu-faq'
 APP_DESCRIPTION = u'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
 APP_DOMAIN = 'http://www.ubufaq.com'
-RECAPTCHA_PUBLIC_KEY = '6Ldrqb4SAAAAAOowIidxQ3Hc6igXPdqWKec3dL_H'
-RECAPTCHA_PRIVATE_KEY = '6Ldrqb4SAAAAABJ33eyTnkT5t2ll8kKDerqDoNj2'
+RECAPTCHA_PUBLIC_KEY = ''
+RECAPTCHA_PRIVATE_KEY = ''
 STEAM_ENLACE_KEY = 'agp1YnVudHUtZmFxcg4LEgZFbmxhY2UYyvYkDA'
 RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
     'http://hipersimple.com/feed',
