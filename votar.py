@@ -19,12 +19,6 @@
 
 import os, logging, cgi, urllib, base64
 
-# cargamos django 1.2
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-from google.appengine.dist import use_library
-use_library('django', '1.2')
-from google.appengine.ext.webapp import template
-
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
@@ -37,7 +31,7 @@ class Guardar_voto(webapp.RequestHandler):
             if not r: # no hay respuesta
                 logging.warning('Respuesta no encontrada!')
                 self.redirect('/error/404')
-            elif self.request.remote_addr in r.ips and self.request.remote_addr != '127.0.0.1': # ya se ha votado desde esta IP
+            elif self.request.remote_addr in r.ips: # ya se ha votado desde esta IP
                 logging.info('Voto ya realizado')
                 p = r.get_pregunta()
                 self.redirect( p.get_link() )
@@ -62,7 +56,6 @@ class Guardar_voto(webapp.RequestHandler):
 
 def main():
     application = webapp.WSGIApplication( [(r'/votar/(.*)/(.*)', Guardar_voto)], debug=DEBUG_FLAG )
-    template.register_template_library('filters.filtros_django')
     run_wsgi_app(application)
 
 if __name__ == "__main__":

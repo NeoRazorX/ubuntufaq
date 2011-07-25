@@ -40,6 +40,8 @@ class stats:
                     'clics_pp': 0,
                     'clics_e': 0,
                     'clics_pe': 0,
+                    'usuarios': 0,
+                    'seguimientos': 0,
                     'top_user': None,
                     'tu_puntos': 0
             }
@@ -51,7 +53,7 @@ class stats:
         else:
             logging.info("Lellendo stats desde memcache")
         
-        # actualizamos el numero de preguntas
+        # actualizamos el número de preguntas
         if stats['iterador'] == 0 and continuar:
             query = db.GqlQuery("SELECT * FROM Pregunta")
             stats['preguntas'] = query.count()
@@ -61,19 +63,19 @@ class stats:
             logging.info("Actualizado stats en base a las preguntas")
             continuar = False
         
-        # actualizamos el numero de respuestas
+        # actualizamos el número de respuestas
         if stats['iterador'] == 1 and continuar:
             query = db.GqlQuery("SELECT * FROM Respuesta")
             stats['respuestas'] = query.count()
             if stats['preguntas'] > 0 and stats['respuestas'] > 0:
-                stats['rpp'] = (stats['respuestas'] / stats['preguntas'])
+                stats['rpp'] = (float(stats['respuestas']) / stats['preguntas'])
             stats['iterador'] += 1
             stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a las respuestas")
             continuar = False
         
-        # actualizamos el numero de enlaces
+        # actualizamos el número de enlaces
         if stats['iterador'] == 2 and continuar:
             query = db.GqlQuery("SELECT * FROM Enlace")
             stats['enlaces'] = query.count()
@@ -83,20 +85,40 @@ class stats:
             logging.info("Actualizado stats en base a los enlaces")
             continuar = False
         
-        # actualizamos el numero de comentarios
+        # actualizamos el número de comentarios
         if stats['iterador'] == 3 and continuar:
             query = db.GqlQuery("SELECT * FROM Comentario")
             stats['comentarios'] = query.count()
             if stats['enlaces'] > 0 and stats['comentarios'] > 0:
-                stats['cpe'] = (stats['comentarios'] / stats['enlaces'])
+                stats['cpe'] = (float(stats['comentarios']) / stats['enlaces'])
             stats['iterador'] += 1
             stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los comentarios")
             continuar = False
         
-        # actualizamos el top de usuarios
+        # actualizamos el número de usuarios
         if stats['iterador'] == 4 and continuar:
+            query = db.GqlQuery("SELECT * FROM Usuario")
+            stats['usuarios'] = query.count()
+            stats['iterador'] += 1
+            stats['iterador2'] = 0
+            memcache.replace('stats', stats)
+            logging.info("Actualizado stats en base a los usuarios")
+            continuar = False
+        
+        # actualizamos el número de seguimientos
+        if stats['iterador'] == 5 and continuar:
+            query = db.GqlQuery("SELECT * FROM Seguimiento")
+            stats['sequimientos'] = query.count()
+            stats['iterador'] += 1
+            stats['iterador2'] = 0
+            memcache.replace('stats', stats)
+            logging.info("Actualizado stats en base a los seguimientos")
+            continuar = False
+        
+        # actualizamos el top de usuarios
+        if stats['iterador'] == 6 and continuar:
             # probamos con populares
             populares = memcache.get( 'populares' )
             stats['tu_puntos'] = 0
@@ -123,7 +145,7 @@ class stats:
             continuar = False
         
         # actualizamos el numero de clics por pregunta
-        if stats['iterador'] == 5 and continuar:
+        if stats['iterador'] == 7 and continuar:
             query = db.GqlQuery("SELECT * FROM Pregunta")
             if stats['iterador2'] == 0:
                 stats['clics_p'] = 0
@@ -144,7 +166,7 @@ class stats:
             continuar = False
         
         # actualizamos el numero de clics por enlace
-        if stats['iterador'] == 6 and continuar:
+        if stats['iterador'] == 8 and continuar:
             query = db.GqlQuery("SELECT * FROM Enlace")
             if stats['iterador2'] == 0:
                 stats['clics_e'] = 0
@@ -163,9 +185,6 @@ class stats:
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los clics por enlace")
             continuar = False
-        
-        
 
 if __name__ == "__main__":
     stats()
-

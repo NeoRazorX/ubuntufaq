@@ -18,9 +18,9 @@
     Desde: {{ karma.fecha|date:"d/m/Y H:i" }}
     {% if usuario == tusuario %}
         {% if karma.emails %}
-            <a href="/stop_emails">No recibir más emails</a>
+            <div class="b_rojo"><a href="/stop_emails">no recibir más emails</a></div>
         {% else %}
-            <a href="/stop_emails">Recibir emails</a>
+            <div class="b_verde"><a href="/stop_emails">recibir emails</a></div>
         {% endif %}
     {% endif %}
     <br/><br/>
@@ -32,8 +32,9 @@
     <br/>
     Comentarios: {{ karma.comentarios }}
     <br/>
-    <a href="{{ mi_perfil }}?rld=True">Actualizar!</a>
+    <div class="b_verde"><a href="{{ mi_perfil }}?rld=True">actualizar</a></div>
 </td>
+<td width="30"></td>
 <td valign="top">
     <div class="comentario">
         Perfil de {{ tusuario.email|cortamail }} - {{ karma.puntos|karmsg }}

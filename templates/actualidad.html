@@ -53,18 +53,6 @@
 <hr/>
 <table width="100%">
 <tr>
-    <td width="90">
-        {{ stats.top_user.email|avatar }}
-    </td>
-    <td>
-    <ul>
-        <li>Usuario m&aacute;s valorado:</li>
-        <ul>
-        <li><a href="/u/{{ stats.top_user.email|urlencode }}">{{ stats.top_user.nickname|cortamail }}</a></li>
-        <li>{{ stats.tu_puntos|puntos }} puntos</li>
-        </ul>
-    </ul>
-    </td>
     <td>
     <ul>
         <li>Preguntas: {{ stats.preguntas }}</li>
@@ -84,6 +72,15 @@
         <li>Clics por enlace: {{ stats.clics_pe }}</li>
         <li>Comentarios: {{ stats.comentarios }}</li>
         <li>Comentarios por enlace: {{ stats.cpe }}</li>
+        </ul>
+    </ul>
+    </td>
+    <td>
+    <ul>
+        <li>Usuarios: {{ stats.usuarios }}</li>
+        <ul>
+        <li>Usuario más valorado: {{ stats.top_user|autor }}</li>
+        <li>Seguimientos: {{ stats.seguimientos }}</li>
         </ul>
     </ul>
     </td>

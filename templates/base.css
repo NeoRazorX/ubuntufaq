@@ -63,8 +63,38 @@ a.notificacion {
     border-bottom-right-radius: 2px 2px;
 }
 
-a.negativo {
+a.seguimiento {
+    color: black;
+}
+
+div.boton, div.b_verde, div.b_rojo {
+    text-align: center;
+    background-color: #333333;
+    padding: 3px;
+    margin: 2px;
+    border-top-left-radius: 2px 2px;
+    border-top-right-radius: 2px 2px;
+    border-bottom-left-radius: 2px 2px;
+    border-bottom-right-radius: 2px 2px;
+}
+
+div.b_verde {
+    background-color: green;
+}
+
+div.b_rojo {
+    background-color: #E20000;
+}
+
+div.boton a, div.b_verde a, div.b_rojo a {
+    color: white;
+}
+
+span.votar {
     margin-left: 30px;
+}
+
+a.negativo {
     background-color: #E20000;
     color: white;
     padding-left: 3px;
@@ -248,11 +278,26 @@ td.clics {
     vertical-align: top;
 }
 
-td.votar {
+td.valoracion, td.v_negativa {
     vertical-align: top;
     width: 50px;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: bold;
+}
+
+td.valoracion a {
+    color: black;
+}
+
+td.v_negativa a {
+    background-color: #E20000;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-top-left-radius: 2px 2px;
+    border-top-right-radius: 2px 2px;
+    border-bottom-left-radius: 2px 2px;
+    border-bottom-right-radius: 2px 2px;
 }
 
 div.clics {
@@ -308,7 +353,21 @@ div.info_respuesta_down {
     padding: 0px;
 }
 
-div.respuesta {
+div.respuesta_d {
+    background-color: #feffc0;
+    border: 1px solid #e1e16e;
+    margin-top: 0px;
+    margin-left: 10px;
+    margin-right: 10px;
+    margin-bottom: 0px;
+    padding: 5px;
+    text-transform: capitalize;
+    font-variant: small-caps;
+    font-size: 15px;
+}
+
+div.respuesta,
+div.respuesta_n {
     background-color: #F7F7F7;
     border: 1px solid #c4c4c4;
     margin-top: 0px;
@@ -318,29 +377,30 @@ div.respuesta {
     padding: 5px;
 }
 
+div.respuesta_n {
+    border: 1px dashed #E20000;
+    color: white;
+}
+
+div.respuesta_n:hover {
+    border: 1px solid #E20000;
+    color: black;
+}
+
 div.respuesta img {
     vertical-align: bottom;
     margin-right: 10px;
 }
 
-div.respuesta a:hover {
+div.pregunta a:hover,
+div.respuesta a:hover,
+div.respuesta_d a:hover {
     background-color: #DD4814;
     color: white;
     border-top-left-radius: 3px 3px;
     border-top-right-radius: 3px 3px;
     border-bottom-right-radius: 3px 3px;
     border-bottom-left-radius: 3px 3px;
-}
-
-div.respuesta_d {
-    background-color: #feffc0;
-    border: 1px solid #e1e16e;
-    margin-top: 0px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 0px;
-    padding: 5px;
-    font-weight: bold;
 }
 
 div.respuesta ul {

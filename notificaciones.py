@@ -19,12 +19,6 @@
 
 import os, logging, cgi, urllib, base64
 
-# cargamos django 1.2
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-from google.appengine.dist import use_library
-use_library('django', '1.2')
-from google.appengine.ext.webapp import template
-
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
@@ -34,8 +28,8 @@ class Redir_notificacion(webapp.RequestHandler):
     def get(self, keyn=None):
         try:
             n = Notificacion.get( keyn )
-            n.rm_cache()
             n.delete()
+            n.borrar_cache()
             self.redirect( n.link )
         except:
             self.redirect('/error/503')
@@ -48,7 +42,7 @@ class Redir_notificacion(webapp.RequestHandler):
                 n.link = '/u/' + urllib.quote( base64.b64encode( users.get_current_user().email() ) )
                 n.mensaje = users.get_current_user().nickname() + ' te dice: ' + cgi.escape( self.request.get('texto')[:450].replace("\n", ' ') )
                 n.put()
-                n.rm_cache()
+                n.borrar_cache()
                 self.redirect('/u/' + urllib.quote( base64.b64encode( self.request.get('destinatario') ) ) + '?priv=True')
             except:
                 self.redirect('/error/503')
@@ -57,7 +51,6 @@ class Redir_notificacion(webapp.RequestHandler):
 
 def main():
     application = webapp.WSGIApplication( [(r'/noti/(.*)', Redir_notificacion)], debug=DEBUG_FLAG )
-    template.register_template_library('filters.filtros_django')
     run_wsgi_app(application)
 
 if __name__ == "__main__":

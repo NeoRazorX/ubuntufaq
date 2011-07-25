@@ -101,22 +101,22 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     </ul>
     </form>
 </td>
-<td valign="top" align="right" width="120">
+<td valign="top" width="120">
+    <a class="seguimiento" href="/ayuda#seguimiento">Seguimientos</a>: {{ pregunta.seguimientos }}
+    <br/>
+    {% if not usuario or usuario != pregunta.autor %}
+    {% if es_seguidor %}
+        <div class="b_rojo"><a href="/seguir/{{ pregunta.key }}">dejar de seguir</a></div>
+    {% else %}
+        <div class="b_verde"><a href="/seguir/{{ pregunta.key }}">seguir</a></div>
+    {% endif %}
+    {% endif %}
+    <br/>
     {% if editar %}
-        <a href="/question/{{ pregunta.key }}?modificar=ok">Modificar</a><br/>
+        <div class="boton"><a href="/question/{{ pregunta.key }}?modificar=ok">modificar</a></div>
     {% endif %}
     {% if administrador %}
-        <a href="#" onclick="borrar_pregunta('{{ pregunta.key }}')">Borrar</a><br/>
-    {% endif %}
-    <br/>
-    <a href="/ayuda#seguimiento">Seguimientos</a>: {{ pregunta.seguimientos }}
-    <br/>
-    {% if usuario != pregunta.autor %}
-    {% if es_seguidor %}
-        <a href="/seguir/{{ pregunta.key }}">Dejar de seguir</a>
-    {% else %}
-        <a href="/seguir/{{ pregunta.key }}">Seguir</a>
-    {% endif %}
+        <div class="b_rojo"><a href="#" onclick="borrar_pregunta('{{ pregunta.key }}')">borrar</a></div>
     {% endif %}
 </td>
 </tr>
@@ -131,7 +131,11 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <tr>
 <td class="avatar">{{ respuesta.autor.email|avatar:40 }}</td>
 <td valign="top">
+{% if respuesta.valoracion >= 0 %}
     <div class="respuesta">
+{% else %}
+    <div class="respuesta_n">
+{% endif %}
     <a name="{{respuesta.key}}"></a>
     {% if modificar %}
     {% if administrador %}
@@ -159,11 +163,16 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
             | <a href="#" onclick="borrar_respuesta('{{pregunta.key}}', '{{respuesta.key}}')">borrar</a>
         {% endif %}
     {% endif %}
+        <span class="votar">votar:</span>
         <a class="negativo" href="/votar/{{respuesta.key}}/0">-1</a>
         <a class="positivo" href="/votar/{{respuesta.key}}/1">+1</a>
     </div>
 </td>
-<td class="votar">{{ respuesta.valoracion }}</td>
+{% if respuesta.valoracion >= 0 %}
+    <td class="valoracion"><a href="/ayuda#votar_respuestas">{{ respuesta.valoracion }}</a></td>
+{% else %}
+    <td class="v_negativa"><a href="/ayuda#votar_respuestas">{{ respuesta.valoracion }}</a></td>
+{% endif %}
 </tr>
 {% empty %}
 <tr>

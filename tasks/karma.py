@@ -40,15 +40,9 @@ class karma:
         # elegimos y procesamos aleatoriamente  de uno a tres usuarios
         if len( self.pending_users ) > 1:
             for i in range(3):
-                try:
-                    self.calcular( random.choice(self.pending_users) )
-                except:
-                    logging.warning('Imposible calcular el karma del usuario')
+                self.calcular( random.choice(self.pending_users) )
         elif len( self.pending_users ) == 1:
-            try:
-                self.calcular( self.pending_users[0] )
-            except:
-                logging.warning('Imposible calcular el karma del usuario')
+            self.calcular( self.pending_users[0] )
         else:
             logging.info("No se ha encontrado ningun usuario al que actualizar el karma")
         # guardamos o actualizamos la lista de usuarios:
@@ -111,9 +105,9 @@ class karma:
                 karma.respuestas = query.count()
                 # lo ideal es responder más que preguntas
                 try:
-                    karma.puntos = max(0, min(10, (2 * float(karma.respuestas) / karma.preguntas )))
+                    karma.puntos = max(0.0, min(10.0, (2 * float(karma.respuestas) / karma.preguntas )))
                 except:
-                    karma.puntos = max(0, min(10, ( karma.preguntas*0.25 + karma.respuestas*0.5 )))
+                    karma.puntos = max(0.0, min(10.0, ( karma.preguntas*0.25 + karma.respuestas*0.5 )))
                 # +0.5 si tiene más de 100 respuestas
                 if karma.respuestas > 100:
                     karma.puntos += 0.5

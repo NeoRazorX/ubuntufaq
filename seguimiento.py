@@ -19,12 +19,6 @@
 
 import os, logging, cgi, urllib, base64
 
-# cargamos django 1.2
-os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
-from google.appengine.dist import use_library
-use_library('django', '1.2')
-from google.appengine.ext.webapp import template
-
 from google.appengine.ext import db, webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
@@ -44,6 +38,7 @@ class Modificar_seguimiento(webapp.RequestHandler):
                 s.estado = p.estado
                 s.usuarios = [ users.get_current_user() ]
                 s.put()
+                s.borrar_cache()
             elif users.get_current_user() in s.usuarios: # el usuario ya es seguidor
                 u = s.usuarios
                 u.remove( users.get_current_user() )
@@ -52,19 +47,19 @@ class Modificar_seguimiento(webapp.RequestHandler):
                 else:
                     s.usuarios = u
                     s.put()
+                    s.borrar_cache()
             else: # el usuario no es seguidor
                 u = s.usuarios
                 u.append( users.get_current_user() )
                 s.usuarios = u
                 s.put()
-            s.borrar_cache()
+                s.borrar_cache()
             self.redirect( p.get_link() )
         except:
             self.redirect('/error/503')
 
 def main():
     application = webapp.WSGIApplication( [(r'/seguir/(.*)', Modificar_seguimiento)], debug=DEBUG_FLAG )
-    template.register_template_library('filters.filtros_django')
     run_wsgi_app(application)
 
 if __name__ == "__main__":

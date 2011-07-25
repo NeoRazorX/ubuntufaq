@@ -225,22 +225,25 @@ def ultimas_respuestas(pregunta, respuestas):
 
 @register.filter
 def respuestas_destacadas(respuestas):
-    if respuestas:
-        retorno = ''
-        i = 1
-        media = 0
-        for r in respuestas:
-            media += r.valoracion
-        media = float(media)/len(respuestas)
-        for r in respuestas:
-            if r.valoracion > media:
-                if retorno == '':
-                    retorno = '<tr><td colspan="3" valign="top"><div class="respuesta_d">Respuestas destacadas: '
-                retorno += '<a href="#' + str(i) + '">#' + str(i) + '</a> '
-            i += 1
-        retorno += '</div></td></tr><tr><td colspan="3">&nbsp;</td></tr>'
-        return mark_safe(retorno)
-    else:
+    try:
+        if respuestas:
+            retorno = ''
+            i = 1
+            media = 0
+            for r in respuestas:
+                media += r.valoracion
+            media = float(media)/len(respuestas)
+            for r in respuestas:
+                if r.valoracion > media:
+                    if retorno == '':
+                        retorno = '<tr><td colspan="3" valign="top"><div class="respuesta_d">Respuestas destacadas: '
+                    retorno += '<a href="#' + str(i) + '">#' + str(i) + '</a> '
+                i += 1
+            retorno += '</div></td></tr><tr><td colspan="3">&nbsp;</td></tr>'
+            return mark_safe(retorno)
+        else:
+            return ''
+    except:
         return ''
 
 
