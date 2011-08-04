@@ -110,7 +110,7 @@ class stats:
         # actualizamos el número de seguimientos
         if stats['iterador'] == 5 and continuar:
             query = db.GqlQuery("SELECT * FROM Seguimiento")
-            stats['sequimientos'] = query.count()
+            stats['seguimientos'] = query.count()
             stats['iterador'] += 1
             stats['iterador2'] = 0
             memcache.replace('stats', stats)

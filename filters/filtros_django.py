@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import hashlib, random, urllib, base64
+import hashlib, random, urllib, base64, math
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import truncatewords, linebreaksbr, urlize
 from google.appengine.ext import webapp
@@ -194,7 +194,11 @@ def sin_solucionar(preguntas, respuestas):
                 texto += '<div class="titulo"><span>Preguntas abiertas</span></div>\n'
             elif estado == 3:
                 texto += '<div class="titulo"><span>Preguntas parcialmente solucionadas</span></div>\n'
-            texto += '<ul>'
+            elif estado == 11:
+                texto += u'<div class="titulo"><span>Preguntas pendientes de confirmación</span></div>\n'
+            else:
+                texto += '<div class="titulo"><span>Estado desconocido</span></div>\n'
+            texto += '<ul class="tags">'
         
         # titulo de la pregunta
         texto += '<li class="pregunta">' + p.creado.strftime("%d/%m/%Y") + ', '
@@ -225,63 +229,52 @@ def ultimas_respuestas(pregunta, respuestas):
 
 @register.filter
 def respuestas_destacadas(respuestas):
-    try:
-        if respuestas:
-            retorno = ''
-            i = 1
-            media = 0
-            for r in respuestas:
-                media += r.valoracion
-            media = float(media)/len(respuestas)
-            for r in respuestas:
-                if r.valoracion > media:
-                    if retorno == '':
-                        retorno = '<tr><td colspan="3" valign="top"><div class="respuesta_d">Respuestas destacadas: '
-                    retorno += '<a href="#' + str(i) + '">#' + str(i) + '</a> '
-                i += 1
-            retorno += '</div></td></tr><tr><td colspan="3">&nbsp;</td></tr>'
-            return mark_safe(retorno)
-        else:
-            return ''
-    except:
+    if len(respuestas) > 4:
+        retorno = ''
+        i = 1
+        media = 0
+        for r in respuestas:
+            media += r.valoracion
+        media = math.ceil(float(media)/len(respuestas))
+        for r in respuestas:
+            if r.valoracion > media:
+                if retorno == '':
+                    retorno = '<tr><td></td><td valign="top"><div class="respuesta_d">Respuestas destacadas: '
+                retorno += '<a href="#' + str(i) + '">#' + str(i) + '</a> '
+            i += 1
+        retorno += '</div></td><td></td></tr><tr><td colspan="3">&nbsp;</td></tr>'
+        return mark_safe(retorno)
+    else:
         return ''
 
 
 @register.filter
 def tipo_enlace(enlace):
     retorno = ''
-    if enlace.tipo_enlace is None:
-        if enlace.url[:23] == 'http://www.youtube.com/':
-            enlace.tipo_enlace = 'youtube'
-        elif enlace.url[:21] == 'http://www.vimeo.com/':
-            enlace.tipo_enlace = 'vimeo'
-        elif enlace.url[-4:] in ['.ogv', '.OGV', '.mp4', '.MP4'] or enlace.url[-5:] in ['.webm', '.WEBM']:
-            enlace.tipo_enlace = 'vhtml5'
-        elif enlace.url[-4:] in ['.png', '.PNG', '.jpg', '.JPG', '.gif', '.GIF'] or enlace.url[-5:] in ['.jpeg', '.JPEG']:
-            enlace.tipo_enlace = 'imagen'
-        elif enlace.url[-4:] in ['.deb', '.DEB']:
-            enlace.tipo_enlace = 'deb'
-        elif enlace.url[-4:] in ['.deb', '.DEB', '.tgz', '.TGZ', '.bz2', '.BZ2'] or enlace.url[-3:] in ['.gz', '.GZ']:
-            enlace.tipo_enlace = 'package'
-        else:
-            enlace.tipo_enlace = 'texto'
-    if enlace.tipo_enlace == 'texto':
+    if enlace.url[:23] == 'http://www.youtube.com/':
+        enlace.tipo_enlace = 'youtube'
+        retorno = '<iframe title="YouTube video player" class="youtube-player" type="text/html" width="425" height="349" src="http://www.youtube.com/embed/'+enlace.url.split('?v=')[1]+'" frameborder="0"></iframe>'
+    elif enlace.url[:21] == 'http://www.vimeo.com/':
+        enlace.tipo_enlace = 'vimeo'
+        retorno = '<iframe src="http://player.vimeo.com/video/'+enlace.url.split('/')[3]+'" width="400" height="300" frameborder="0"></iframe>'
+    elif enlace.url[-4:] in ['.ogv', '.OGV', '.mp4', '.MP4'] or enlace.url[-5:] in ['.webm', '.WEBM']:
+        enlace.tipo_enlace = 'vhtml5'
+        retorno = '<video src="'+enlace.url+'" controls="controls"></video>'
+    elif enlace.url[-4:] in ['.png', '.PNG', '.jpg', '.JPG', '.gif', '.GIF'] or enlace.url[-5:] in ['.jpeg', '.JPEG']:
+        enlace.tipo_enlace = 'imagen'
+        retorno = '<a href="'+enlace.url+'" target="_Blank">'+miniatura(enlace.url)+'</a></center>'
+    elif enlace.url[-4:] in ['.deb', '.DEB']:
+        enlace.tipo_enlace = 'deb'
+        retorno = '<a href="'+enlace.url+'"><img src="/img/application-x-deb.png" alt="'+enlace.descripcion+'"/></a>'
+    elif enlace.url[-4:] in ['.deb', '.DEB', '.tgz', '.TGZ', '.bz2', '.BZ2'] or enlace.url[-3:] in ['.gz', '.GZ']:
+        enlace.tipo_enlace = 'package'
+        retorno = '<a href="'+enlace.url+'"><img src="/img/emblem-package.png" alt="'+enlace.descripcion+'" title="clic para descargar"/></a>'
+    else:
+        enlace.tipo_enlace = 'texto'
         if enlace.autor:
             retorno = '<div class="avatar">'+avatar(enlace.autor.email())+'<br/>'+puntos(enlace.puntos)+'</div>'
         else:
             retorno = '<div class="avatar">'+avatar()+'<br/>'+puntos(enlace.puntos)+'</div>'
-    elif enlace.tipo_enlace == 'youtube':
-        retorno = '<iframe title="YouTube video player" class="youtube-player" type="text/html" width="425" height="349" src="http://www.youtube.com/embed/'+enlace.url.split('?v=')[1]+'" frameborder="0"></iframe>'
-    elif enlace.tipo_enlace == 'vimeo':
-        retorno = '<iframe src="http://player.vimeo.com/video/'+enlace.url.split('/')[3]+'" width="400" height="300" frameborder="0"></iframe>'
-    elif enlace.tipo_enlace == 'vhtml5':
-        retorno = '<video src="'+enlace.url+'" controls="controls">¡Tu navegador no soporta el tag de vídeo en html5!</video>'
-    elif enlace.tipo_enlace == 'imagen':
-        retorno = '<a href="'+enlace.url+'" target="_Blank">'+miniatura(enlace.url)+'</a></center>'
-    elif enlace.tipo_enlace == 'deb':
-        retorno = '<a href="'+enlace.url+'"><img src="/img/application-x-deb.png" alt="'+enlace.descripcion+'"/></a>'
-    elif enlace.tipo_enlace == 'package':
-        retorno = '<a href="'+enlace.url+'"><img src="/img/emblem-package.png" alt="'+enlace.descripcion+'" title="clic para descargar"/></a>'
     return mark_safe(retorno)
 
 
@@ -299,7 +292,7 @@ def paginar(datos):
             texto += '<a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a>\n'
     
     # actual
-    texto += '<span id="actual"><a href="' + datos[2] + str(datos[1]) + '">' + str(datos[1]) + '</a></span>\n'
+    texto += '<a id="actual" href="' + datos[2] + str(datos[1]) + '">' + str(datos[1]) + '</a>\n'
     
     # siguientes
     for pag in range(datos[1] + 1, datos[1] + 6):

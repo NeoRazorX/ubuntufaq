@@ -3,13 +3,12 @@ function menu_cabecera(eleccion)
 {
     document.getElementById('menupregunta').setAttribute("class", "caca");
     document.getElementById('menuenlace').setAttribute("class", "caca");
+    document.getElementById('menupensamiento').setAttribute("class", "caca");
     document.getElementById('menubuscar').setAttribute("class", "caca");
-    document.getElementById('menumapa').setAttribute("class", "caca");
     document.getElementById('pregunta').style.display = 'none';
     document.getElementById('enlace').style.display = 'none';
     document.getElementById('buscar').style.display = 'none';
     document.getElementById('buscar2').style.display = 'none';
-    document.getElementById('mapa').style.display = 'none';
     
     switch( eleccion )
     {
@@ -24,9 +23,8 @@ function menu_cabecera(eleccion)
             document.getElementById('buscar2').style.display = 'block';
             break;
         
-        case 'mapa':
-            document.getElementById('menumapa').setAttribute("class", "menusel");
-            document.getElementById('mapa').style.display = 'block';
+        case 'pensamiento':
+            document.getElementById('menupensamiento').setAttribute("class", "menusel");
             break;
         
         default:
@@ -69,14 +67,14 @@ function enviar_pregunta()
     }
 }
 
-function enviar_enlace()
+function enviar_enlace(pensamiento)
 {
     var url = document.publicar.url.value;
     var descripcion = document.publicar.descripcion.value;
     var mensaje;
     var continuar = true;
     
-    if(url == '' || url == 'http://')
+    if(!pensamiento && (url == '' || url == 'http://') )
     {
         continuar = false;
         mensaje = "¡Debes modificar la URL del enlace!";
@@ -93,7 +91,7 @@ function enviar_enlace()
     else if(descripcion.length > 450)
     {
         continuar = false;
-        mensaje = "¡La descripción del enlace es demasiado larga! Max. 450 caracteres, actual=" + descripcion.length;
+        mensaje = "¡La descripción es demasiado larga! Max. 450 caracteres, actual=" + descripcion.length;
         document.publicar.descripcion.focus();
         document.publicar.descripcion.select();
     }

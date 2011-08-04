@@ -102,7 +102,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <td class="avatar"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
 <td valign="top">
     <div class="mensaje">
-    Cada vez que un noticia se queda sin comentarios, Dios mata un gatito.
+    Cada vez que una noticia se queda sin comentarios, Dios mata un gatito.
     <br/>
     Por favor, piensa en los gatitos!
     </div>
@@ -144,7 +144,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <td></td>
     <td colspan="2">
     <b>Informaci&oacute;n relacionada: {{ tags|tags }}.</b>
-    <ul>
+    <ul class="tags">
     {% for rel in relacionadas %}
         <li><a href="{{ rel.link }}">{{ rel.title|truncatewords:25 }}</a></li>
     {% endfor %}

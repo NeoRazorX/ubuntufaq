@@ -38,7 +38,10 @@
     {% endif %}
     <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_pregunta()"/>
     </form>
-{% else %}
+{% endif %}
+
+{% if tipo = 'enlace' %}
+    <br/>
     <div class="titulo">Nuevo enlace:</div>
     <ul>
         <li>Una noticia, un art&iacute;culo o un blog.</li>
@@ -46,6 +49,7 @@
         <a href="http://www.vimeo.com" target="_Blank">vimeo</a> o incluso v&iacute;deos en formato OGM o WEB.</li>
         <li>Una imagen o una captura de pantalla, puedes usar el servicio
         <a href="http://www.imgur.com" target="_Blank">imgur</a> para mayor comodidad.</li>
+        <li>Máximo 450 caracteres.</li>
     </ul>
     
     <form name="publicar" action="/nueva" method="post">
@@ -60,7 +64,31 @@
     {% else %}
         {{ captcha|safe }}
     {% endif %}
-    <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace()"/>
+    <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace(false)"/>
+    </form>
+{% endif %}
+
+{% if not tipo %}
+    <br/>
+    <div class="titulo">Nuevo Pensamiento:</div>
+    <ul>
+        <li>Cualquier cosa que se te pase por la cabeza, pero que tenga algo que ver con Linux.</li>
+        <li>Cualquier cosa que no se pueda catalogar como pregunta o enlace.</li>
+        <li>Un comentario u opinión sobre esta web.</li>
+        <li>Máximo 450 caracteres.</li>
+        <li>Nota: a nivel interno se considerará un enlace.</li>
+    </ul>
+    
+    <form name="publicar" action="/nueva" method="post">
+    <input type="hidden" name="url" value=""/>
+    <textarea name="descripcion" rows="6" cols="60"></textarea>
+    <br/>
+    {% if formulario %}
+        <input type="checkbox" name="anonimo"/>An&oacute;nimo
+    {% else %}
+        {{ captcha|safe }}
+    {% endif %}
+    <input type="button" class="boton" name="enviar" value="enviar" onclick="enviar_enlace(true)"/>
     </form>
 {% endif %}
 

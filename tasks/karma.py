@@ -66,7 +66,7 @@ class karma:
             logging.warning('Buscando en todas las respuestas...')
             query = db.GqlQuery("SELECT * FROM Respuesta")
             if query.count() > 0:
-                seleccion = query.fetch(20, max(0, random.randint(0, query.count()-1)))
+                seleccion = query.fetch(20, random.randint(0, max(0, query.count()-1)))
             else:
                 seleccion = []
         if len( seleccion ) > 0:
@@ -224,11 +224,11 @@ class karma:
                 for ele in seleccion:
                     ele.puntos = puntos
                     ele.put()
-                logging.info("Actualizado el karma del usuario")
+                logging.info("Actualizado el karma del usuario " + str(autor))
             else:
                 logging.info("No hay registros para actualizar (tabla: " + str(eleccion) + ")")
         except:
-            logging.warning("Imposible actualizar el karma del usuario")
+            logging.warning("Imposible actualizar el karma del usuario " + str(autor))
 
 if __name__ == "__main__":
     karma()

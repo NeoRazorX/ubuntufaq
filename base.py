@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DEBUG_FLAG = True
+DEBUG_FLAG = False
 APP_NAME = 'ubuntu-faq'
 APP_DESCRIPTION = u'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
 APP_DOMAIN = 'http://www.ubufaq.com'
@@ -25,7 +25,7 @@ RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 STEAM_ENLACE_KEY = 'agp1YnVudHUtZmFxcg4LEgZFbmxhY2UYyvYkDA'
 RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
-    'http://hipersimple.com/feed',
+    'http://www.cristianvicente.com/feed/',
     'http://neorazorx.blogspot.com/feeds/posts/default']
 KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', 'meego', 'fedora', 'gentoo',
     'suse', 'debian', 'unix', 'canonical', 'lucid', 'maverick', 'natty', 'ocelot', 'chrome os',
@@ -258,6 +258,11 @@ class Enlace(db.Model):
     url = db.LinkProperty()
     ultima_ip = db.StringProperty(default='0.0.0.0')
     
+    def comprobar(self):
+        if self.url is None:
+            self.url = APP_DOMAIN + self.get_link()
+            self.put()
+    
     # devuelve los comentarios del enlace
     # ademas suma un clic si se le proporciona una ip
     def get_comentarios(self, ip=None):
@@ -282,7 +287,7 @@ class Enlace(db.Model):
                         n.put()
                         n.borrar_cache()
                     except:
-                        logging.error('Imposible guardar la notificación')
+                        logging.warning('Imposible guardar la notificación')
                 else:
                     det = Detector_respuestas()
                     det.detectar(comentarios, self.get_link())
@@ -315,7 +320,7 @@ class Enlace(db.Model):
                 else:
                     self.tags += ', ' + tag
         if self.tags == '':
-            self.tags = 'ubuntu, general'
+            self.tags = 'general'
     
     def hundir(self):
         self.fecha = datetime.min
@@ -493,7 +498,7 @@ class Tags:
                     else:
                         logging.warning('Fallo al reemplazar los resultados del tag ' + tag + ' en memcache')
             else:
-                logging.error('Para el tag: ' + tag + ' no hay elementos!')
+                logging.info('Para el tag: ' + tag + ' no hay elementos!')
             # actualizamos la lista general de tags
             encontrado = False
             for t in self.alltags:
@@ -533,6 +538,9 @@ class Usuario(db.Model):
     puntos = db.FloatProperty(default=0.0)
     respuestas = db.IntegerProperty(default=0)
     usuario = db.UserProperty()
+    
+    def get_link(self):
+        return base64.b64decode( urllib.unquote( self.usuario.email() ) )
 
 # clase base
 class Pagina(webapp.RequestHandler):
@@ -545,7 +553,7 @@ class Pagina(webapp.RequestHandler):
                 else:
                     retorno += ', ' + tag
         if retorno == '':
-            retorno = 'ubuntu, general'
+            retorno = 'general'
         return retorno
     
     def get(self):
@@ -588,7 +596,7 @@ class Pagina(webapp.RequestHandler):
             if memcache.add('ultimas-respuestas', respuestas):
                 logging.info('Almacenando ultimas-respuestas en memcache')
             else:
-                logging.error('Fallo al rellenar memcache con las preguntas ultimas-respuestas')
+                logging.warning('Fallo al rellenar memcache con las preguntas ultimas-respuestas')
         else:
             logging.info('Leyendo ultimas-respuestas de memcache')
         return respuestas

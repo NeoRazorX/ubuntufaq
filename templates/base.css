@@ -206,11 +206,17 @@ div.formcabecera a:hover {
     border-bottom-left-radius: 3px 3px;
 }
 
-div.formcabecera div#pregunta {
-}
-
+div.formcabecera div#pregunta,
 div.formcabecera div#enlace {
     display: none;
+}
+
+div.formcabecera table td.mini a {
+    font-size: 12px;
+    padding: 0px;
+    padding-left: 2px;
+    padding-right: 2px;
+    margin-right: 5px;
 }
 
 table.menucabecera,
@@ -232,15 +238,6 @@ div#buscar2 {
     padding: 0px;
     padding-left: 30px;
     padding-right: 30px;
-}
-
-div.formcabecera div#mapa {
-    padding: 5px;
-    display: none;
-}
-
-div.formcabecera div#mapa a {
-    margin-right: 10px;
 }
 
 div.dominio {
@@ -375,6 +372,7 @@ div.respuesta_n {
     margin-right: 10px;
     margin-bottom: 0px;
     padding: 5px;
+    min-height: 35px;
 }
 
 div.respuesta_n {
@@ -387,20 +385,8 @@ div.respuesta_n:hover {
     color: black;
 }
 
-div.respuesta img {
-    vertical-align: bottom;
-    margin-right: 10px;
-}
-
-div.pregunta a:hover,
-div.respuesta a:hover,
-div.respuesta_d a:hover {
-    background-color: #DD4814;
-    color: white;
-    border-top-left-radius: 3px 3px;
-    border-top-right-radius: 3px 3px;
-    border-bottom-right-radius: 3px 3px;
-    border-bottom-left-radius: 3px 3px;
+div.respuesta img.icono {
+    float: right;
 }
 
 div.respuesta ul {
@@ -478,8 +464,8 @@ div.paginacion {
 }
 
 div.paginacion span {
-    background-color: #F7F7F7;
-    border: 1px solid #E4E4E4;
+    background-color: #E7E7E7;
+    border: 1px solid #C4C4C4;
     margin-right: 5px;
     padding: 3px;
 }
@@ -488,14 +474,12 @@ div.paginacion a {
     padding: 2px;
     margin-left: 2px;
     margin-right: 2px;
-}
-
-div.paginacion span#actual {
-    background-color: #DD4814;
     border: 1px solid #DD4814;
 }
 
-div.paginacion span#actual a {
+div.paginacion a:hover,
+div.paginacion a#actual {
+    background-color: #DD4814;
     color: white;
 }
 
@@ -540,6 +524,21 @@ div.pie a {
     color: white;
 }
 
+div.pie table {
+    width: 100%;
+}
+
+div.pie table td {
+    vertical-align: top;
+}
+
+div.pregunta a:hover,
+div.respuesta a:hover,
+div.respuesta_d a:hover,
+div.comentario a:hover,
+div.enlace a:hover,
+ul.tags a:hover,
+div.alltags a:hover,
 div.pie a:hover {
     background-color: #DD4814;
     color: white;
@@ -547,12 +546,4 @@ div.pie a:hover {
     border-top-right-radius: 3px 3px;
     border-bottom-right-radius: 3px 3px;
     border-bottom-left-radius: 3px 3px;
-}
-
-div.pie table {
-    width: 100%;
-}
-
-div.pie table td {
-    vertical-align: top;
 }

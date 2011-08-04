@@ -56,11 +56,11 @@ class Sin_solucionar(Pagina):
     def get_preguntas(self):
         preguntas = memcache.get('sin-solucionar')
         if preguntas is None:
-            preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE estado < 10 ORDER BY estado ASC").fetch(100)
+            preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE estado in :1 ORDER BY estado ASC", [0, 1, 2, 3, 11]).fetch(100)
             if memcache.add('sin-solucionar', preguntas):
                 logging.info('Almacenando sin-solucionar en memcache')
             else:
-                logging.error("Fallo al rellenar memcache con las preguntas de sin-solucionar")
+                logging.warning("Fallo al rellenar memcache con las preguntas de sin-solucionar")
         else:
             logging.info('Leyendo sin-solucionar de memcache')
         return preguntas

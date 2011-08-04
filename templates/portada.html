@@ -6,39 +6,54 @@
     <h1>{{ error|safe|urlize }}</h1>
 </center>
 {% else %}
-<center><a href="/ayuda#ayuda_preguntas"><img class="portada" src="/img/banner.png" alt="¿Necesitas ayuda?"/></a></center>
+<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>
+<script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
+<script type="text/javascript" src="http://apis.google.com/js/plusone.js">
+  {lang: 'es'}
+</script>
 <table width='100%'>
+<tr>
+    <td></td>
+    <td>
+    <ul class="social">
+        <li><g:plusone size="medium"></g:plusone></li>
+        <li><a title="Publicar en Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-count" data-locale="es"></a></li>
+        <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
+        <li><div class="identica" style="padding: 3px; padding-bottom: 2px;background-color: white;
+border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://identi.ca//index.php?action=bookmarklet',l=d.location,e=encodeURIComponent,g=f+'&status_textarea=%E2%80%9C'+((e(s))?e(s):e(document.title))+'%E2%80%9D%20%E2%80%94%20'+l.href;function%20a(){if(!w.open(g,'t','toolbar=0,resizable=0,scrollbars=1,status=1,width=450,height=200')){l.href=g;}}a();})()"><img src="/img/identica.png" alt="identica"/></a></div></li>
+        <li><iframe src="http://www.facebook.com/plugins/like.php?href&amp;send=true&amp;layout=button_count&amp;width=150&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe></li>
+    </ul>
+    </td>
+    <td></td>
+</tr>
 {% for mix in mixto %}
     <tr>
     <td class="avatar">{{ mix.autor.email|avatar:40 }}</td>
     <td>
     <div class="respuesta">
-        {% ifequal mix.tipo 'imagen' %}
-            <a href="{{ mix.link }}"><img src="/img/photo.png" alt="imagen"/></a>
-        {% endifequal %}
-        {% ifequal mix.tipo 'youtube' %}
-            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
-        {% endifequal %}
-        {% ifequal mix.tipo 'vimeo' %}
-            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
-        {% endifequal %}
-        {% ifequal mix.tipo 'vhtml5' %}
-            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
-        {% endifequal %}
-        
-        {% ifequal mix.tipo 'pregunta' %}
-        <div class='titulo'>
-            <span>{{ mix.estado|estado_pregunta }}</span>
-            <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
-        </div>
-        {{ mix.descripcion|safe|truncatewords:35 }}
-        {{ mix.key|ultimas_respuestas:urespuestas }}
+        {% if mix.tipo == 'pregunta' %}
+            <div class='titulo'>
+                <span>{{ mix.estado|estado_pregunta }}</span>
+                <a href="{{ mix.link }}">{{ mix.titulo|safe }}</a>
+            </div>
+            {{ mix.descripcion|safe|truncatewords:35 }}
+            {{ mix.key|ultimas_respuestas:urespuestas }}
         {% else %}
-        {{ mix.descripcion|safe|urlize }}
-            {% ifequal mix.tipo 'texto' %}
-            - <a href="/e/{{ mix.key }}" target="_Blank">fuente original</a>.
-            {% endifequal %}
-        {% endifequal %}
+            {% if mix.tipo == 'imagen' %}
+                <a href="{{ mix.link }}"><img class="icono" src="/img/photo.png" alt="imagen"/></a>
+            {% endif %}
+            {% if mix.tipo == 'youtube' %}
+                <a href="{{ mix.link }}"><img class="icono" src="/img/video.png" alt="v&iacute;deo"/></a>
+            {% endif %}
+            {% if mix.tipo == 'vimeo' %}
+                <a href="{{ mix.link }}"><img class="icono" src="/img/video.png" alt="v&iacute;deo"/></a>
+            {% endif %}
+            {% if mix.tipo == 'vhtml5' %}
+                <a href="{{ mix.link }}"><img class="icono" src="/img/video.png" alt="v&iacute;deo"/></a>
+            {% endif %}
+            {{ mix.descripcion|safe|urlize }}
+            - <a href="{{ mix.link }}">leer más</a>.
+        {% endif %}
     </div>
     <div class="info_respuesta_down">
         {{ mix.fecha|timesince|traducir }} |

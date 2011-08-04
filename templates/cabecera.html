@@ -25,7 +25,12 @@
       })();
     </script>
 </head>
-<body>
+
+{% if foco %}
+<body onload="menu_cabecera('{{ foco }}')">
+{% else %}
+<body onload="menu_cabecera('pregunta')">
+{% endif %}
 
 <div class="cabecera">
 <table class="menucabecera">
@@ -34,8 +39,8 @@
         <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
         <a id="menupregunta" class="menusel" href="#" onclick="menu_cabecera('pregunta')">pregunta</a>
         <a id="menuenlace" href="#" onclick="menu_cabecera('enlace')">enlace</a>
+        <a id="menupensamiento" href="/nueva">pensamiento</a>
         <a id="menubuscar" href="#" onclick="menu_cabecera('buscar')">buscar</a>
-        <a id="menumapa" href="#" onclick="menu_cabecera('mapa')">más...</a>
     </td>
     <td id="right">
 {% if formulario %}
@@ -63,6 +68,14 @@
         </td>
         <td><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_preguntas">Ayuda</a></td>
         </tr>
+        <tr>
+        <td colspan="2" class="mini">
+            <a href="/preguntas">Todas</a>
+            <a href="/populares">Populares</a>
+            <a href="/sin-solucionar">Sin solucionar</a>
+            | <a href="/tag/">Tags</a>
+        </td>
+        </tr>
         </table>
         </form>
     </div>
@@ -75,6 +88,13 @@
             <input class="titulo" type="text" name="url" size="70" maxlength="150" value="http://" onclick="this.select()"/>
         </td>
         <td><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_enlaces">Ayuda</a></td>
+        </tr>
+        <tr>
+        <td colspan="2" class="mini">
+            <a href="/actualidad">Actualidad</a>
+            <a href="/images">Imágenes</a>
+            | <a href="/tag/">Tags</a>
+        </td>
         </tr>
         </table>
         </form>
@@ -93,18 +113,6 @@
             customSearchControl.draw('cse', options);
           }, true);
         </script>
-    </div>
-    <div id="mapa">
-        Preguntas: &nbsp;
-        <a href="/preguntas">Todas</a>
-        <a href="/populares">Populares</a>
-        <a href="/sin-solucionar">Sin solucionar</a>
-        | &nbsp;
-        <a href="/actualidad">Actualidad</a>
-        <a href="/images">Imágenes</a>
-        <a href="/tag/">Tags</a>
-        | &nbsp;
-        <a href="/ayuda">Ayuda</a>
     </div>
 </div>
 </div>

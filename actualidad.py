@@ -50,24 +50,29 @@ class Actualidad(Pagina):
             'usuario': users.get_current_user(),
             'notis': self.get_notificaciones(),
             'error_dominio': self.error_dominio,
-            'stats': memcache.get( 'stats' )
-            }
-        
+            'stats': memcache.get( 'stats' ),
+            'foco': 'enlace'
+        }
         path = os.path.join(os.path.dirname(__file__), 'templates/actualidad.html')
         self.response.out.write(template.render(path, template_values))
     
     # crea un nuevo enlace
     def post(self):
-        if self.request.get('url') and self.request.get('descripcion'):
+        if self.request.get('descripcion'):
+            redirigir = False
             # comprobamos que no se haya introducido anteriormente el enlace
             url = self.request.get('url')
-            enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE url = :1", url).fetch(1)
-            if enlaces:
-                self.redirect('/story/' + str( enlaces[0].key() ))
+            if url != '':
+                enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE url = :1", url).fetch(1)
+                if enlaces:
+                    redirigir = '/story/' + str( enlaces[0].key() )
+            if redirigir:
+                self.redirect( redirigir )
             else:
                 enl = Enlace()
                 enl.descripcion = cgi.escape(self.request.get('descripcion')[:450].replace("\n", ' '), True)
-                enl.url = url
+                if url != '':
+                    enl.url = url
                 enl.os = self.request.environ['HTTP_USER_AGENT']
                 
                 if users.get_current_user():
@@ -75,6 +80,7 @@ class Actualidad(Pagina):
                         enl.autor = users.get_current_user()
                     try:
                         enl.put()
+                        enl.comprobar()
                         enl.borrar_cache()
                         self.redirect( enl.get_link() )
                     except:
@@ -93,6 +99,7 @@ class Actualidad(Pagina):
                     if cResponse.is_valid:
                         try:
                             enl.put()
+                            enl.comprobar()
                             enl.borrar_cache()
                             self.redirect( enl.get_link() )
                         except:
@@ -134,8 +141,6 @@ class Detalle_enlace(Pagina):
             else:
                 modificar = False
             
-            comentarios = e.get_comentarios(self.request.remote_addr)
-            
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
                 'descripcion': u'Discusión sobre: ' + e.descripcion,
@@ -145,16 +150,16 @@ class Detalle_enlace(Pagina):
                 'mi_perfil': self.mi_perfil,
                 'formulario': self.formulario,
                 'enlace': e,
-                'comentarios': comentarios,
+                'comentarios': e.get_comentarios(self.request.remote_addr),
                 'captcha': chtml,
                 'relacionadas': self.paginas_relacionadas( e.tags ),
                 'administrador': users.is_current_user_admin(),
                 'modificar': modificar,
                 'usuario': users.get_current_user(),
                 'notis': self.get_notificaciones(),
-                'error_dominio': self.error_dominio
-                }
-            
+                'error_dominio': self.error_dominio,
+                'foco': 'enlace'
+            }
             path = os.path.join(os.path.dirname(__file__), 'templates/enlace.html')
             self.response.out.write(template.render(path, template_values))
         else:

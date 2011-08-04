@@ -25,17 +25,17 @@ from base import *
 class emails:
     def __init__(self):
         query = db.GqlQuery("SELECT * FROM Usuario")
-        usuarios = query.fetch(20, random.randint(0, max(0, query.count()-20)))
+        usuarios = query.fetch(15, random.randint(0, max(0, query.count()-15)))
         for u in usuarios:
             if self.comprobar(u):
                 break;
     
     def comprobar(self, u):
         retorno = False
-        logging.info('Comprobando notificaciones para el usuario: ' + u.usuario.email())
-        notis = db.GqlQuery("SELECT * FROM Notificacion WHERE usuario = :1 ORDER BY fecha DESC", u.usuario).fetch(20)
-        if notis:
-            if u.emails:
+        if u.emails:
+            logging.info('Comprobando notificaciones para el usuario: ' + u.usuario.email())
+            notis = db.GqlQuery("SELECT * FROM Notificacion WHERE usuario = :1 ORDER BY fecha DESC", u.usuario).fetch(10)
+            if notis:
                 enviar = False
                 for n in notis:
                     if n.email:
@@ -43,15 +43,9 @@ class emails:
                 if enviar:
                     retorno = self.enviar(u, notis)
             else:
-                logging.info('No quiere recibir emails')
-                for n in notis:
-                    try:
-                        n.email = False
-                        n.put()
-                    except:
-                        logging.warning('Imposible modificar notificación: ' + str(n.key()))
+                logging.info('No tiene notificaciones')
         else:
-            logging.info('No tiene notificaciones')
+            logging.info('No quiere recibir emails')
         return retorno
     
     def enviar(self, u, notis):

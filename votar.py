@@ -31,10 +31,14 @@ class Guardar_voto(webapp.RequestHandler):
             if not r: # no hay respuesta
                 logging.warning('Respuesta no encontrada!')
                 self.redirect('/error/404')
-            elif self.request.remote_addr in r.ips: # ya se ha votado desde esta IP
+            elif self.request.environ['HTTP_USER_AGENT'].lower().find('googlebot') != -1:
+                logging.info('Googlebot!')
+                p = r.get_pregunta()
+                self.redirect(p.get_link() + '#' + str(r.key()))
+            elif self.request.remote_addr in r.ips and self.request.remote_addr != '127.0.0.1': # ya se ha votado desde esta IP
                 logging.info('Voto ya realizado')
                 p = r.get_pregunta()
-                self.redirect( p.get_link() )
+                self.redirect(p.get_link() + '#' + str(r.key()))
             else: # voto válido
                 p = r.get_pregunta()
                 ips = r.ips
@@ -50,7 +54,7 @@ class Guardar_voto(webapp.RequestHandler):
                     logging.info('Voto no válido: ' + str(voto))
                 r.put()
                 r.borrar_cache()
-                self.redirect( p.get_link() )
+                self.redirect(p.get_link() + '#' + str(r.key()))
         except:
             self.redirect('/error/503')
 

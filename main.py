@@ -34,7 +34,6 @@ from base import *
 from pregunta import *
 from actualidad import *
 from imagenes import *
-from tags import *
 
 class Portada(Pagina):
     def mezclar(self):
@@ -256,7 +255,12 @@ class Nueva_publicacion(Pagina):
                 public_key = RECAPTCHA_PUBLIC_KEY,
                 use_ssl = False,
                 error = None)
-        
+        if self.request.get('tipo') == 'pregunta':
+            foco = 'pregunta'
+        elif self.request.get('tipo') == 'enlace':
+            foco = 'enlace'
+        else:
+            foco = 'pensamiento'
         template_values = {
             'titulo': 'Publicar...',
             'descripcion': u'Formulario de publicación de Ubuntu FAQ. ' + APP_DESCRIPTION,
@@ -271,7 +275,8 @@ class Nueva_publicacion(Pagina):
             'captcha': chtml,
             'tipo': self.request.get('tipo'),
             'contenido': self.request.get('contenido'),
-            'url2': self.request.get('url')
+            'url2': self.request.get('url'),
+            'foco': foco
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/nueva.html')
         self.response.out.write(template.render(path, template_values))
@@ -313,7 +318,8 @@ class Perror(Pagina):
             'cerror': cerror,
             'usuario': users.get_current_user(),
             'notis': self.get_notificaciones(),
-            'error_dominio': self.error_dominio
+            'error_dominio': self.error_dominio,
+            'foco': 'buscar'
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/portada.html')
         self.response.out.write(template.render(path, template_values))

@@ -31,9 +31,10 @@ class Procesar_seguimientos:
         if s.respuestas < p.respuestas: # nuevas respuestas
             for u in s.usuarios:
                 n = Notificacion()
-                n.link = p.get_link()
+                n.link = p.get_link() + '#' + str(s.respuestas)
                 n.usuario = u
-                n.mensaje = 'La pregunta "' + p.titulo[:99] + '" tiene ' + str(p.respuestas - s.respuestas) + ' respuestas nuevas.'
+                n.mensaje = 'La pregunta "' + p.titulo[:99] + '" tiene ' + str(p.respuestas - s.respuestas)
+                n.mensaje += ' respuestas nuevas, de un total de ' + str(p.respuestas) + '.'
                 try:
                     n.put()
                     n.borrar_cache()

@@ -50,7 +50,8 @@ class Imagenes(Pagina):
             'usuario': users.get_current_user(),
             'notis': self.get_notificaciones(),
             'error_dominio': self.error_dominio,
-            'stats': memcache.get( 'stats' )
+            'stats': memcache.get( 'stats' ),
+            'foco': 'enlace'
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/imagenes.html')
         self.response.out.write(template.render(path, template_values))

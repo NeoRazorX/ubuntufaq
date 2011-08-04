@@ -44,6 +44,7 @@ class Modificar_seguimiento(webapp.RequestHandler):
                 u.remove( users.get_current_user() )
                 if len( u ) == 0:
                     s.delete()
+                    s.borrar_cache()
                 else:
                     s.usuarios = u
                     s.put()

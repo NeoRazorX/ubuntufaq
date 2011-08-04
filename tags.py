@@ -49,7 +49,8 @@ class Detalle_tag(Pagina):
                 'formulario' : self.formulario,
                 'usuario': users.get_current_user(),
                 'notis': self.get_notificaciones(),
-                'error_dominio': self.error_dominio
+                'error_dominio': self.error_dominio,
+                'foco': 'buscar'
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/tags.html')
         self.response.out.write(template.render(path, template_values))
