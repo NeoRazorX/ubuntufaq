@@ -5,6 +5,7 @@ function menu_cabecera(eleccion)
     document.getElementById('menuenlace').setAttribute("class", "caca");
     document.getElementById('menupensamiento').setAttribute("class", "caca");
     document.getElementById('menubuscar').setAttribute("class", "caca");
+    document.getElementById('menusuario').setAttribute("class", "caca");
     document.getElementById('pregunta').style.display = 'none';
     document.getElementById('enlace').style.display = 'none';
     document.getElementById('buscar').style.display = 'none';
@@ -25,6 +26,10 @@ function menu_cabecera(eleccion)
         
         case 'pensamiento':
             document.getElementById('menupensamiento').setAttribute("class", "menusel");
+            break;
+        
+        case 'usuario':
+            document.getElementById('menusuario').setAttribute("class", "menusel");
             break;
         
         default:

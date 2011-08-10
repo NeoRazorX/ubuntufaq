@@ -67,6 +67,34 @@ a.seguimiento {
     color: black;
 }
 
+a.negativo {
+    background-color: #E20000;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+a.positivo {
+    background-color: green;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+big {
+    font-size: 24px;
+}
+
+small {
+    font-size: 10px;
+}
+
+div.codigo {
+    border: 1px dashed #333333;
+    padding: 10px;
+    margin: 5px;
+}
+
 div.boton, div.b_verde, div.b_rojo {
     text-align: center;
     background-color: #333333;
@@ -92,20 +120,6 @@ div.boton a, div.b_verde a, div.b_rojo a {
 
 span.votar {
     margin-left: 30px;
-}
-
-a.negativo {
-    background-color: #E20000;
-    color: white;
-    padding-left: 3px;
-    padding-right: 3px;
-}
-
-a.positivo {
-    background-color: green;
-    color: white;
-    padding-left: 3px;
-    padding-right: 3px;
 }
 
 textarea {

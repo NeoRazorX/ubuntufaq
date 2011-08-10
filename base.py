@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-DEBUG_FLAG = False
+DEBUG_FLAG = True
 APP_NAME = 'ubuntu-faq'
 APP_DESCRIPTION = u'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
 APP_DOMAIN = 'http://www.ubufaq.com'

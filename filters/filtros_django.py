@@ -17,13 +17,61 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import hashlib, random, urllib, base64, math
+import hashlib, urllib, base64, math, re
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import truncatewords, linebreaksbr, urlize
 from google.appengine.ext import webapp
 from datetime import datetime
 
 register = webapp.template.create_template_register()
+
+@register.filter
+def bbcode(value):
+    bbdata = [
+        (r'\[url\](.+?)\[/url\]', r'<a target="_Blank" href="\1">\1</a>'),
+        (r'\[url=(.+?)\](.+?)\[/url\]', r'<a target="_Blank" href="\1">\2</a>'),
+        (r'\[email\](.+?)\[/email\]', r'<a href="mailto:\1">\1</a>'),
+        (r'\[email=(.+?)\](.+?)\[/email\]', r'<a href="mailto:\1">\2</a>'),
+        (r'\[img\](.+?)\[/img\]', r'<a target="_Blank" href="\1"><img class="galeria" src="\1"></a>'),
+        (r'\[img=(.+?)\](.+?)\[/img\]', r'<a target="_Blank" href="\1"><img class="galeria" src="\1" alt="\2"></a>'),
+        (r'\[b\](.+?)\[/b\]', r'<b>\1</b>'),
+        (r'\[i\](.+?)\[/i\]', r'<i>\1</i>'),
+        (r'\[u\](.+?)\[/u\]', r'<u>\1</u>'),
+        (r'\[quote\](.+?)\[/quote\]', r'<div class="respuesta">\1</div>'),
+        (r'\[center\](.+?)\[/center\]', r'<div align="center">\1</div>'),
+        (r'\[code\](.+?)\[/code\]', r'<div class="codigo">\1</div>'),
+        (r'\[big\](.+?)\[/big\]', r'<big>\1</big>'),
+        (r'\[small\](.+?)\[/small\]', r'<small>\1</small>')
+    ]
+    for bbset in bbdata:
+        p = re.compile(bbset[0], re.DOTALL)
+        value = p.sub(bbset[1], value)
+    #The following two code parts handle the more complex list statements
+    temp = ''
+    p = re.compile(r'\[list\](.+?)\[/list\]', re.DOTALL)
+    m = p.search(value)
+    if m:
+        items = re.split(re.escape('[*]'), m.group(1))
+        for i in items[1:]:
+            temp = temp + '<li>' + i + '</li>'
+        value = p.sub(r'<ul>'+temp+'</ul>', value)
+    temp = ''
+    p = re.compile(r'\[list=(.)\](.+?)\[/list\]', re.DOTALL)
+    m = p.search(value)
+    if m:
+        items = re.split(re.escape('[*]'), m.group(2))
+        for i in items[1:]:
+            temp = temp + '<li>' + i + '</li>'
+        value = p.sub(r'<ol type=\1>'+temp+'</ol>', value)
+    # youtube
+    p = re.compile(r'\[youtube\](.+?)\[/youtube\]', re.DOTALL)
+    value = p.sub(youtube, value)
+    return mark_safe(value)
+
+def youtube(url):
+    texto = '<iframe title="YouTube" class="youtube-player" type="text/html" width="425" height="349" src="'
+    texto += 'http://www.youtube.com/embed/' + url.group(0).split('?v=')[1].replace('[/youtube]', '" frameborder="0"></iframe>')
+    return texto
 
 @register.filter
 def cortamail(email=None):

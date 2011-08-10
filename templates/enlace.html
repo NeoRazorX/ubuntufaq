@@ -84,7 +84,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
             </form>
         {% else %}
             <a class="comentario" name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-            {{ coment.contenido|safe|linebreaksbr|urlize }}
+            {{ coment.contenido|safe|linebreaksbr|bbcode }}
         {% endif %}
         </div>
         <div class="info_respuesta_down">
@@ -116,7 +116,7 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 <table width="100%">
 <tr>
 <td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
-<td>
+<td valign="top">
     <div class="formulario">
     <form name="comentario" action="/add_c" method="post">
     <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
@@ -136,6 +136,13 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
         <li>Para contestar al comentario #1 escribre @1 en el tuyo.</li>
         <li>Para contestar al comentario #2 escribre @2 en el tuyo.</li>
         <li>...</li>
+        <li>Para poner un <b>enlace</b>: [url]url-del-enlace[/url]</li>
+        <li>Para poner una <b>imagen</b>: [img]url-de-la-imagen[/img]</li>
+        <li>Para poner un vídeo de <b>youtube</b>: [youtube]url-del-video[/youtube]</li>
+        <li>Para poner <b>código</b>: [code]el-codigo[/code]</li>
+        <li>Para poner un texto en <b>negrita</b>: [b]el-texto[/b]</li>
+        <li>Para poner un texto en <b>cursiva</b>: [i]el-texto[/i]</li>
+        <li>Para poner un texto <b>subrayado</b>: [u]el-texto[/u]</li>
     </ul>
 </td>
 </tr>

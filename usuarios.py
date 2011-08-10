@@ -102,6 +102,10 @@ class Detalle_usuario(Pagina):
             elif tusuario not in pending_users:
                 pending_users.append( tusuario )
                 memcache.replace('pending-users', pending_users)
+            if tusuario == users.get_current_user():
+                foco = 'usuario'
+            else:
+                foco = ''
             template_values = {
                     'titulo': 'Perfil de ' + tusuario.nickname(),
                     'descripcion': 'Resumen del historial del usuario ' + tusuario.nickname() + ' en Ubuntu FAQ',
@@ -119,7 +123,8 @@ class Detalle_usuario(Pagina):
                     'notis': self.get_notificaciones(),
                     'formulario' : self.formulario,
                     'error_dominio': self.error_dominio,
-                    'privado': self.request.get('priv')
+                    'privado': self.request.get('priv'),
+                    'foco': foco
             }
             path = os.path.join(os.path.dirname(__file__), 'templates/usuario.html')
             self.response.out.write(template.render(path, template_values))

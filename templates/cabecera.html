@@ -46,10 +46,8 @@
 {% if formulario %}
     {% if notis %}
         <a class="notificacion" href="{{ mi_perfil }}">{{ notis|length }}</a>
-        <a href="{{ mi_perfil }}">{{ usuario }}</a>
-    {% else %}
-        <a href="{{ mi_perfil }}">{{ usuario }}</a>
     {% endif %}
+    <a id="menusuario" href="{{ mi_perfil }}">{{ usuario }}</a>
 {% else %}
     <a href="/ayuda#ayuda_sesion">?</a>
 {% endif %}
@@ -73,7 +71,7 @@
             <a href="/preguntas">Todas</a>
             <a href="/populares">Populares</a>
             <a href="/sin-solucionar">Sin solucionar</a>
-            | <a href="/tag/">Tags</a>
+            | <a href="/tag/">Etiquetas</a>
         </td>
         </tr>
         </table>
@@ -93,7 +91,7 @@
         <td colspan="2" class="mini">
             <a href="/actualidad">Actualidad</a>
             <a href="/images">Imágenes</a>
-            | <a href="/tag/">Tags</a>
+            | <a href="/tag/">Etiquetas</a>
         </td>
         </tr>
         </table>
