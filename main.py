@@ -120,6 +120,7 @@ class Portada(Pagina):
             'tags': tags,
             'mixto': mixto,
             'urespuestas': self.get_ultimas_respuestas(),
+            'searches': memcache.get('all-searches'),
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,

@@ -24,31 +24,17 @@ from base import *
 
 class emails:
     def __init__(self):
-        query = db.GqlQuery("SELECT * FROM Usuario")
-        usuarios = query.fetch(15, random.randint(0, max(0, query.count()-15)))
-        for u in usuarios:
-            if self.comprobar(u):
-                break;
-    
-    def comprobar(self, u):
-        retorno = False
-        if u.emails:
-            logging.info('Comprobando notificaciones para el usuario: ' + u.usuario.email())
-            notis = db.GqlQuery("SELECT * FROM Notificacion WHERE usuario = :1 ORDER BY fecha DESC", u.usuario).fetch(10)
-            if notis:
-                enviar = False
-                for n in notis:
-                    if n.email:
-                        enviar = True
-                if enviar:
-                    retorno = self.enviar(u, notis)
+        notis = db.GqlQuery("SELECT * FROM Notificacion WHERE email = :1", True).fetch(20)
+        pendientes = {}
+        for n in notis:
+            if n.usuario.email() not in pendientes:
+                pendientes[n.usuario.email()] = [n]
             else:
-                logging.info('No tiene notificaciones')
-        else:
-            logging.info('No quiere recibir emails')
-        return retorno
+                pendientes[n.usuario.email()].append(n)
+        for email in pendientes.keys():
+            self.enviar(email, pendientes[email])
     
-    def enviar(self, u, notis):
+    def enviar(self, email, notis):
         subject = "Notificación de Ubuntu FAQ"
         body = ''
         for n in notis:
@@ -59,18 +45,16 @@ class emails:
                     n.put()
                 except:
                     logging.warning('Imposible modificar notificación: ' + str(n.key()))
-        body += "\nAccede a tu perfil desde: http://www.ubufaq.com/u/" + urllib.quote( base64.b64encode( u.usuario.email() ) )
+        body += "\nAccede a tu perfil desde: http://www.ubufaq.com/u/" + urllib.quote( base64.b64encode( email ) )
         body += "\n\nAtentamente,\nEl cron de Ubuntu FAQ."
         try:
-            mail.send_mail("contacto@ubufaq.com", u.usuario.email(), subject, body)
-            logging.info('Enviado email para el usuario: ' + u.usuario.email())
+            mail.send_mail("contacto@ubufaq.com", email, subject, body)
+            logging.info('Enviado email para el usuario: ' + email)
             logging.info(body)
             return True
         except:
-            logging.warning('Error al enviar el email para el usuario: ' + u.usuario.email())
+            logging.warning('Error al enviar el email para el usuario: ' + email())
             return False
-
 
 if __name__ == "__main__":
     emails()
-

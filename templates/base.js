@@ -9,7 +9,6 @@ function menu_cabecera(eleccion)
     document.getElementById('pregunta').style.display = 'none';
     document.getElementById('enlace').style.display = 'none';
     document.getElementById('buscar').style.display = 'none';
-    document.getElementById('buscar2').style.display = 'none';
     
     switch( eleccion )
     {
@@ -21,7 +20,7 @@ function menu_cabecera(eleccion)
         case 'buscar':
             document.getElementById('menubuscar').setAttribute("class", "menusel");
             document.getElementById('buscar').style.display = 'block';
-            document.getElementById('buscar2').style.display = 'block';
+            document.buscar.query.focus();
             break;
         
         case 'pensamiento':
@@ -208,4 +207,9 @@ function enviar_privado()
     {
         alert( mensaje );
     }
+}
+
+function ayuda_votar()
+{
+    alert("Vota esta respuesta utilizando los botones de la parte inferior derecha, esto sirve para destacar las mejores respuestas y/o para penalizar las que no aporten nada.");
 }

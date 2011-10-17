@@ -22,6 +22,135 @@ from google.appengine.ext import db
 from google.appengine.api import memcache
 from base import *
 
-if __name__ == "__main__":
-    Tags()
+class Buscar:
+    def __init__(self):
+        # diccionario que almacena todos los tags
+        self.pendientes = {}
+        # lista general de tags
+        self.alltags = memcache.get('all-tags')
+        if self.alltags is None:
+            self.alltags_memcache = False
+            self.alltags = []
+            for tag in KEYWORD_LIST:
+                self.alltags.append([tag.lower(), 0])
+        else:
+            # eliminamos los tags vacios y los duplicados
+            unicos = []
+            for tag in self.alltags:
+                if tag[0].strip() != '':
+                    found = False
+                    for ntag in unicos:
+                        if tag[0] == ntag[0]:
+                            found = True
+                    if not found:
+                        unicos.append([ tag[0], tag[1] ])
+            self.alltags = unicos
+            self.alltags_memcache = True
+        # elegimos aleatoriamente una tabla
+        for i in range(2):
+            if self.seleccionar_tarea( random.randint(0, 1) ):
+                break;
+    
+    def seleccionar_tarea(self, tabla):
+        retorno = False
+        if tabla == 0:
+            query = db.GqlQuery("SELECT * FROM Pregunta")
+            logging.info('Comprobando tags de preguntas')
+        else:
+            query = db.GqlQuery("SELECT * FROM Enlace")
+            logging.info('Comprobando tags de enlaces')
+        total = query.count()
+        seleccion = query.fetch(5, random.randint(0, max(0, total-5)))
+        if len(seleccion) > 0:
+            for ele in seleccion:
+                # actualizamos los tags
+                tag0 = ele.tags
+                ele.get_tags()
+                if ele.tags != tag0:
+                    try:
+                        ele.put()
+                        logging.info("Actualizados tags de " + link)
+                    except:
+                        logging.warning("Imposible actualizar tags de " + link)
+                # agrupamos los datos necesarios
+                if tabla == 0:
+                    tags = self.tag2list(ele.tags)
+                    link = '/question/' + str(ele.key())
+                    title = ele.titulo
+                    clics = ele.visitas
+                else:
+                    tags = self.tag2list(ele.tags)
+                    link = '/story/' + str(ele.key())
+                    title = ele.descripcion
+                    clics = ele.clicks
+                self.procesar(tags, link, title, clics)
+            # actualizamos los resultados de las búsquedas
+            self.actualizar()
+            retorno = True
+        return retorno
+    
+    # a partir de un string de tags, devuelve una lista de cada uno de ellos
+    def tag2list(self, tags):
+        try:
+            retorno = []
+            found_tags = tags.split(', ')
+            if len(found_tags) > 0:
+                # eliminamos duplicados
+                for tag in found_tags:
+                    if tag.strip() != '' and tag not in retorno:
+                        retorno.append(tag)
+        except:
+            retorno = []
+        return retorno
+    
+    # rellena pendientes con cada elemento, en funcion del tag
+    def procesar(self, tags, link, title, clics):
+        for t in tags:
+            logging.info('Comprobando el tag: ' + t)
+            if t not in self.pendientes:
+                logging.info('No hay pendientes para: ' + t)
+                query = db.GqlQuery("SELECT * FROM Busqueda WHERE tag = :1", t)
+                elementos_cache = query.fetch( query.count() )
+                if elementos_cache:
+                    self.pendientes[t] = elementos_cache
+                else:
+                    self.pendientes[t] = []
+            logging.info('Hay '+str(len(self.pendientes[t]))+' pendientes para: ' + t)
+            encontrado = False
+            for p in self.pendientes[t]:
+                if p.url  == link:
+                    encontrado = True
+                    if p.text != title or p.clics != clics:
+                        p.text = title
+                        p.clics = clics
+                        try:
+                            p.put()
+                            logging.info('Actualizada la url: ' + p.url)
+                        except:
+                            logging.warning("Imposible modificar el enlace a: " + p.url)
+            if not encontrado:
+                try:
+                    busq = Busqueda()
+                    busq.url = link
+                    busq.text = title
+                    busq.clics = clics
+                    busq.tag = t
+                    busq.put()
+                    self.pendientes[t].append( busq )
+                    logging.info('Añadida la url: ' + busq.url)
+                except:
+                    logging.warning("Imposible guardar en busqueda la url: " + busq.url)
+    
+    # actualiza los elementos de memcache con los nuevos resultados obtenidos
+    def actualizar(self):
+        for tag in self.alltags:
+            nume = len( self.pendientes.get(tag[0], []) )
+            if nume > 0:
+                tag[1] = nume
+        if not self.alltags_memcache:
+            memcache.add('all-tags', self.alltags)
+        else:
+            memcache.replace('all-tags', self.alltags)
 
+if __name__ == "__main__":
+    Buscar()

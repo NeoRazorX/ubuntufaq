@@ -23,7 +23,7 @@ APP_DESCRIPTION = u'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, 
 APP_DOMAIN = 'http://www.ubufaq.com'
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
-STEAM_ENLACE_KEY = 'agp1YnVudHUtZmFxcg4LEgZFbmxhY2UYyvYkDA'
+STEAM_ENLACE_KEY = ''
 RSS_LIST = ['http://diegocg.blogspot.com/feeds/posts/default',
     'http://www.cristianvicente.com/feed/',
     'http://neorazorx.blogspot.com/feeds/posts/default']
@@ -32,13 +32,13 @@ KEYWORD_LIST = ['ubuntu', 'kubuntu', 'xubuntu', 'lubuntu', 'linux', 'android', '
     'unity', 'gnome', 'kde', 'xfce', 'enlightment', 'x.org', 'wayland', 'compiz', 'alsa', 'gtk', 'gdk', 'qt',
     'plymouth', 'kms', 'systemd', 'kernel', 'gcc', 'grub', 'wine', 'ppa', 'gallium3d', 'gdm',
     'nouveau', 'opengl', 'xfs', 'ext2', 'ext3', 'ext4', 'btrfs', 'reiser', 'mysql', 'postgresql',
-    'gnu', 'linus', 'desura', 'libreoffice', 'nautilus', 'python', 'juego', 'wifi', '3g', 'windows', 'mac',
-    'bios', 'driver']
+    'gnu', 'linus', 'desura', 'libreoffice', 'nautilus', 'python', 'juego', 'wifi', '3g', 'bios', 'driver']
 
-import math, random, logging, urllib, base64
+import math, random, logging, urllib, base64, re
 from google.appengine.ext import db, webapp
 from google.appengine.api import users, memcache
 from datetime import datetime
+
 
 class Pregunta(db.Model):
     autor = db.UserProperty()
@@ -50,8 +50,8 @@ class Pregunta(db.Model):
     puntos = db.IntegerProperty(default=0)
     respuestas = db.IntegerProperty(default=0)
     seguimientos = db.IntegerProperty(default=0)
-    tags = db.StringProperty()
-    titulo = db.StringProperty()
+    tags = db.StringProperty(default='')
+    titulo = db.StringProperty(default='')
     ultima_ip = db.StringProperty(default='0.0.0.0')
     visitas = db.IntegerProperty(default=0)
     
@@ -114,6 +114,22 @@ class Pregunta(db.Model):
         else:
             return seguimiento[0]
     
+    def get_tags(self):
+        all_tags = memcache.get('all-tags')
+        if all_tags is None:
+            all_tags = []
+            for tag in KEYWORD_LIST:
+                all_tags.append([tag.lower(), 0])
+        for tag in all_tags:
+            if re.search('\\b'+tag[0]+'\\b', self.titulo.lower()+self.contenido.lower()):
+                if tag[0].strip() != '' and self.tags.lower().find(tag[0]) == -1:
+                    if self.tags == '':
+                        self.tags = tag[0]
+                    else:
+                        self.tags += ', ' + tag[0]
+        if self.tags == '':
+            self.tags = 'general'
+    
     def es_seguidor(self, usuario):
         s = self.get_seguimiento()
         if not usuario:
@@ -129,6 +145,9 @@ class Pregunta(db.Model):
     
     def get_link(self):
         return '/question/' + str(self.key())
+    
+    def get_full_link(self):
+        return APP_DOMAIN + '/question/' + str(self.key())
     
     def get_estado(self):
         retorno = 'estado desconocido'
@@ -225,6 +244,7 @@ class Pregunta(db.Model):
         self.borrar_cache()
         self.delete()
 
+
 class Respuesta(db.Model):
     autor = db.UserProperty()
     contenido = db.TextProperty()
@@ -244,6 +264,7 @@ class Respuesta(db.Model):
     def borrar_cache(self):
         memcache.delete( self.id_pregunta )
 
+
 class Enlace(db.Model):
     autor = db.UserProperty()
     clicks = db.IntegerProperty(default=0)
@@ -253,7 +274,7 @@ class Enlace(db.Model):
     fecha = db.DateTimeProperty(auto_now_add=True)
     os = db.StringProperty(default='desconocido')
     puntos = db.IntegerProperty(default=0)
-    tags = db.StringProperty()
+    tags = db.StringProperty(default='')
     tipo_enlace = db.StringProperty()
     url = db.LinkProperty()
     ultima_ip = db.StringProperty(default='0.0.0.0')
@@ -311,14 +332,22 @@ class Enlace(db.Model):
     def get_link(self):
         return '/story/' + str(self.key())
     
+    def get_full_link(self):
+        return APP_DOMAIN + '/story/' + str(self.key())
+    
     def get_tags(self):
-        self.tags = ''
-        for tag in KEYWORD_LIST:
-            if self.descripcion.lower().find(tag) != -1:
-                if self.tags == '':
-                    self.tags = tag
-                else:
-                    self.tags += ', ' + tag
+        all_tags = memcache.get('all-tags')
+        if all_tags is None:
+            all_tags = []
+            for tag in KEYWORD_LIST:
+                all_tags.append([tag.lower(), 0])
+        for tag in all_tags:
+            if re.search('\\b'+tag[0]+'\\b', self.descripcion.lower()):
+                if self.tags.lower().find(tag[0]) == -1 and tag[0].strip() != '':
+                    if self.tags == '':
+                        self.tags = tag[0]
+                    else:
+                        self.tags += ', ' + tag[0]
         if self.tags == '':
             self.tags = 'general'
     
@@ -347,6 +376,7 @@ class Enlace(db.Model):
         self.borrar_cache()
         self.delete()
 
+
 class Comentario(db.Model):
     autor = db.UserProperty()
     contenido = db.TextProperty()
@@ -361,6 +391,7 @@ class Comentario(db.Model):
         except:
             return None
 
+
 class Notificacion(db.Model):
     email = db.BooleanProperty(default=True) # ¿Enviar email?
     fecha = db.DateTimeProperty(auto_now_add=True)
@@ -370,6 +401,7 @@ class Notificacion(db.Model):
     
     def borrar_cache(self):
         memcache.delete('notificaciones_' + str(self.usuario))
+
 
 class Detector_respuestas():
     def detectar(self, conjunto=[], link='/'):
@@ -392,125 +424,13 @@ class Detector_respuestas():
                         logging.error('Imposible guardar la notificación')
                 i -= 1
 
-class Tags:
-    def __init__(self):
-        # diccionario que almacena todos los tags
-        self.pendientes = {}
-        # lista general de tags
-        self.alltags = memcache.get('all-tags')
-        if self.alltags is None:
-            self.alltags = []
-            self.alltags_memcache = False
-        else:
-            self.alltags_memcache = True
-        # elegimos aleatoriamente una tabla
-        for i in range(2):
-            if self.seleccionar_tarea( random.randint(0, 1) ):
-                break;
-    
-    def seleccionar_tarea(self, tabla):
-        retorno = False
-        if tabla == 0:
-            query = db.GqlQuery("SELECT * FROM Pregunta")
-            logging.info('Actualizando tags de preguntas')
-        else:
-            query = db.GqlQuery("SELECT * FROM Enlace")
-            logging.info('Actualizando tags de enlaces')
-        total = query.count()
-        seleccion = query.fetch(20, random.randint(0, max(0, total-20)))
-        if len(seleccion) > 0:
-            for ele in seleccion:
-                if tabla == 0:
-                    tags = self.tag2list( ele.tags )
-                    link = '/question/' + str(ele.key())
-                    title = ele.titulo
-                    clics = ele.visitas
-                else:
-                    tags = self.tag2list( ele.tags )
-                    link = '/story/' + str(ele.key())
-                    title = ele.descripcion
-                    clics = ele.clicks
-                self.procesar(tags, link, title, clics)
-            # actualizamos los datos de memcache
-            self.actualizar()
-            retorno = True
-        return retorno
-    
-    # a partir de un string de tags, devuelve una lista de cada uno de ellos
-    def tag2list(self, tags):
-        try:
-            return tags.split(', ')
-        except:
-            return ['general']
-    
-    # rellena pendientes con cada elemento, en funcion del tag
-    def procesar(self, tags, link, title, clics):
-        elemento = {'link': link, 'title': title, 'clics': clics}
-        for t in tags:
-            if t in self.pendientes:
-                encontrado = False
-                for p in self.pendientes[t]:
-                    if p.get('link', '')  == link:
-                        p['title'] = title
-                        p['clics'] = clics
-                        encontrado = True
-                if not encontrado:
-                    self.pendientes[t].append( elemento )
-            else:
-                elementos_cache = memcache.get('tag_' + t)
-                if elementos_cache is None:
-                    self.pendientes[t] = [elemento]
-                else:
-                    self.pendientes[t] = elementos_cache
-                    if elemento not in self.pendientes[t]:
-                        self.pendientes[t].append( elemento )
-    
-    # reducimos el numero de elementos por tag, en funcion de los clics
-    def reducir(self, elementos):
-        reducido = []
-        for i in range(25):
-            seleccionado = {'clics': -1}
-            for e in elementos:
-                if e not in reducido and e.get('clics', 0) > seleccionado.get('clics', 0):
-                    seleccionado = e
-            if seleccionado != {'clics': -1}:
-                duplicado = False
-                for e in reducido:
-                    if e.get('link', '') == seleccionado.get('link', ''):
-                        duplicado = True
-                if not duplicado:
-                    reducido.append( seleccionado )
-        return reducido
-    
-    # actualiza los elementos de memcache con los nuevos resultados obtenidos
-    def actualizar(self):
-        for tag in self.pendientes.keys():
-            elementos = self.reducir( self.pendientes[tag] )
-            if elementos:
-                if memcache.get('tag_' + tag) is None:
-                    if memcache.add('tag_' + tag, elementos):
-                        logging.info('Almacenados los resultados del tag ' + tag + ' en memcache')
-                    else:
-                        logging.warning('Fallo al almacenar los resultados del tag ' + tag + ' en memcache')
-                else:
-                    if memcache.replace('tag_' + tag, elementos):
-                        logging.info('Reemplazados los resultados del tag ' + tag + ' en memcache')
-                    else:
-                        logging.warning('Fallo al reemplazar los resultados del tag ' + tag + ' en memcache')
-            else:
-                logging.info('Para el tag: ' + tag + ' no hay elementos!')
-            # actualizamos la lista general de tags
-            encontrado = False
-            for t in self.alltags:
-                if t[0] == tag:
-                    t[1] = max(len(elementos), t[1])
-                    encontrado = True
-            if not encontrado:
-                self.alltags.append([tag, 1])
-        if not self.alltags_memcache:
-            memcache.add('all-tags', self.alltags)
-        else:
-            memcache.replace('all-tags', self.alltags)
+
+class Busqueda(db.Model):
+    tag = db.StringProperty()
+    url = db.StringProperty()
+    text = db.StringProperty()
+    clics = db.IntegerProperty(default=0)
+
 
 # clase para gestionar el siguimiento de preguntas
 class Seguimiento(db.Model):
@@ -528,6 +448,7 @@ class Seguimiento(db.Model):
     def borrar_cache(self):
         memcache.delete('seguimiento_' + self.id_pregunta)
 
+
 class Usuario(db.Model):
     comentarios = db.IntegerProperty(default=0)
     emails = db.BooleanProperty(default=True) # ¿Enviar emails?
@@ -542,16 +463,23 @@ class Usuario(db.Model):
     def get_link(self):
         return base64.b64decode( urllib.unquote( self.usuario.email() ) )
 
+
 # clase base
 class Pagina(webapp.RequestHandler):
     def extraer_tags(self, texto):
         retorno = ''
-        for tag in KEYWORD_LIST:
-            if texto.lower().find(tag) != -1:
-                if retorno == '':
-                    retorno = tag
-                else:
-                    retorno += ', ' + tag
+        all_tags = memcache.get('all-tags')
+        if all_tags is None:
+            all_tags = []
+            for tag in KEYWORD_LIST:
+                all_tags.append([tag.lower(), 0])
+        for tag in all_tags:
+            if re.search('\\b'+tag[0].lower()+'\\b', texto.lower()):
+                if tag[0].strip() != '':
+                    if retorno == '':
+                        retorno = tag[0]
+                    else:
+                        retorno += ', ' + tag[0]
         if retorno == '':
             retorno = 'general'
         return retorno
@@ -579,12 +507,10 @@ class Pagina(webapp.RequestHandler):
         paginas = int( math.ceil( query.count() / float(limite) ) )
         if paginas < 1:
             paginas = 1
-        
         try:
             p_actual = int(actual)
         except:
             p_actual = 0
-        
         # paginamos
         return query.fetch(limite, int(limite * p_actual) ), paginas, p_actual
     
@@ -627,7 +553,7 @@ class Pagina(webapp.RequestHandler):
         for e in elementos:
             tags = e.tags.split(', ')
             for t in tags:
-                if t not in listags:
+                if t not in listags and t.strip() != '':
                     listags.append(t)
         for t in listags:
             if retorno == '':
@@ -637,21 +563,33 @@ class Pagina(webapp.RequestHandler):
         return retorno
     
     # devuelve las paginas relacionadas con alguno de los tags del enlace
-    def paginas_relacionadas(self, cadena):
+    def paginas_relacionadas(self, cadena, todas = False):
         retorno = []
         try:
             tags = str(cadena).split(', ')
             if len(tags) > 1:
                 intentos = 4
                 while intentos > 0 and len(retorno) < 10:
-                    aux = memcache.get('tag_' + random.choice( tags ))
+                    query = db.GqlQuery("SELECT * FROM Busqueda WHERE tag = :1 ORDER BY clics DESC", random.choice( tags ))
+                    if todas:
+                        aux = query.fetch( query.count() )
+                    else:
+                        aux = query.fetch(20)
                     if aux:
                         for elem in aux:
-                            if elem not in retorno:
+                            encontrado = False
+                            for r in retorno:
+                                if elem.url == r.url:
+                                    encontrado = True
+                            if not encontrado:
                                 retorno.append( elem )
                     intentos -= 1
             elif len(tags) == 1:
-                retorno = memcache.get('tag_' + tags[0])
+                query = db.GqlQuery("SELECT * FROM Busqueda WHERE tag = :1 ORDER BY clics DESC", tags[0])
+                if todas:
+                    retorno = query.fetch( query.count() )
+                else:
+                    retorno = query.fetch(20)
         except:
             pass
         return retorno
@@ -668,3 +606,94 @@ class Pagina(webapp.RequestHandler):
             return notis
         else:
             return []
+    
+    def search_job(self, query):
+        retorno = []
+        aux = db.GqlQuery("SELECT * FROM Busqueda WHERE tag = :1 ORDER BY clics DESC", query)
+        if aux.count() > 0:
+            retorno = aux.fetch( aux.count() )
+        else:
+            preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(20)
+            for p in preguntas:
+                p.get_tags()
+                if p.tags.find(query) != -1:
+                    try:
+                        busq = Busqueda()
+                        busq.url = '/question/' + str(p.key())
+                        busq.text = p.titulo
+                        busq.clics = p.visitas
+                        busq.tag = query
+                        busq.put()
+                        logging.info('Añadida la url: ' + busq.url)
+                        retorno.append(busq)
+                    except:
+                        logging.warning("Imposible guardar en busqueda la url: " + busq.url)
+        return retorno
+    
+    def buscar(self, query=''):
+        try:
+            query = query.lower().strip()
+        except:
+            query = ''
+        if len(query) > 1:
+            # cargamos los tags
+            all_tags = memcache.get('all-tags')
+            if all_tags is None:
+                all_tags = []
+                for tag in KEYWORD_LIST:
+                    all_tags.append([tag.lower(), 0])
+            # añadimos la busqueda a la lista de tags
+            found = False
+            for tag in all_tags:
+                if tag[0] == query:
+                    found = True
+            if not found:
+                all_tags.append([query, 0])
+                memcache.replace('all-tags', all_tags)
+            # añadimos la busqueda a la lista de busquedas
+            all_searches = memcache.get('all-searches')
+            if all_searches is not None:
+                found = False
+                for s in all_searches:
+                    if s[0] == query:
+                        s[1] += 1
+                        found = True
+                if not found:
+                    all_searches.append([query, 1])
+                memcache.replace('all-searches', all_searches)
+            else:
+                all_searches = [[query, 1]]
+                memcache.add('all-searches', all_searches)
+            # comprobamos la busqueda en memcache
+            retorno = self.search_job(query)
+            if not retorno:
+                # si no hay resultados, comprobamos si la query contiene etiquetas ya utilizadas
+                retorno = []
+                for tag in all_tags:
+                    logging.info("Comprobando sub-busqueda: " + tag[0])
+                    if re.search('\\b'+tag[0]+'\\b', query):
+                        logging.info("Anyadiendo sub-busqueda: " + tag[0])
+                        aux = db.GqlQuery("SELECT * FROM Busqueda WHERE tag = :1 ORDER BY clics DESC", tag[0]).fetch(20)
+                        if aux is not None:
+                            for a in aux:
+                                retorno.append(a)
+            # filtramos duplicados y destacamos el resultado exacto
+            if len(retorno) > 1:
+                mix = []
+                while len(retorno) > 0:
+                    elemento = retorno[0]
+                    for r in retorno:
+                        if r.text.lower().find(query) != -1:
+                            elemento = r
+                            break
+                        elif r.clics > elemento.clics:
+                            elemento = r
+                    encontrado = False
+                    for m in mix:
+                        if m.url == elemento.url:
+                            encontrado = True
+                    if not encontrado:
+                        mix.append(elemento)
+                    retorno.remove(elemento)
+                retorno = mix
+            return retorno

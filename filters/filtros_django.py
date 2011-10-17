@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import hashlib, urllib, base64, math, re
+import hashlib, urllib, base64, math, re, logging
 from django.utils.safestring import mark_safe
 from django.template.defaultfilters import truncatewords, linebreaksbr, urlize
 from google.appengine.ext import webapp
@@ -26,14 +26,8 @@ from datetime import datetime
 register = webapp.template.create_template_register()
 
 @register.filter
-def bbcode(value):
+def fuckcode(value):
     bbdata = [
-        (r'\[url\](.+?)\[/url\]', r'<a target="_Blank" href="\1">\1</a>'),
-        (r'\[url=(.+?)\](.+?)\[/url\]', r'<a target="_Blank" href="\1">\2</a>'),
-        (r'\[email\](.+?)\[/email\]', r'<a href="mailto:\1">\1</a>'),
-        (r'\[email=(.+?)\](.+?)\[/email\]', r'<a href="mailto:\1">\2</a>'),
-        (r'\[img\](.+?)\[/img\]', r'<a target="_Blank" href="\1"><img class="galeria" src="\1"></a>'),
-        (r'\[img=(.+?)\](.+?)\[/img\]', r'<a target="_Blank" href="\1"><img class="galeria" src="\1" alt="\2"></a>'),
         (r'\[b\](.+?)\[/b\]', r'<b>\1</b>'),
         (r'\[i\](.+?)\[/i\]', r'<i>\1</i>'),
         (r'\[u\](.+?)\[/u\]', r'<u>\1</u>'),
@@ -46,32 +40,27 @@ def bbcode(value):
     for bbset in bbdata:
         p = re.compile(bbset[0], re.DOTALL)
         value = p.sub(bbset[1], value)
-    #The following two code parts handle the more complex list statements
-    temp = ''
-    p = re.compile(r'\[list\](.+?)\[/list\]', re.DOTALL)
-    m = p.search(value)
-    if m:
-        items = re.split(re.escape('[*]'), m.group(1))
-        for i in items[1:]:
-            temp = temp + '<li>' + i + '</li>'
-        value = p.sub(r'<ul>'+temp+'</ul>', value)
-    temp = ''
-    p = re.compile(r'\[list=(.)\](.+?)\[/list\]', re.DOTALL)
-    m = p.search(value)
-    if m:
-        items = re.split(re.escape('[*]'), m.group(2))
-        for i in items[1:]:
-            temp = temp + '<li>' + i + '</li>'
-        value = p.sub(r'<ol type=\1>'+temp+'</ol>', value)
-    # youtube
-    p = re.compile(r'\[youtube\](.+?)\[/youtube\]', re.DOTALL)
-    value = p.sub(youtube, value)
+    # links
+    p = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.DOTALL)
+    value = p.sub(urlizer, value)
+    # tags
+    aux_tags = re.findall(r'#[0-9a-zA-Z+_]+', value)
+    for t in aux_tags:
+        value = value.replace(t, tag(t[1:]))
+    # mentions
+    aux_mentions = re.findall(r'@[0-9]+', value)
+    for mention in aux_mentions:
+        value = value.replace(mention, '<a href="#'+mention[1:]+'">'+mention+'</a>')
     return mark_safe(value)
 
-def youtube(url):
-    texto = '<iframe title="YouTube" class="youtube-player" type="text/html" width="425" height="349" src="'
-    texto += 'http://www.youtube.com/embed/' + url.group(0).split('?v=')[1].replace('[/youtube]', '" frameborder="0"></iframe>')
-    return texto
+@register.filter
+def urlizer(link):
+    if link.group(0)[-4:].lower() in ['.jpg', '.gif', '.png'] or link.group(0)[-5:].lower() in ['.jpeg']:
+        return '<a href="'+link.group(0)+'">'+miniatura(link.group(0))+'</a>'
+    elif link.group(0)[:31] == 'http://www.youtube.com/watch?v=':
+        return '<div><iframe width="420" height="345" src="http://www.youtube.com/embed/' + link.group(0).split('?v=')[1] + '" frameborder="0" allowfullscreen></iframe></div>'
+    else:
+        return '<a target="_Blank" href="' + link.group(0) + '">' + link.group(0) + '</a>'
 
 @register.filter
 def cortamail(email=None):
@@ -91,6 +80,20 @@ def autor(a=None):
         return 'anónimo'
 
 @register.filter
+def tag(value, t=0, c=0):
+    if value:
+        if t == 3:
+            return mark_safe('<a class="max" title="' + str(c) + '" class="tag" href="/search/' + value + '">' + value + '</a>')
+        elif t == 2:
+            return mark_safe('<a class="min" title="' + str(c) + '" class="tag" href="/search/' + value + '">' + value + '</a>')
+        elif t == 1:
+            return mark_safe('<a title="' + str(c) + '" href="/search/' + value + '">' + value + '</a>')
+        else:
+            return mark_safe('<a class="tag" href="/search/' + value + '">' + value + '</a>')
+    else:
+        return ''
+
+@register.filter
 def tags(cadena=None):
     retorno = ''
     if cadena:
@@ -98,30 +101,35 @@ def tags(cadena=None):
         for t in ts:
             if retorno != '':
                 retorno += ', '
-            retorno += '<a class="tag" href="/tag/' + t + '">' + t + '</a>'
+            retorno += tag(t)
     return mark_safe(retorno)
 
 @register.filter
 def alltags(tags):
     retorno = ''
+    vtags = []
     if tags:
-        tmedia = 0
         for t in tags:
+            if t[1] > 0:
+                vtags.append(t)
+    if vtags:
+        tmedia = 0
+        for t in vtags:
             tmedia += t[1]
         try:
             tmedia = tmedia / len(tags)
         except:
             tmedia = 10
-        tags.sort(key=lambda a: a[0].lower())
-        for t in tags:
+        vtags.sort(key=lambda a: a[0].lower())
+        for t in vtags:
             if retorno != '':
                 retorno += ' '
             if t[1] < tmedia:
-                retorno += '<a class="min" title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
+                retorno += tag(t[0], 2, t[1])
             elif t[1] > tmedia:
-                retorno += '<a class="max" title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
+                retorno += tag(t[0], 3, t[1])
             else:
-                retorno += '<a title="' + str(t[1]) + '" href="/tag/' + t[0] + '">' + t[0] + '</a>'
+                retorno += tag(t[0], 1, t[1])
         return mark_safe('<div class="alltags">'+retorno+'</div>')
     else:
         return mark_safe('<div class="mensaje">Sin resultados.</div>')
@@ -269,7 +277,7 @@ def ultimas_respuestas(pregunta, respuestas):
         retorno = '<ul>'
         for r in respuestas:
             if r.id_pregunta == str(pregunta):
-                retorno += '<li><b>' + cortamail(r.autor) + '</b> responde: ' + truncatewords(r.contenido, 20) + "</li>\n"
+                retorno += '<li>' + truncatewords(r.contenido, 20) + "</li>\n"
         return mark_safe(retorno+'</ul>')
     else:
         return ''
@@ -277,8 +285,9 @@ def ultimas_respuestas(pregunta, respuestas):
 
 @register.filter
 def respuestas_destacadas(respuestas):
+    retorno = ''
+    destacadas = []
     if len(respuestas) > 4:
-        retorno = ''
         i = 1
         media = 0
         for r in respuestas:
@@ -286,14 +295,21 @@ def respuestas_destacadas(respuestas):
         media = math.ceil(float(media)/len(respuestas))
         for r in respuestas:
             if r.valoracion > media:
-                if retorno == '':
-                    retorno = '<tr><td></td><td valign="top"><div class="respuesta_d">Respuestas destacadas: '
-                retorno += '<a href="#' + str(i) + '">#' + str(i) + '</a> '
+                destacadas.append([i, r.valoracion])
             i += 1
-        retorno += '</div></td><td></td></tr><tr><td colspan="3">&nbsp;</td></tr>'
-        return mark_safe(retorno)
-    else:
-        return ''
+    if len(destacadas) > 0:
+        while len(destacadas) > 0:
+            elemento = [0, 0]
+            for r in destacadas:
+                if r[1] > elemento[1]:
+                    elemento = r
+            destacadas.remove(elemento)
+            if retorno == '':
+                retorno = '<tr><td></td><td valign="top"><div class="respuesta_d">Respuestas destacadas: '
+            retorno += '<a href="#' + str(elemento[0]) + '">@' + str(elemento[0]) + '</a> &nbsp; '
+        if retorno != '':
+            retorno += '</div></td><td></td></tr>'
+    return mark_safe(retorno)
 
 
 @register.filter
@@ -319,10 +335,7 @@ def tipo_enlace(enlace):
         retorno = '<a href="'+enlace.url+'"><img src="/img/emblem-package.png" alt="'+enlace.descripcion+'" title="clic para descargar"/></a>'
     else:
         enlace.tipo_enlace = 'texto'
-        if enlace.autor:
-            retorno = '<div class="avatar">'+avatar(enlace.autor.email())+'<br/>'+puntos(enlace.puntos)+'</div>'
-        else:
-            retorno = '<div class="avatar">'+avatar()+'<br/>'+puntos(enlace.puntos)+'</div>'
+        retorno = '<a href="'+enlace.url+'" target="_Blank">'+enlace.url+'</a>'
     return mark_safe(retorno)
 
 

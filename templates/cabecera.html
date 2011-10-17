@@ -38,7 +38,7 @@
     <td>
         <a title="Soluciones r&aacute;pidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu y Linux en general" href="/">Ubuntu <s>FUCK</s> FAQ</a>
         <a id="menupregunta" class="menusel" href="#" onclick="menu_cabecera('pregunta')">pregunta</a>
-        <a id="menuenlace" href="#" onclick="menu_cabecera('enlace')">enlace</a>
+        <a id="menuenlace" href="#" onclick="menu_cabecera('enlace')">noticia</a>
         <a id="menupensamiento" href="/nueva">pensamiento</a>
         <a id="menubuscar" href="#" onclick="menu_cabecera('buscar')">buscar</a>
     </td>
@@ -58,20 +58,20 @@
 <div class="formcabecera">
     <div id="pregunta">
         <form name="pregunta" action="/nueva" method="get">
-        <table>
+        <table width="100%">
         <tr>
         <td>
             <input type="hidden" name="tipo" value="pregunta"/>
             <input class="titulo" type="text" name="contenido" size="70" maxlength="500" value="¡Haz tu pregunta!" onclick="this.select()"/>
         </td>
-        <td><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_preguntas">Ayuda</a></td>
+        <td width="150"><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_preguntas">Ayuda</a></td>
         </tr>
         <tr>
         <td colspan="2" class="mini">
             <a href="/preguntas">Todas</a>
             <a href="/populares">Populares</a>
             <a href="/sin-solucionar">Sin solucionar</a>
-            | <a href="/tag/">Etiquetas</a>
+            | <a href="/search/">Etiquetas</a>
         </td>
         </tr>
         </table>
@@ -79,38 +79,36 @@
     </div>
     <div id="enlace">
         <form name="enlace" action="/nueva" method="get">
-        <table>
+        <table width="100%">
         <tr>
         <td>
             <input type="hidden" name="tipo" value="enlace"/>
             <input class="titulo" type="text" name="url" size="70" maxlength="150" value="http://" onclick="this.select()"/>
         </td>
-        <td><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_enlaces">Ayuda</a></td>
+        <td width="150"><input type="submit" class="boton" value="continuar"/> <a href="/ayuda#ayuda_enlaces">Ayuda</a></td>
         </tr>
         <tr>
         <td colspan="2" class="mini">
             <a href="/actualidad">Actualidad</a>
             <a href="/images">Imágenes</a>
-            | <a href="/tag/">Etiquetas</a>
+            | <a href="/search/">Etiquetas</a>
         </td>
         </tr>
         </table>
         </form>
     </div>
     <div id="buscar">
-        <div id="cse-search-form" style="width: 100%;">Loading</div>
-        <script src="http://www.google.com/jsapi" type="text/javascript"></script>
-        <script type="text/javascript"> 
-          google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
-          google.setOnLoadCallback(function() {
-            var customSearchControl = new google.search.CustomSearchControl('012555462685872355777:lsfrysuzq4w');
-            customSearchControl.setResultSetSize(google.search.Search.FILTERED_CSE_RESULTSET);
-            var options = new google.search.DrawOptions();
-            options.setSearchFormRoot('cse-search-form');
-            options.setAutoComplete(true);    
-            customSearchControl.draw('cse', options);
-          }, true);
-        </script>
+        <form name="buscar" action="/search/" method="POST">
+        <table width="100%">
+        <tr>
+        <td><input class="titulo" type="text" name="query" size="70" maxlength="150" value=""/></td>
+        <td width="60"><input type="submit" class="boton" value="buscar"/></td>
+        </tr>
+        </table>
+        </form>
+        {% if searches %}
+            {{ searches|alltags }}
+        {% endif %}
     </div>
 </div>
 </div>
@@ -118,5 +116,3 @@
 {% if error_dominio %}
 <div class="dominio">Por favor, usa el dominio <a href="http://www.ubufaq.com">ubufaq.com</a> para acceder a esta web.</div>
 {% endif %}
-
-<div id="buscar2"><div id="cse"></div></div>

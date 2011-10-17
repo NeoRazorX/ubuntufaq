@@ -28,12 +28,10 @@ from base import *
 class Todas_preguntas(Pagina):
     def get(self, p=0):
         Pagina.get(self)
-        
         # paginamos
         p_query = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC")
         preguntas, paginas, p_actual = self.paginar(p_query, 20, p)
         datos_paginacion = [paginas, p_actual, '/preguntas/']
-        
         template_values = {
             'titulo': 'Todas la preguntas de Ubuntu FAQ',
             'descripcion': 'Todas la preguntas de Ubuntu FAQ. ' + APP_DESCRIPTION,
@@ -68,7 +66,6 @@ class Sin_solucionar(Pagina):
     def get(self, p=0):
         Pagina.get(self)
         preguntas = self.get_preguntas()
-        
         template_values = {
             'titulo': 'Ubuntu FAQ - sin solucionar',
             'descripcion': 'Listado de preguntas sin solucionar de Ubuntu FAQ. ' + APP_DESCRIPTION,
@@ -92,9 +89,8 @@ class Nueva_pregunta(Pagina):
         p = Pregunta()
         p.titulo = cgi.escape(self.request.get('titulo'), True)
         p.contenido = cgi.escape(self.request.get('contenido'), True)
-        p.tags = self.extraer_tags( self.request.get('titulo') + self.request.get('contenido') )
+        p.get_tags()
         p.os = self.request.environ['HTTP_USER_AGENT']
-        
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
                 p.autor = users.get_current_user()
@@ -113,7 +109,6 @@ class Nueva_pregunta(Pagina):
                 response,
                 RECAPTCHA_PRIVATE_KEY,
                 remoteip)
-            
             if cResponse.is_valid:
                 try:
                     p.put()
@@ -136,22 +131,17 @@ class Redir_pregunta(Pagina):
 class Detalle_pregunta(Pagina):
     def get(self, id_p=None):
         Pagina.get(self)
-        
         try:
             p = Pregunta.get( id_p )
         except:
             p = None
-        
         if p:
             editar = False
             modificar = False
-            
             if (users.get_current_user() and users.get_current_user() == p.autor) or users.is_current_user_admin():
                 editar = True
-            
             if self.request.get('modificar') and editar:
                 modificar = True
-            
             # el captcha
             if users.get_current_user():
                 chtml = ''
@@ -160,7 +150,6 @@ class Detalle_pregunta(Pagina):
                     public_key = RECAPTCHA_PUBLIC_KEY,
                     use_ssl = False,
                     error = None)
-            
             template_values = {
                 'titulo': p.titulo + ' [ ' + p.get_estado() + ' ]',
                 'descripcion': p.contenido,
@@ -192,7 +181,6 @@ class Detalle_pregunta(Pagina):
             p = Pregunta.get( self.request.get('id') )
         except:
             p = None
-        
         # solo el autor de la preguna o un administrador puede modificarla
         if p and self.request.get('titulo') and self.request.get('contenido') and self.request.get('tags') and self.request.get('estado'):
             if (users.get_current_user() == p.autor) or users.is_current_user_admin():
@@ -237,7 +225,6 @@ class Responder(webapp.RequestHandler):
         r.id_pregunta = self.request.get('id_pregunta')
         r.os = self.request.environ['HTTP_USER_AGENT']
         r.ips = [self.request.remote_addr]
-        
         if users.get_current_user() and self.request.get('id_pregunta') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
                 r.autor = users.get_current_user()

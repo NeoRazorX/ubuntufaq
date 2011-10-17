@@ -3,11 +3,16 @@
 
 {{ datos_paginacion|paginar }}
 
-<table width='100%'>
+<table align="center">
 {% for enlace in enlaces %}
     <tr>
     <td class="avatar">{{ enlace.autor.email|avatar:40 }}</td>
     <td>
+    <div class="info_respuesta_up">
+        &nbsp; {{ enlace.autor|autor }} |
+        {{ enlace.fecha|timesince|traducir }} |
+        {{ enlace.clicks }} clics
+    </div>
     <div class="respuesta">
         {% if enlace.tipo_enlace == 'imagen' %}
             <a href="/story/{{ enlace.key }}"><img class="icono" src="/img/photo.png" alt="imagen"/></a>
@@ -24,12 +29,7 @@
         {{ enlace.descripcion|safe|urlize }}
         - <a href="/e/{{ enlace.key }}" target="_Blank">{{ enlace.url|slice:"7:37" }}</a>
     </div>
-    <div class="info_respuesta_down">
-        {{ enlace.fecha|timesince|traducir }} |
-        {{ enlace.creado|date:"d/m/Y H:i" }} |
-        {{ enlace.clicks }} clics |
-        {{ enlace.autor|autor }}
-    </div>
+    <div class="info_respuesta_down"></div>
     </td>
     <td class="col_info_mix">
         {% if enlace.comentarios %}
@@ -72,7 +72,7 @@
         </ul>
     </ul>
     </td>
-    <td>
+    <td valign="top">
     <ul>
         <li>Usuarios: {{ stats.usuarios }}</li>
         <ul>

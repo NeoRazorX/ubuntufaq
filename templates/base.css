@@ -14,12 +14,15 @@ a {
 }
 
 a.comentario {
-    margin-right: 10px;
+    background-color: #333333;
+    color: white;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 a.comentarios {
     font-size: 20px;
-    background-color: #DD4814;
+    background-color: #333333;
     color: white;
     padding: 5px;
     padding-left: 10px;
@@ -31,7 +34,7 @@ a.comentarios {
 
 a.no-comentarios {
     font-size: 20px;
-    background-color: #333333;
+    background-color: #c4c4c4;
     color: white;
     padding: 5px;
     padding-left: 10px;
@@ -68,14 +71,14 @@ a.seguimiento {
 }
 
 a.negativo {
-    background-color: #E20000;
+    background-color: #D43723;
     color: white;
     padding-left: 3px;
     padding-right: 3px;
 }
 
 a.positivo {
-    background-color: green;
+    background-color: #36A736;
     color: white;
     padding-left: 3px;
     padding-right: 3px;
@@ -95,31 +98,41 @@ div.codigo {
     margin: 5px;
 }
 
-div.boton, div.b_verde, div.b_rojo {
+input.boton, div.boton, div.b_verde, div.b_rojo {
+    background-color: #f1f1f1;
     text-align: center;
-    background-color: #333333;
+    font-weight: bold;
+    color: black;
     padding: 3px;
     margin: 2px;
     border-top-left-radius: 2px 2px;
     border-top-right-radius: 2px 2px;
     border-bottom-left-radius: 2px 2px;
     border-bottom-right-radius: 2px 2px;
-}
-
-div.b_verde {
-    background-color: green;
-}
-
-div.b_rojo {
-    background-color: #E20000;
+    border: 1px outset #848484;
 }
 
 div.boton a, div.b_verde a, div.b_rojo a {
+    color: black;
+}
+
+div.boton:hover {
+    background-color: #c4c4c4;
+}
+
+input.boton:hover, div.b_verde:hover {
+    background-color: #36A736;
+    border: 1px outset #36A736;
     color: white;
 }
 
-span.votar {
-    margin-left: 30px;
+div.b_rojo:hover {
+    background-color: #D43723;
+    border: 1px outset #D43723;
+}
+
+div.b_verde:hover a, div.b_rojo:hover a {
+    color: white;
 }
 
 textarea {
@@ -129,19 +142,6 @@ textarea {
 
 input {
     border: 1px solid #333333;
-}
-
-input.boton {
-    background-color: #333333;
-    color: white;
-    font-weight: bold;
-    font-size: 15px;
-    padding: 3px;
-    border: 1px solid #333333;
-    border-top-left-radius: 3px 3px;
-    border-top-right-radius: 3px 3px;
-    border-bottom-left-radius: 3px 3px;
-    border-bottom-right-radius: 3px 3px;
 }
 
 input.titulo {
@@ -203,7 +203,9 @@ div.formcabecera {
     background-color: #F1F1F1;
     color: black;
     padding: 3px;
-    border-bottom: 1px solid #333333;
+    border-bottom: 1px solid #c4c4c4;
+    border-top-left-radius: 8px 8px;
+    border-top-right-radius: 8px 8px;
 }
 
 div.formcabecera a {
@@ -289,7 +291,8 @@ td.clics {
     vertical-align: top;
 }
 
-td.valoracion, td.v_negativa {
+td.valoracion, td.v_negativa, td.v_positiva {
+    text-align: right;
     vertical-align: top;
     width: 50px;
     font-size: 22px;
@@ -297,11 +300,29 @@ td.valoracion, td.v_negativa {
 }
 
 td.valoracion a {
-    color: black;
+    background-color: #c4c4c4;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-top-left-radius: 2px 2px;
+    border-top-right-radius: 2px 2px;
+    border-bottom-left-radius: 2px 2px;
+    border-bottom-right-radius: 2px 2px;
 }
 
 td.v_negativa a {
-    background-color: #E20000;
+    background-color: #D43723;
+    color: white;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-top-left-radius: 2px 2px;
+    border-top-right-radius: 2px 2px;
+    border-bottom-left-radius: 2px 2px;
+    border-bottom-right-radius: 2px 2px;
+}
+
+td.v_positiva a {
+    background-color: #36A736;
     color: white;
     padding-left: 3px;
     padding-right: 3px;
@@ -347,19 +368,22 @@ div.formulario {
 
 div.info_respuesta_up {
     font-size: 11px;
-    margin-top: 5px;
-    margin-left: 10px;
-    margin-right: 10px;
-    margin-bottom: 2px;
+    margin-top: 0px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-bottom: 0px;
     padding: 0px;
+    border-top: 1px solid #c4c4c4;
+    border-left: 1px solid #c4c4c4;
+    border-right: 1px solid #c4c4c4;
+    background-color: #c4c4c4;
 }
 
 div.info_respuesta_down {
-    text-align: right;
     font-size: 11px;
     margin-top: 0px;
     margin-left: 10px;
-    margin-right: 15px;
+    margin-right: 10px;
     margin-bottom: 5px;
     padding: 0px;
 }
@@ -368,8 +392,8 @@ div.respuesta_d {
     background-color: #feffc0;
     border: 1px solid #e1e16e;
     margin-top: 0px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
     margin-bottom: 0px;
     padding: 5px;
     text-transform: capitalize;
@@ -382,20 +406,24 @@ div.respuesta_n {
     background-color: #F7F7F7;
     border: 1px solid #c4c4c4;
     margin-top: 0px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
     margin-bottom: 0px;
     padding: 5px;
     min-height: 35px;
 }
 
+div.respuesta:hover {
+    background-color: #EFEFEF;
+}
+
 div.respuesta_n {
-    border: 1px dashed #E20000;
+    border: 1px dashed #AFAFAF;
     color: white;
 }
 
 div.respuesta_n:hover {
-    border: 1px solid #E20000;
+    border: 1px solid #AFAFAF;
     color: black;
 }
 
@@ -412,11 +440,15 @@ div.comentario {
     background-color: #EFEFEF;
     border: 1px solid #c4c4c4;
     margin-top: 0px;
-    margin-left: 10px;
-    margin-right: 10px;
+    margin-left: 5px;
+    margin-right: 5px;
     margin-bottom: 0px;
     padding: 5px;
     font-size: 17px;
+}
+
+div.num_respuesta {
+    float: right;
 }
 
 div.mensaje {
@@ -434,6 +466,7 @@ div.titulo {
     font-size: 15px;
     letter-spacing: 0.12em;
     margin-bottom: 3px;
+    text-transform: uppercase;
 }
 
 div.titulo span {
@@ -512,18 +545,18 @@ ul.social li {
 }
 
 div.alltags {
-    margin-bottom: 30px;
-    font-size: 20px;
+    margin-bottom: 5px;
+    font-size: 14px;
     text-align: center;
     word-spacing: 15px;
 }
 
 div.alltags a.max {
-    font-size: 28px;
+    font-size: 20px;
 }
 
 div.alltags a.min {
-    font-size: 14px;
+    font-size: 11px;
 }
 
 div.pie {
@@ -549,8 +582,10 @@ div.pie table td {
 div.pregunta a:hover,
 div.respuesta a:hover,
 div.respuesta_d a:hover,
-div.comentario a:hover,
-div.enlace a:hover,
+div.comentario a:hover {
+    text-decoration: underline;
+}
+
 ul.tags a:hover,
 div.alltags a:hover,
 div.pie a:hover {

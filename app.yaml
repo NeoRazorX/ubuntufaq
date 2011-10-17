@@ -1,5 +1,5 @@
 application: ubuntu-faq
-version: 46
+version: 48
 runtime: python
 api_version: 1
 
@@ -75,8 +75,8 @@ handlers:
   script: stop_emails.py
   login: required
 
-- url: /tag/.*
-  script: tags.py
+- url: /search/.*
+  script: search.py
 
 - url: /votar/.*
   script: votar.py

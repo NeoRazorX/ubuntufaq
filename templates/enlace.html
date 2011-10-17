@@ -1,17 +1,19 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
-<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>
 <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
 <script type="text/javascript" src="http://apis.google.com/js/plusone.js">
   {lang: 'es'}
 </script>
 
-
+<table width="100%">
+<tr>
+    <td valign="top"><div class="avatar">{{ enlace.autor.email|avatar }}<br/>{{ enlace.puntos|puntos }}</div></td>
+    <td valign="top">
 {% if modificar %}
-<div>
-    <div class="titulo">Editar enlace:</div>
-    <form name="enlace" action="/mod_e" method="post">
+        <div>
+        <div class="titulo">Editar enlace:</div>
+        <form name="enlace" action="/mod_e" method="post">
         <input type="hidden" name="id" value="{{ enlace.key }}"/>
         <input class="titulo" type="text" name="url" size="50" maxlength="100" value="{{ enlace.url }}"/>
         <textarea name="descripcion" rows="6" cols="60">{{ enlace.descripcion|safe }}</textarea>
@@ -19,62 +21,55 @@
         Tags: <input type="text" name="tags" size="50" maxlength="100" value="{{ enlace.tags }}"/> &nbsp;
         Tipo enlace: <input type="text" name="tipo_enlace" size="30" maxlength="100" value="{{ enlace.tipo_enlace }}"/>
         <input type="submit" class="boton" value="modificar">
-    </form>
-</div>
-<br/>
+        </form>
+        </div>
 {% else %}
-<table width="100%">
-<tr>
-    <td valign="top">
-    {{ enlace|tipo_enlace }}
-    </td>
-    <td valign="top" width="100%">
         <div class="info_respuesta_up">
-        {{ enlace.comentarios }} comentarios |
-        {{ enlace.clicks }} clicks |
-        {{ enlace.creado|date:"d/m/Y H:i" }} |
-        etiquetas: {{ tags|tags }} |
-        {{ enlace.os|muestra_os }} |
-        {{ enlace.autor|autor }}
-        {% if administrador %}
-            | <a href="/story/{{ enlace.key }}?modificar=ok">modificar</a>
-            | <a href="#" onclick="hundir_enlace('{{ enlace.key }}')">hundir</a>
-            | <a href="#" onclick="borrar_enlace('{{ enlace.key }}')">borrar</a>
-        {% endif %}
+            &nbsp; {{ enlace.autor|autor }} |
+            {{ enlace.os|muestra_os }} |
+            {{ enlace.creado|date:"d/m/Y H:i" }} |
+            {{ enlace.comentarios }} comentarios |
+            {{ enlace.clicks }} clicks
         </div>
         <div class="comentario">
-        {% if enlace.tipo_enlace != 'texto' %}
-            {{ enlace.autor.email|avatar }}
+            {{ enlace.descripcion|safe|fuckcode }}
             <br/>
-            {{ enlace.autor|autor }}
-            <br/><br/>
-        {% endif %}
-        <a href="/story/{{ enlace.key }}">#0</a> {{ enlace.descripcion|safe|urlizetrunc:30 }}
-        {% ifequal enlace.tipo_enlace 'texto' %}
-            - <a href="{{ enlace.url }}" target="_Blank">{{ enlace.url|slice:":37" }}</a>
-        {% endifequal %}
+            {{ enlace|tipo_enlace }}
         </div>
-        <ul class="social">
-            <li><g:plusone size="medium"></g:plusone></li>
-            <li><a title="Publicar en Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-count" data-locale="es"></a></li>
-            <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
-            <li><div class="identica" style="padding: 3px; padding-bottom: 2px;background-color: white;
-border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://identi.ca//index.php?action=bookmarklet',l=d.location,e=encodeURIComponent,g=f+'&status_textarea=%E2%80%9C'+((e(s))?e(s):e(document.title))+'%E2%80%9D%20%E2%80%94%20'+l.href;function%20a(){if(!w.open(g,'t','toolbar=0,resizable=0,scrollbars=1,status=1,width=450,height=200')){l.href=g;}}a();})()"><img src="/img/identica.png" alt="identica"/></a></div></li>
-            <li><iframe src="http://www.facebook.com/plugins/like.php?href&amp;send=true&amp;layout=button_count&amp;width=150&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe></li>
-        </ul>
+{% endif %}
+    </td>
+    <td valign="top">
+        {% if administrador %}
+        <div class="boton"><a href="/story/{{ enlace.key }}?modificar=ok">modificar</a></div>
+        <div class="b_rojo"><a href="#" onclick="hundir_enlace('{{ enlace.key }}')">hundir</a></div>
+        <div class="b_rojo"><a href="#" onclick="borrar_enlace('{{ enlace.key }}')">borrar</a></div>
+        {% endif %}
     </td>
 </tr>
-</table>
-{% endif %}
+<tr>
+    <td></td>
+    <td>
+        <ul class="social">
+            <li><iframe src="http://www.facebook.com/plugins/like.php?href={{ enlace.get_full_link|urlencode }}&amp;show_faces=false" scrolling="no" frameborder="0" style="height: 40px; width: 400px" allowTransparency="true"></iframe></li>
+            <li><g:plusone size="medium"></g:plusone></li>
+            <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
+        </ul>
+    </td>
+    <td></td>
+</tr>
 
-
-<table width="100%">
 {% for coment in comentarios %}
 <tr>
-    <td class="avatar">{{ coment.autor.email|avatar:40 }}</td>
+    <td align="right" valign="top">{{ coment.autor.email|avatar:40 }}</td>
     <td valign="top">
+        <div class="info_respuesta_up">
+            <a name="{{ coment.key }}"></a>
+            <a class="comentario" name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">@{{ forloop.counter }}</a>
+            &nbsp; {{ coment.autor|autor }} |
+            {{ coment.os|muestra_os }} |
+            {{ coment.fecha|timesince|traducir }}
+        </div>
         <div class="respuesta">
-        <a name="{{ coment.key }}"></a>
         {% if modificar %}
             <form name="comentario{{ forloop.counter }}" action="/mod_c" method="post">
             <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
@@ -83,23 +78,19 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
             <input type="submit" class="boton" value="modificar">
             </form>
         {% else %}
-            <a class="comentario" name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-            {{ coment.contenido|safe|linebreaksbr|bbcode }}
-        {% endif %}
-        </div>
-        <div class="info_respuesta_down">
-            {{ coment.fecha|timesince|traducir }} |
-            {{ coment.os|muestra_os }} |
-            {{ coment.autor|autor }}
-        {% if administrador %}
-            | <a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a>
+            {{ coment.contenido|safe|linebreaksbr|fuckcode }}
         {% endif %}
         </div>
     </td>
+    {% if administrador %}
+    <td valign="top">
+        <div class="b_rojo"><a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a></div>
+    </td>
+    {% endif %}
 </tr>
 {% empty %}
 <tr>
-<td class="avatar"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
+<td align="right" valign="top"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
 <td valign="top">
     <div class="mensaje">
     Cada vez que una noticia se queda sin comentarios, Dios mata un gatito.
@@ -109,14 +100,15 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
 </td>
 </tr>
 {% endfor %}
-</table>
 
-<hr/>
+<tr><td></td><td><hr/></td><td></td></tr>
 
-<table width="100%">
 <tr>
-<td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
-<td valign="top">
+<td align="right" valign="top"><br/>{{ usuario.email|avatar:40 }}</td>
+<td valign="top" colspan="2">
+    <table width="100%">
+    <tr>
+    <td>
     <div class="formulario">
     <form name="comentario" action="/add_c" method="post">
     <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
@@ -128,32 +120,29 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
     <input type="button" class="boton" value="comentar" onclick="enviar_comentario()"/>
     </form>
     </div>
-</td>
-<td valign="top">
+    </td>
+    <td valign="top">
     <ul>
         <li>Respeta a los demás.</li>
         <li>Repasa la ortografía.</li>
-        <li>Para contestar al comentario #1 escribre @1 en el tuyo.</li>
-        <li>Para contestar al comentario #2 escribre @2 en el tuyo.</li>
-        <li>...</li>
-        <li>Para poner un <b>enlace</b>: [url]url-del-enlace[/url]</li>
-        <li>Para poner una <b>imagen</b>: [img]url-de-la-imagen[/img]</li>
-        <li>Para poner un vídeo de <b>youtube</b>: [youtube]url-del-video[/youtube]</li>
         <li>Para poner <b>código</b>: [code]el-codigo[/code]</li>
         <li>Para poner un texto en <b>negrita</b>: [b]el-texto[/b]</li>
         <li>Para poner un texto en <b>cursiva</b>: [i]el-texto[/i]</li>
         <li>Para poner un texto <b>subrayado</b>: [u]el-texto[/u]</li>
     </ul>
+    </td>
+    </tr>
+    </table>
 </td>
 </tr>
 {% if relacionadas %}
 <tr>
     <td></td>
-    <td colspan="2">
+    <td>
     <b>Informaci&oacute;n relacionada: {{ tags|tags }}.</b>
     <ul class="tags">
     {% for rel in relacionadas %}
-        <li><a href="{{ rel.link }}">{{ rel.title|truncatewords:25 }}</a></li>
+        <li><a href="{{ rel.url }}">{{ rel.text|truncatewords:25 }}</a></li>
     {% endfor %}
     </ul>
     </td>

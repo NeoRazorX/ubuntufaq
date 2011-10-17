@@ -1,14 +1,19 @@
 {% include "cabecera.html" %}
 <div class="preguntas">
 
-<script type="text/javascript" src="http://www.google.com/buzz/api/button.js"></script>
 <script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script>
 <script type="text/javascript" src="http://apis.google.com/js/plusone.js">
   {lang: 'es'}
 </script>
 
+<table width="100%">
+<tr>
+<td valign="top">
+    <div class="avatar">{{ pregunta.autor.email|avatar }}<br/>{{ pregunta.puntos|puntos }}</div>
+</td>
+<td valign="top">
 {% if modificar %}
-    <div class="pregunta">
+    <div class="comentario">
         <div class="titulo">Editar pregunta:</div>
         <form name="pregunta" action="/mod_p" method="post">
         <input type="hidden" name="id" value="{{ pregunta.key }}"/>
@@ -66,41 +71,34 @@
         <input type="submit" class="boton" value="modificar">
         </form>
     </div>
-    <br/>
 {% else %}
-<table width="100%">
-<tr>
-<td valign="top" width="120">
-    <div class="avatar">{{ pregunta.autor.email|avatar }}<br/>{{ pregunta.puntos|puntos }}</div>
-</td>
-<td valign="top">
-    <div class="pregunta">
-    <div class="titulo">
-        <span>{{ pregunta.estado|estado_pregunta }}</span>
-        <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|safe }}</a>
-    </div>
-    {{ pregunta.contenido|safe|linebreaksbr|urlizetrunc:35 }}
-    <div class="bottom">
-        {{ pregunta.respuestas }} respuestas |
-        {{ pregunta.visitas }} clics |
-        {{ pregunta.creado|date:"d/m/Y H:i" }} |
-        etiquetas: {{ pregunta.tags|tags }} |
+    <div class="info_respuesta_up">
+        &nbsp; {{ pregunta.autor|autor }} |
         {{ pregunta.os|muestra_os }} |
-        {{ pregunta.autor|autor }}
+        {{ pregunta.creado|date:"d/m/Y H:i" }} |
+        {{ pregunta.respuestas }} respuestas |
+        {{ pregunta.visitas }} clics
     </div>
+    <div class="comentario">
+        <div class="titulo">
+            <span>{{ pregunta.estado|estado_pregunta }}</span>
+            <a href="/question/{{ pregunta.key }}">{{ pregunta.titulo|safe }}</a>
+        </div>
+        {{ pregunta.contenido|safe|linebreaksbr|fuckcode }}
     </div>
+    <div class="info_respuesta_down">
+        <a class="seguimiento" href="/ayuda#seguimiento">Seguimientos</a>: {{ pregunta.seguimientos }}
+    </div>
+{% endif %}
 </td>
 <td valign="top" width="120">
-    <a class="seguimiento" href="/ayuda#seguimiento">Seguimientos</a>: {{ pregunta.seguimientos }}
-    <br/>
     {% if not usuario or usuario != pregunta.autor %}
     {% if es_seguidor %}
-        <div class="b_rojo"><a href="/seguir/{{ pregunta.key }}">dejar de seguir</a></div>
+        <div class="boton"><a href="/seguir/{{ pregunta.key }}">dejar de seguir</a></div>
     {% else %}
         <div class="b_verde"><a href="/seguir/{{ pregunta.key }}">seguir</a></div>
     {% endif %}
     {% endif %}
-    <br/>
     {% if editar %}
         <div class="boton"><a href="/question/{{ pregunta.key }}?modificar=ok">modificar</a></div>
     {% endif %}
@@ -109,36 +107,33 @@
     {% endif %}
 </td>
 </tr>
-<tr>
-<td></td>
-<td colspan="2">
-    <ul class="social">
-        <li><g:plusone size="medium"></g:plusone></li>
-        <li><a title="Publicar en Google Buzz" class="google-buzz-button" href="http://www.google.com/buzz/post" data-button-style="small-count" data-locale="es"></a></li>
-        <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
-        <li><div class="identica" style="padding: 3px; padding-bottom: 2px;background-color: white;
-border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=window,e=w.getSelection,k=d.getSelection,x=d.selection,s=(e?e():(k)?k():(x?x.createRange().text:0)),f='http://identi.ca//index.php?action=bookmarklet',l=d.location,e=encodeURIComponent,g=f+'&status_textarea=%E2%80%9C'+((e(s))?e(s):e(document.title))+'%E2%80%9D%20%E2%80%94%20'+l.href;function%20a(){if(!w.open(g,'t','toolbar=0,resizable=0,scrollbars=1,status=1,width=450,height=200')){l.href=g;}}a();})()"><img src="/img/identica.png" alt="identica"/></a></div></li>
-        <li><iframe src="http://www.facebook.com/plugins/like.php?href&amp;send=true&amp;layout=button_count&amp;width=150&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:150px; height:21px;" allowTransparency="true"></iframe></li>
-    </ul>
-</td>
-</tr>
-</table>
-{% endif %}
 
-
-<table width="100%">
 {{ respuestas|respuestas_destacadas }}
 
 {% for respuesta in respuestas %}
 <tr>
-<td class="avatar">{{ respuesta.autor.email|avatar:40 }}</td>
-<td valign="top">
+{% if respuesta.valoracion >= -1 and respuesta.valoracion <= 1 %}
+    <td class="valoracion"><a title="valoración" href="#{{ forloop.counter }}" onclick="ayuda_votar()">{{ respuesta.valoracion }}</a></td>
+{% else %}
+    {% if respuesta.valoracion > 1 %}
+    <td class="v_positiva"><a title="valoración" href="#{{ forloop.counter }}" onclick="ayuda_votar()">{{ respuesta.valoracion }}</a></td>
+    {% else %}
+    <td class="v_negativa"><a title="valoración" href="#{{ forloop.counter }}" onclick="ayuda_votar()">{{ respuesta.valoracion }}</a></td>
+    {% endif %}
+{% endif %}
+    <td valign="top">
+    <div class="info_respuesta_up">
+        <a name="{{respuesta.key}}"></a>
+        <a class="comentario" name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">@{{ forloop.counter }}</a>
+        &nbsp; {{ respuesta.autor|autor }} |
+        {{ respuesta.os|muestra_os }} |
+        {{ respuesta.fecha|timesince|traducir }}
+    </div>
 {% if respuesta.valoracion >= -1 %}
     <div class="respuesta">
 {% else %}
     <div class="respuesta_n">
 {% endif %}
-    <a name="{{respuesta.key}}"></a>
     {% if modificar %}
     {% if administrador %}
         <form name="respuesta{{ forloop.counter }}" action="/mod_r" method="post">
@@ -148,92 +143,102 @@ border: 1px outset #ccc;"><a href="javascript:(function(){var%20d=document,w=win
         <input type="submit" class="boton" value="modificar">
         </form>
     {% else %}
-        <a class="comentario" name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-        {{ respuesta.contenido|safe|linebreaksbr|bbcode }}
+        {{ respuesta.contenido|safe|linebreaksbr|fuckcode }}
     {% endif %}
     {% else %}
-        <a class="comentario" name="{{ forloop.counter }}" href="/question/{{pregunta.key}}#{{ forloop.counter }}">#{{ forloop.counter }}</a>
-        {{ respuesta.contenido|safe|linebreaksbr|bbcode }}
+        {{ respuesta.contenido|safe|linebreaksbr|fuckcode }}
     {% endif %}
     </div>
     <div class="info_respuesta_down">
-        {{ respuesta.fecha|timesince|traducir }} |
-        {{ respuesta.os|muestra_os }} |
-        {{ respuesta.autor|autor }}
-    {% if editar %}
-        {% if administrador %}
-            | <a href="#" onclick="borrar_respuesta('{{pregunta.key}}', '{{respuesta.key}}')">borrar</a>
-        {% endif %}
-    {% endif %}
-        <span class="votar">votar:</span>
-        <a class="negativo" href="/votar/{{respuesta.key}}/0">-1</a>
-        <a class="positivo" href="/votar/{{respuesta.key}}/1">+1</a>
+        Votar:
+        <a class="negativo" title="voto negativo" href="/votar/{{respuesta.key}}/0">-1</a>
+        <a class="positivo" title="voto positivo" href="/votar/{{respuesta.key}}/1">+1</a>
     </div>
 </td>
-{% if respuesta.valoracion >= -1 %}
-    <td class="valoracion"><a href="/ayuda#votar_respuestas">{{ respuesta.valoracion }}</a></td>
-{% else %}
-    <td class="v_negativa"><a href="/ayuda#votar_respuestas">{{ respuesta.valoracion }}</a></td>
-{% endif %}
-</tr>
-{% empty %}
-<tr>
-<td class="avatar"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
 <td valign="top">
+    {% if administrador %}
+        <div class="b_rojo"><a href="#" onclick="borrar_respuesta('{{pregunta.key}}', '{{respuesta.key}}')">borrar</a></div>
+    {% else %}
+        {{ respuesta.autor.email|avatar:40 }}
+    {% endif %}
+</td>
+</tr>
+{% endfor %}
+
+{% if respuestas %}
+<tr>
+    <td></td>
+    <td align="center">
+        <div class="mensaje">¿Te pareció útil? <a href="#compartir">pulsa el botón +1 o compártelo en Facebook o twitter</a>. No olvides votar las respuestas.</div>
+    </td>
+    <td></td>
+</tr>
+<tr>
+    <td><a name="compartir"></a></td>
+    <td>
+    <ul class="social">
+        <li><iframe src="http://www.facebook.com/plugins/like.php?href={{ pregunta.get_full_link|urlencode }}&amp;show_faces=false" scrolling="no" frameborder="0" style="height: 40px; width: 400px" allowTransparency="true"></iframe></li>
+        <li><g:plusone size="medium"></g:plusone></li>
+        <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
+    </ul>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td align="right" valign="top"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
+    <td valign="top">
     <div class="mensaje">
     Cada vez que una pregunta se queda sin respuesta, Dios mata un gatito.
     <br/>
     Por favor, piensa en los gatitos!
     </div>
-</td>
+    </td>
 </tr>
-{% endfor %}
-</table>
+{% endif %}
 
-<hr/>
+<tr><td></td><td><hr/></td></tr>
 
-<table width="100%">
 <tr>
-<td class="avatar"><br/>{{ usuario.email|avatar:40 }}</td>
-<td valign="top">
+    <td align="right" valign="top"><br/>{{ usuario.email|avatar:40 }}</td>
+    <td colspan="2" valign="top">
     <div class="formulario">
     <form name="respuesta" action="/add_r" method="post">
+    <table width="100%">
+    <tr>
+    <td valign="top">
     <input type="hidden" name="id_pregunta" value="{{ pregunta.key }}"/>
     <textarea name="contenido" rows="6" cols="60"></textarea>
     <br/>{{ captcha|safe }}
 {% if formulario %}
-    <input type="checkbox" name="anonimo"/>An&oacute;nimo
+    <input type="checkbox" name="anonimo"/>An&oacute;nimo<br/>
 {% endif %}
     <input type="button" class="boton" value="responder" onclick="enviar_respuesta()"/>
-    </form>
-    </div>
-</td>
-<td valign="top">
+    </td>
+    <td valign="top">
     <ul>
         <li>Utiliza un lenguaje claro y conciso.</li>
         <li>Respeta a los demás.</li>
         <li>Repasa la ortografía.</li>
-        <li>Para contestar al comentario #1 escribre @1 en el tuyo.</li>
-        <li>Para contestar al comentario #2 escribre @2 en el tuyo.</li>
-        <li>...</li>
-        <li>Para poner un <b>enlace</b>: [url]url-del-enlace[/url]</li>
-        <li>Para poner una <b>imagen</b>: [img]url-de-la-imagen[/img]</li>
-        <li>Para poner un vídeo de <b>youtube</b>: [youtube]url-del-video[/youtube]</li>
         <li>Para poner <b>código</b>: [code]el-codigo[/code]</li>
         <li>Para poner un texto en <b>negrita</b>: [b]el-texto[/b]</li>
         <li>Para poner un texto en <b>cursiva</b>: [i]el-texto[/i]</li>
         <li>Para poner un texto <b>subrayado</b>: [u]el-texto[/u]</li>
     </ul>
-</td>
+    </td>
+    </tr>
+    </table>
+    </form>
+    </div>
+    </td>
 </tr>
 {% if relacionadas %}
 <tr>
     <td></td>
-    <td colspan="2">
+    <td>
     <b>Informaci&oacute;n relacionada: {{ pregunta.tags|tags }}.</b>
     <ul class="tags">
     {% for rel in relacionadas %}
-        <li><a href="{{ rel.link }}">{{ rel.title|truncatewords:25 }}</a></li>
+        <li><a href="{{ rel.url }}">{{ rel.text|truncatewords:25 }}</a></li>
     {% endfor %}
     </ul>
     </td>

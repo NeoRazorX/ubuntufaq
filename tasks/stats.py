@@ -55,8 +55,7 @@ class stats:
         
         # actualizamos el número de preguntas
         if stats['iterador'] == 0 and continuar:
-            query = db.GqlQuery("SELECT * FROM Pregunta")
-            stats['preguntas'] = query.count()
+            stats['preguntas'] = Pregunta.all(keys_only=True).count(999999)
             stats['iterador'] += 1
             stats['iterador2'] = 0
             memcache.replace('stats', stats)
@@ -65,8 +64,7 @@ class stats:
         
         # actualizamos el número de respuestas
         if stats['iterador'] == 1 and continuar:
-            query = db.GqlQuery("SELECT * FROM Respuesta")
-            stats['respuestas'] = query.count()
+            stats['respuestas'] = Respuesta.all(keys_only=True).count(999999)
             if stats['preguntas'] > 0 and stats['respuestas'] > 0:
                 stats['rpp'] = (float(stats['respuestas']) / stats['preguntas'])
             stats['iterador'] += 1
@@ -77,8 +75,7 @@ class stats:
         
         # actualizamos el número de enlaces
         if stats['iterador'] == 2 and continuar:
-            query = db.GqlQuery("SELECT * FROM Enlace")
-            stats['enlaces'] = query.count()
+            stats['enlaces'] = Enlace.all(keys_only=True).count(999999)
             stats['iterador'] += 1
             stats['iterador2'] = 0
             memcache.replace('stats', stats)
@@ -87,8 +84,7 @@ class stats:
         
         # actualizamos el número de comentarios
         if stats['iterador'] == 3 and continuar:
-            query = db.GqlQuery("SELECT * FROM Comentario")
-            stats['comentarios'] = query.count()
+            stats['comentarios'] = Comentario.all(keys_only=True).count(999999)
             if stats['enlaces'] > 0 and stats['comentarios'] > 0:
                 stats['cpe'] = (float(stats['comentarios']) / stats['enlaces'])
             stats['iterador'] += 1
@@ -99,8 +95,7 @@ class stats:
         
         # actualizamos el número de usuarios
         if stats['iterador'] == 4 and continuar:
-            query = db.GqlQuery("SELECT * FROM Usuario")
-            stats['usuarios'] = query.count()
+            stats['usuarios'] = Usuario.all(keys_only=True).count(999999)
             stats['iterador'] += 1
             stats['iterador2'] = 0
             memcache.replace('stats', stats)
@@ -109,8 +104,7 @@ class stats:
         
         # actualizamos el número de seguimientos
         if stats['iterador'] == 5 and continuar:
-            query = db.GqlQuery("SELECT * FROM Seguimiento")
-            stats['seguimientos'] = query.count()
+            stats['seguimientos'] = Seguimiento.all(keys_only=True).count(999999)
             stats['iterador'] += 1
             stats['iterador2'] = 0
             memcache.replace('stats', stats)

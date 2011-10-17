@@ -3,11 +3,16 @@
 
 {{ datos_paginacion|paginar }}
 
-<table width='100%'>
+<table align="center">
 {% for preg in preguntas %}
     <tr>
     <td class="avatar">{{ preg.autor.email|avatar:40 }}</td>
     <td>
+    <div class="info_respuesta_up">
+        &nbsp; {{ preg.autor|autor }} |
+        {{ preg.creado|timesince|traducir }} |
+        {{ preg.visitas }} clics
+    </div>
     <div class="respuesta">
         <div class='titulo'>
             <span>{{ preg.estado|estado_pregunta }}</span>
@@ -15,12 +20,7 @@
         </div>
         {{ preg.contenido|safe|truncatewords:35 }}
     </div>
-    <div class="info_respuesta_down">
-        {{ preg.creado|timesince|traducir }} |
-        {{ preg.creado|date:"d/m/Y H:i" }} |
-        {{ preg.visitas }} clics |
-        {{ preg.autor|autor }}
-    </div>
+    <div class="info_respuesta_down"></div>
     </td>
     <td class="col_info_mix">
     {% if preg.respuestas %}
@@ -63,7 +63,7 @@
         </ul>
     </ul>
     </td>
-    <td>
+    <td valign="top">
     <ul>
         <li>Usuarios: {{ stats.usuarios }}</li>
         <ul>
