@@ -45,7 +45,7 @@
     {% if usuario == tusuario %}
         {% if notis %}
         <div class="titulo"><a class="notificacion" href="#">Notificaciones</a></div>
-        <ul>
+        <ul class="tags">
         {% for noti in notis %}
             <li>
             <a href="/noti/{{ noti.key }}">{{ noti.fecha|timesince|traducir }}</a> -
@@ -72,7 +72,7 @@
     
     <div class="titulo"><span>&Uacute;ltimas preguntas</span></div>
     {% if preguntas %}
-    <ul>
+    <ul class="tags">
     {% for pregunta in preguntas %}
         <li>
         <a href="/question/{{ pregunta.key }}">{{ pregunta.creado|timesince|traducir }}</a> -
@@ -89,7 +89,7 @@
     
     <div class="titulo"><span>&Uacute;ltimas respuestas</span></div>
     {% if respuestas %}
-    <ul>
+    <ul class="tags">
     {% for respuesta in respuestas %}
         <li>
         <a href="/question/{{respuesta.id_pregunta}}#{{respuesta.key}}">{{ respuesta.fecha|timesince|traducir }}</a> -
@@ -105,7 +105,7 @@
 
     <div class="titulo"><span>&Uacute;ltimos enlaces</span></div>
     {% if enlaces %}
-    <ul>
+    <ul class="tags">
     {% for enlace in enlaces %}
         <li>
         <a href="/story/{{ enlace.key }}">{{ enlace.creado|timesince|traducir }}</a> -
@@ -121,7 +121,7 @@
 
     <div class="titulo"><span>&Uacute;ltimos comentarios</span></div>
     {% if comentarios %}
-    <ul>
+    <ul class="tags">
     {% for coment in comentarios %}
         <li>
         <a href="/story/{{ coment.id_enlace }}#{{ coment.key }}">{{ coment.fecha|timesince|traducir }}</a> -

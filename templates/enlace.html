@@ -64,7 +64,7 @@
     <td valign="top">
         <div class="info_respuesta_up">
             <a name="{{ coment.key }}"></a>
-            <a class="comentario" name="{{ forloop.counter }}" href="/story/{{ enlace.key }}#{{ forloop.counter }}">@{{ forloop.counter }}</a>
+            <a class="comentario" name="{{ forloop.counter }}" onclick="citar_comentario('{{ forloop.counter }}', '')">@{{ forloop.counter }}</a>
             &nbsp; {{ coment.autor|autor }} |
             {{ coment.os|muestra_os }} |
             {{ coment.fecha|timesince|traducir }}
@@ -84,6 +84,7 @@
     </td>
     {% if administrador %}
     <td valign="top">
+        <div class="boton"><a href="/story/{{ enlace.key }}?modificar=ok#{{ forloop.counter }}">modificar</a></div>
         <div class="b_rojo"><a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a></div>
     </td>
     {% endif %}
@@ -105,13 +106,16 @@
 
 <tr>
 <td align="right" valign="top"><br/>{{ usuario.email|avatar:40 }}</td>
-<td valign="top" colspan="2">
-    <table width="100%">
-    <tr>
-    <td>
+<td valign="top">
     <div class="formulario">
     <form name="comentario" action="/add_c" method="post">
     <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
+    <input type="button" name="add_b" value="negrita" onclick="add_negrita('')"/>
+    <input type="button" name="add_i" value="cursiva" onclick="add_cursiva('')"/>
+    <input type="button" name="add_u" value="subrayado" onclick="add_subrayado('')"/>
+    <input type="button" name="add_big" value="gigante" onclick="add_gigante('')"/>
+    <input type="button" name="add_small" value="diminuto" onclick="add_diminuto('')"/>
+    <input type="button" name="add_code" value="código" onclick="add_codigo('')"/>
     <textarea name="contenido" rows="6" cols="60"></textarea>
     <br/>{{ captcha|safe }}
 {% if formulario %}
@@ -120,19 +124,6 @@
     <input type="button" class="boton" value="comentar" onclick="enviar_comentario()"/>
     </form>
     </div>
-    </td>
-    <td valign="top">
-    <ul>
-        <li>Respeta a los demás.</li>
-        <li>Repasa la ortografía.</li>
-        <li>Para poner <b>código</b>: [code]el-codigo[/code]</li>
-        <li>Para poner un texto en <b>negrita</b>: [b]el-texto[/b]</li>
-        <li>Para poner un texto en <b>cursiva</b>: [i]el-texto[/i]</li>
-        <li>Para poner un texto <b>subrayado</b>: [u]el-texto[/u]</li>
-    </ul>
-    </td>
-    </tr>
-    </table>
 </td>
 </tr>
 {% if relacionadas %}

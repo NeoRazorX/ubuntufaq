@@ -12,16 +12,16 @@
     </div>
     <div class="respuesta">
         {% ifequal mix.tipo 'imagen' %}
-            <a href="{{ mix.link }}"><img src="/img/photo.png" alt="imagen"/></a>
+            <a href="{{ mix.link }}"><img class="icono" src="/img/photo.png" alt="imagen"/></a>
         {% endifequal %}
         {% ifequal mix.tipo 'youtube' %}
-            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
+            <a href="{{ mix.link }}"><img class="icono" src="/img/video.png" alt="v&iacute;deo"/></a>
         {% endifequal %}
         {% ifequal mix.tipo 'vimeo' %}
-            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
+            <a href="{{ mix.link }}"><img class="icono" src="/img/video.png" alt="v&iacute;deo"/></a>
         {% endifequal %}
         {% ifequal mix.tipo 'vhtml5' %}
-            <a href="{{ mix.link }}"><img src="/img/video.png" alt="v&iacute;deo"/></a>
+            <a href="{{ mix.link }}"><img class="icono" src="/img/video.png" alt="v&iacute;deo"/></a>
         {% endifequal %}
         
         {% ifequal mix.tipo 'pregunta' %}

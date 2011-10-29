@@ -20,7 +20,7 @@
 DEBUG_FLAG = True
 APP_NAME = 'ubuntu-faq'
 APP_DESCRIPTION = u'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
-APP_DOMAIN = 'http://www.ubufaq.com'
+APP_DOMAIN = ''
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 STEAM_ENLACE_KEY = ''
@@ -233,6 +233,10 @@ class Pregunta(db.Model):
         s = db.GqlQuery("SELECT * FROM Seguimiento WHERE id_pregunta = :1", str(self.key()))
         db.delete(s)
     
+    def borrar_busquedas(self):
+        b = db.GqlQuery("SELECT * FROM Busqueda WHERE url = :1", self.get_link())
+        db.delete(b)
+    
     # borramos la cache que contenga esta pregunta
     def borrar_cache(self):
         memcache.delete_multi([str(self.key()), 'seguimiento_' + str(self.key()), 'portada',
@@ -241,6 +245,7 @@ class Pregunta(db.Model):
     def borrar_todo(self):
         self.borrar_respuestas()
         self.borrar_seguimiento()
+        self.borrar_busquedas()
         self.borrar_cache()
         self.delete()
 
@@ -367,12 +372,17 @@ class Enlace(db.Model):
         c = Comentario.all().filter('id_enlace =', self.key())
         db.delete(c)
     
+    def borrar_busquedas(self):
+        b = db.GqlQuery("SELECT * FROM Busqueda WHERE url = :1", self.get_link())
+        db.delete(b)
+    
     # borramos la cache que contenga este enlace
     def borrar_cache(self):
         memcache.delete_multi([str(self.key()), 'portada', 'populares', 'sitemap_enlaces'])
     
     def borrar_todo(self):
         self.borrar_comentarios()
+        self.borrar_busquedas()
         self.borrar_cache()
         self.delete()
 
@@ -613,7 +623,8 @@ class Pagina(webapp.RequestHandler):
         if aux.count() > 0:
             retorno = aux.fetch( aux.count() )
         else:
-            preguntas = db.GqlQuery("SELECT * FROM Pregunta ORDER BY fecha DESC").fetch(20)
+            consulta = db.GqlQuery("SELECT * FROM Pregunta")
+            preguntas = consulta.fetch(20, random.randint(0, max(0, consulta.count()-20)))
             for p in preguntas:
                 p.get_tags()
                 if p.tags.find(query) != -1:

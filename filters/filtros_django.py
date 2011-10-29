@@ -31,8 +31,6 @@ def fuckcode(value):
         (r'\[b\](.+?)\[/b\]', r'<b>\1</b>'),
         (r'\[i\](.+?)\[/i\]', r'<i>\1</i>'),
         (r'\[u\](.+?)\[/u\]', r'<u>\1</u>'),
-        (r'\[quote\](.+?)\[/quote\]', r'<div class="respuesta">\1</div>'),
-        (r'\[center\](.+?)\[/center\]', r'<div align="center">\1</div>'),
         (r'\[code\](.+?)\[/code\]', r'<div class="codigo">\1</div>'),
         (r'\[big\](.+?)\[/big\]', r'<big>\1</big>'),
         (r'\[small\](.+?)\[/small\]', r'<small>\1</small>')
@@ -43,12 +41,8 @@ def fuckcode(value):
     # links
     p = re.compile('http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', re.DOTALL)
     value = p.sub(urlizer, value)
-    # tags
-    aux_tags = re.findall(r'#[0-9a-zA-Z+_]+', value)
-    for t in aux_tags:
-        value = value.replace(t, tag(t[1:]))
     # mentions
-    aux_mentions = re.findall(r'@[0-9]+', value)
+    aux_mentions = re.findall(r'@[0-9]+\b', value)
     for mention in aux_mentions:
         value = value.replace(mention, '<a href="#'+mention[1:]+'">'+mention+'</a>')
     return mark_safe(value)
@@ -56,7 +50,7 @@ def fuckcode(value):
 @register.filter
 def urlizer(link):
     if link.group(0)[-4:].lower() in ['.jpg', '.gif', '.png'] or link.group(0)[-5:].lower() in ['.jpeg']:
-        return '<a href="'+link.group(0)+'">'+miniatura(link.group(0))+'</a>'
+        return '<a target="_Blank" href="'+link.group(0)+'">'+miniatura(link.group(0))+'</a>'
     elif link.group(0)[:31] == 'http://www.youtube.com/watch?v=':
         return '<div><iframe width="420" height="345" src="http://www.youtube.com/embed/' + link.group(0).split('?v=')[1] + '" frameborder="0" allowfullscreen></iframe></div>'
     else:
@@ -291,7 +285,8 @@ def respuestas_destacadas(respuestas):
         i = 1
         media = 0
         for r in respuestas:
-            media += r.valoracion
+            if r.valoracion > 0:
+                media += r.valoracion
         media = math.ceil(float(media)/len(respuestas))
         for r in respuestas:
             if r.valoracion > media:
@@ -299,7 +294,7 @@ def respuestas_destacadas(respuestas):
             i += 1
     if len(destacadas) > 0:
         while len(destacadas) > 0:
-            elemento = [0, 0]
+            elemento = destacadas[0]
             for r in destacadas:
                 if r[1] > elemento[1]:
                     elemento = r

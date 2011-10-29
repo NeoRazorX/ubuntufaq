@@ -213,3 +213,101 @@ function ayuda_votar()
 {
     alert("Vota esta respuesta utilizando los botones de la parte inferior derecha, esto sirve para destacar las mejores respuestas y/o para penalizar las que no aporten nada.");
 }
+
+function citar_comentario(num, tipo)
+{
+    if(tipo == 'respuesta')
+    {
+        document.respuesta.contenido.value += ' @'+num+' ';
+        document.respuesta.contenido.focus();
+    }
+    else
+    {
+        document.comentario.contenido.value += ' @'+num+' ';
+        document.comentario.contenido.focus();
+    }
+}
+
+function add_negrita(tipo)
+{
+    if(tipo == 'respuesta')
+    {
+        document.respuesta.contenido.value += ' [b]texto[/b] ';
+        document.respuesta.contenido.focus();
+    }
+    else
+    {
+        document.comentario.contenido.value += ' [b]texto[/b] ';
+        document.comentario.contenido.focus();
+    }
+}
+
+function add_cursiva(tipo)
+{
+    if(tipo == 'respuesta')
+    {
+        document.respuesta.contenido.value += ' [i]texto[/i] ';
+        document.respuesta.contenido.focus();
+    }
+    else
+    {
+        document.comentario.contenido.value += ' [i]texto[/i] ';
+        document.comentario.contenido.focus();
+    }
+}
+
+function add_subrayado(tipo)
+{
+    if(tipo == 'respuesta')
+    {
+        document.respuesta.contenido.value += ' [u]texto[/u] ';
+        document.respuesta.contenido.focus();
+    }
+    else
+    {
+        document.comentario.contenido.value += ' [u]texto[/u] ';
+        document.comentario.contenido.focus();
+    }
+}
+
+function add_gigante(tipo)
+{
+    if(tipo == 'respuesta')
+    {
+        document.respuesta.contenido.value += ' [big]texto[/big] ';
+        document.respuesta.contenido.focus();
+    }
+    else
+    {
+        document.comentario.contenido.value += ' [big]texto[/big] ';
+        document.comentario.contenido.focus();
+    }
+}
+
+function add_diminuto(tipo)
+{
+    if(tipo == 'respuesta')
+    {
+        document.respuesta.contenido.value += ' [small]texto[/small] ';
+        document.respuesta.contenido.focus();
+    }
+    else
+    {
+        document.comentario.contenido.value += ' [small]texto[/small] ';
+        document.comentario.contenido.focus();
+    }
+}
+
+function add_codigo(tipo)
+{
+    if(tipo == 'respuesta')
+    {
+        document.respuesta.contenido.value += ' [code]texto[/code] ';
+        document.respuesta.contenido.focus();
+    }
+    else
+    {
+        document.comentario.contenido.value += ' [code]texto[/code] ';
+        document.comentario.contenido.focus();
+    }
+}

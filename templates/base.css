@@ -70,18 +70,18 @@ a.seguimiento {
     color: black;
 }
 
-a.negativo {
-    background-color: #D43723;
+a.negativo, a.positivo {
     color: white;
     padding-left: 3px;
     padding-right: 3px;
 }
 
+a.negativo {
+    background-color: #D43723;
+}
+
 a.positivo {
     background-color: #36A736;
-    color: white;
-    padding-left: 3px;
-    padding-right: 3px;
 }
 
 big {
@@ -96,6 +96,8 @@ div.codigo {
     border: 1px dashed #333333;
     padding: 10px;
     margin: 5px;
+    overflow: auto;
+    max-height: 300px;
 }
 
 input.boton, div.boton, div.b_verde, div.b_rojo {
@@ -170,6 +172,8 @@ hr {
 
 div.cabecera {
     font-size: 14px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 table.menucabecera td {
@@ -214,7 +218,7 @@ div.formcabecera a {
 }
 
 div.formcabecera a:hover {
-    background-color: #DD4814;
+    background-color: #333333;
     color: white;
     border-top-left-radius: 3px 3px;
     border-top-right-radius: 3px 3px;
@@ -272,6 +276,8 @@ div.preguntas {
     padding: 10px;
     padding-left: 30px;
     padding-right: 30px;
+    margin-left: 10px;
+    margin-right: 10px;
     min-height: 400px;
 }
 
@@ -420,11 +426,21 @@ div.respuesta:hover {
 div.respuesta_n {
     border: 1px dashed #AFAFAF;
     color: white;
+    overflow: auto;
+    max-height: 300px;
+}
+
+div.respuesta_n a, div.respuesta_n img {
+    display: none;
 }
 
 div.respuesta_n:hover {
     border: 1px solid #AFAFAF;
     color: black;
+}
+
+div.respuesta_n:hover a, div.respuesta_n:hover img {
+    display: block;
 }
 
 div.respuesta img.icono {
@@ -562,7 +578,6 @@ div.alltags a.min {
 div.pie {
     font-size: 14px;
     padding: 5px;
-    border-top: 1px solid black;
 }
 
 div.pie a {
@@ -582,12 +597,12 @@ div.pie table td {
 div.pregunta a:hover,
 div.respuesta a:hover,
 div.respuesta_d a:hover,
-div.comentario a:hover {
+div.comentario a:hover,
+ul.tags a:hover,
+div.alltags a:hover {
     text-decoration: underline;
 }
 
-ul.tags a:hover,
-div.alltags a:hover,
 div.pie a:hover {
     background-color: #DD4814;
     color: white;
