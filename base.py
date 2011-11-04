@@ -20,7 +20,7 @@
 DEBUG_FLAG = True
 APP_NAME = 'ubuntu-faq'
 APP_DESCRIPTION = u'Soluciones rápidas para tus problemas con Ubuntu, Kubuntu, Xubuntu, Lubuntu, y linux en general, así como noticias, vídeos, wallpapers y enlaces de interés.'
-APP_DOMAIN = ''
+APP_DOMAIN = 'http://www.ubufaq.com'
 RECAPTCHA_PUBLIC_KEY = ''
 RECAPTCHA_PRIVATE_KEY = ''
 STEAM_ENLACE_KEY = ''
@@ -620,6 +620,7 @@ class Pagina(webapp.RequestHandler):
     def search_job(self, query):
         retorno = []
         aux = db.GqlQuery("SELECT * FROM Busqueda WHERE tag = :1 ORDER BY clics DESC", query)
+        logging.info("Iniciando search_job para: " + query)
         if aux.count() > 0:
             retorno = aux.fetch( aux.count() )
         else:

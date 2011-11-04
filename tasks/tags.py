@@ -69,18 +69,18 @@ class Buscar:
                 if ele.tags != tag0:
                     try:
                         ele.put()
-                        logging.info("Actualizados tags de " + link)
+                        logging.info("Actualizados tags de " + ele.get_link())
                     except:
-                        logging.warning("Imposible actualizar tags de " + link)
+                        logging.warning("Imposible actualizar tags de " + ele.get_link())
                 # agrupamos los datos necesarios
                 if tabla == 0:
                     tags = self.tag2list(ele.tags)
-                    link = '/question/' + str(ele.key())
+                    link = ele.get_link()
                     title = ele.titulo
                     clics = ele.visitas
                 else:
                     tags = self.tag2list(ele.tags)
-                    link = '/story/' + str(ele.key())
+                    link = ele.get_link()
                     title = ele.descripcion
                     clics = ele.clicks
                 self.procesar(tags, link, title, clics)
@@ -99,6 +99,12 @@ class Buscar:
                 for tag in found_tags:
                     if tag.strip() != '' and tag not in retorno:
                         retorno.append(tag)
+                    encontrado = False
+                    for otag in self.alltags:
+                        if otag[0] == tag:
+                            encontrado = True
+                    if not encontrado:
+                        self.alltags.append([tag, 1])
         except:
             retorno = []
         return retorno

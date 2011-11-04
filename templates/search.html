@@ -7,17 +7,28 @@
     {% else %}
         <div class="titulo">Informaci&oacute;n relacionada con el tag: {{ tag|tag }}</div>
     {% endif %}
-    <ul class="tags">
+    <br/>
     {% for rel in relacionadas %}
-        <li><a href="{{ rel.url }}">{{ rel.text|truncatewords:30 }}</a> &nbsp;&nbsp;&nbsp; {{ rel.clics }} clics</li>
+        <div class="tweet">
+            <a href="{{ rel.url }}">{{ rel.text|truncatewords:30|resalta_tag:tag|capfirst }}</a>
+            <br/>
+            <span>{{ rel.clics }} clics</span>
+        </div>
     {% empty %}
-        <li>Sin resultados.</li>
+        <div class="mensaje">Sin resultados.</div>
     {% endfor %}
-    </ul>
-    
-    <br/><br/>
-    
-    <div id="cse" style="width: 100%;">Loading</div>
+{% endif %}
+
+{% if alltags %}
+    <br/>
+    <hr/>
+    <div class="pregunta">
+        <div class="titulo">Todas las etiquetas:</div>
+        {{ alltags|alltags }}
+    </div>
+{% endif %}
+
+<div id="cse" style="width: 100%;">Loading</div>
     <script src="http://www.google.es/jsapi" type="text/javascript"></script>
     <script type="text/javascript"> 
       google.load('search', '1', {language : 'es', style : google.loader.themes.MINIMALIST});
@@ -28,16 +39,7 @@
         options.setAutoComplete(true);
         customSearchControl.draw('cse', options);
       }, true);
-    </script>
-{% endif %}
-
-{% if alltags %}
-    <hr/>
-    <div class="pregunta">
-        <div class="titulo">Todas las etiquetas:</div>
-        {{ alltags|alltags }}
-    </div>
-{% endif %}
+</script>
 
 </div>
 {% include "pie.html" %}

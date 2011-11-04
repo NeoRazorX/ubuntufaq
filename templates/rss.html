@@ -24,6 +24,8 @@
             <guid>http://www.ubufaq.com/question/{{ pregunta.key }}</guid>
             <pubDate>{{ pregunta.creado|date:"r" }}</pubDate>
             <description>
+                Estado: {{ pregunta.get_estado }}.
+                &lt;br/&gt;&lt;br/&gt;
                 {{ pregunta.contenido|safe|truncatewords:50 }}
                 &lt;br/&gt;&lt;br/&gt;
                 {{ pregunta.respuestas }} respuestas

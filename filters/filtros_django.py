@@ -57,6 +57,13 @@ def urlizer(link):
         return '<a target="_Blank" href="' + link.group(0) + '">' + link.group(0) + '</a>'
 
 @register.filter
+def resalta_tag(texto, tag):
+    if texto:
+        return mark_safe( texto.lower().replace(tag, '<u>'+tag+'</u>') )
+    else:
+        return ''
+
+@register.filter
 def cortamail(email=None):
     if email:
         return str(email).split('@')[0]

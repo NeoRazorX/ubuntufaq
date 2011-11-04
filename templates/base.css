@@ -575,6 +575,23 @@ div.alltags a.min {
     font-size: 11px;
 }
 
+div.tweet {
+    padding: 5px;
+    border-bottom: 1px solid silver;
+}
+
+div.tweet:hover {
+    background-color: #feffc0;
+}
+
+div.tweet a u {
+    color: #333333;
+}
+
+div.tweet span {
+    color: gray;
+}
+
 div.pie {
     font-size: 14px;
     padding: 5px;
