@@ -264,6 +264,8 @@ div.dominio {
     background-color: #FFD5AD;
     border-bottom: 1px solid #EEB27A;
     padding: 5px;
+    margin-left: 10px;
+    margin-right: 10px;
     font-size: 15px;
     text-align: center;
     color: black;

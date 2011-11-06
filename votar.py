@@ -25,41 +25,43 @@ from google.appengine.api import users
 from base import *
 
 class Guardar_voto(webapp.RequestHandler):
-    def get(self, keyr=None, voto='-1'):
+    def get(self, tipo='x', keye=None, voto='-1'):
         try:
-            r = Respuesta.get( keyr )
-            if not r: # no hay respuesta
-                logging.warning('Respuesta no encontrada!')
+            if tipo == 'r':
+                elemento = Respuesta.get( keye )
+            elif tipo == 'c':
+                elemento = Comentario.get( keye )
+            else:
+                elemento = False
+            if not elemento: # no hay elemento a votar
+                logging.warning('Elemento no encontrado!')
                 self.redirect('/error/404')
             elif self.request.environ['HTTP_USER_AGENT'].lower().find('googlebot') != -1:
                 logging.info('Googlebot!')
-                p = r.get_pregunta()
-                self.redirect(p.get_link() + '#' + str(r.key()))
-            elif self.request.remote_addr in r.ips and self.request.remote_addr != '127.0.0.1': # ya se ha votado desde esta IP
+                self.redirect( elemento.get_link() )
+            elif self.request.remote_addr in elemento.ips and self.request.remote_addr != '127.0.0.1': # ya se ha votado desde esta IP
                 logging.info('Voto ya realizado')
-                p = r.get_pregunta()
-                self.redirect(p.get_link() + '#' + str(r.key()))
+                self.redirect( elemento.get_link() )
             else: # voto válido
-                p = r.get_pregunta()
-                ips = r.ips
+                ips = elemento.ips
                 ips.append( self.request.remote_addr )
-                r.ips = ips
+                elemento.ips = ips
                 if voto == '0':
-                    r.valoracion -= 1
+                    elemento.valoracion -= 1
                     logging.info('Voto negativo')
                 elif voto == '1':
-                    r.valoracion += 1
+                    elemento.valoracion += 1
                     logging.info('Voto positivo')
                 else:
                     logging.info('Voto no válido: ' + str(voto))
-                r.put()
-                r.borrar_cache()
-                self.redirect(p.get_link() + '#' + str(r.key()))
+                elemento.put()
+                elemento.borrar_cache()
+                self.redirect( elemento.get_link() )
         except:
             self.redirect('/error/503')
 
 def main():
-    application = webapp.WSGIApplication( [(r'/votar/(.*)/(.*)', Guardar_voto)], debug=DEBUG_FLAG )
+    application = webapp.WSGIApplication( [(r'/votar/(.*)/(.*)/(.*)', Guardar_voto)], debug=DEBUG_FLAG )
     run_wsgi_app(application)
 
 if __name__ == "__main__":

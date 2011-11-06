@@ -39,11 +39,15 @@
 {% endif %}
     </td>
     <td valign="top">
-        {% if administrador %}
+    {% if not modificar %}
+        {% if editar %}
         <div class="boton"><a href="/story/{{ enlace.key }}?modificar=ok">modificar</a></div>
+        {% endif %}
+        {% if administrador %}
         <div class="b_rojo"><a href="#" onclick="hundir_enlace('{{ enlace.key }}')">hundir</a></div>
         <div class="b_rojo"><a href="#" onclick="borrar_enlace('{{ enlace.key }}')">borrar</a></div>
         {% endif %}
+    {% endif %}
     </td>
 </tr>
 <tr>
@@ -58,9 +62,19 @@
     <td></td>
 </tr>
 
+{{ comentarios|respuestas_destacadas }}
+
 {% for coment in comentarios %}
 <tr>
-    <td align="right" valign="top">{{ coment.autor.email|avatar:40 }}</td>
+{% if coment.valoracion >= -1 and coment.valoracion <= 1 %}
+    <td class="valoracion"><a title="valoración" href="#{{ forloop.counter }}" onclick="ayuda_votar()">{{ coment.valoracion }}</a></td>
+{% else %}
+    {% if coment.valoracion > 1 %}
+    <td class="v_positiva"><a title="valoración" href="#{{ forloop.counter }}" onclick="ayuda_votar()">{{ coment.valoracion }}</a></td>
+    {% else %}
+    <td class="v_negativa"><a title="valoración" href="#{{ forloop.counter }}" onclick="ayuda_votar()">{{ coment.valoracion }}</a></td>
+    {% endif %}
+{% endif %}
     <td valign="top">
         <div class="info_respuesta_up">
             <a name="{{ coment.key }}"></a>
@@ -69,8 +83,12 @@
             {{ coment.os|muestra_os }} |
             {{ coment.fecha|timesince|traducir }}
         </div>
+{% if coment.valoracion >= -1 %}
         <div class="respuesta">
-        {% if modificar %}
+{% else %}
+        <div class="respuesta_n">
+{% endif %}
+        {% if modificar and administrador %}
             <form name="comentario{{ forloop.counter }}" action="/mod_c" method="post">
             <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
             <input type="hidden" name="id_comentario" value="{{ coment.key }}"/>
@@ -81,13 +99,20 @@
             {{ coment.contenido|safe|linebreaksbr|fuckcode }}
         {% endif %}
         </div>
+        <div class="info_respuesta_down">
+            Votar:
+            <a class="negativo" title="voto negativo" href="/votar/c/{{coment.key}}/0">-1</a>
+            <a class="positivo" title="voto positivo" href="/votar/c/{{coment.key}}/1">+1</a>
+        </div>
     </td>
-    {% if administrador %}
     <td valign="top">
+    {% if administrador and not modificar %}
         <div class="boton"><a href="/story/{{ enlace.key }}?modificar=ok#{{ forloop.counter }}">modificar</a></div>
         <div class="b_rojo"><a href="#" onclick="borrar_comentario('{{ enlace.key }}', '{{ coment.key }}')">borrar</a></div>
-    </td>
+    {% else %}
+        {{ coment.autor.email|avatar:40 }}
     {% endif %}
+    </td>
 </tr>
 {% empty %}
 <tr>

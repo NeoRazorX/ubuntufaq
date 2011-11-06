@@ -127,6 +127,12 @@ class Detalle_enlace(Pagina):
             e = None
         
         if e:
+            editar = False
+            modificar = False
+            if (users.get_current_user() and users.get_current_user() == e.autor) or users.is_current_user_admin():
+                editar = True
+            if self.request.get('modificar') and editar:
+                modificar = True
             # el captcha
             if users.get_current_user():
                 chtml = ''
@@ -135,12 +141,6 @@ class Detalle_enlace(Pagina):
                     public_key = RECAPTCHA_PUBLIC_KEY,
                     use_ssl = False,
                     error = None)
-            
-            if self.request.get('modificar') and users.is_current_user_admin():
-                modificar = True
-            else:
-                modificar = False
-            
             template_values = {
                 'titulo': e.descripcion + ' - Ubuntu FAQ',
                 'descripcion': u'Discusión sobre: ' + e.descripcion,
@@ -154,6 +154,7 @@ class Detalle_enlace(Pagina):
                 'captcha': chtml,
                 'relacionadas': self.paginas_relacionadas( e.tags ),
                 'administrador': users.is_current_user_admin(),
+                'editar': editar,
                 'modificar': modificar,
                 'usuario': users.get_current_user(),
                 'notis': self.get_notificaciones(),
@@ -167,7 +168,11 @@ class Detalle_enlace(Pagina):
     
     # modifica el enlace
     def post(self):
-        if users.is_current_user_admin():
+        try:
+            e = Enlace.get( self.request.get('id') )
+        except:
+            e = None
+        if e and ((users.get_current_user() and users.get_current_user() == e.autor) or users.is_current_user_admin()):
             try:
                 e = Enlace.get( self.request.get('id') )
                 e.url = self.request.get('url')
@@ -264,11 +269,10 @@ class Modificar_comentario(webapp.RequestHandler):
         if users.is_current_user_admin():
             try:
                 c = Comentario.get( self.request.get('id_comentario') )
-                e = c.get_enlace()
                 c.contenido = cgi.escape(self.request.get('contenido'), True)
                 c.put()
-                e.borrar_cache()
-                self.redirect( e.get_link() )
+                c.borrar_cache()
+                self.redirect( c.get_link() )
             except:
                 self.redirect('/error/503')
         else:
@@ -279,11 +283,10 @@ class Borrar_comentario(webapp.RequestHandler):
         if users.is_current_user_admin() and self.request.get('id') and self.request.get('c'):
             try:
                 c = Comentario.get( self.request.get('c') )
-                e = c.get_enlace()
                 c.delete()
-                e.borrar_cache()
+                c.borrar_cache()
                 logging.warning('Se ha borrado el comentario con id: ' + self.request.get('c'))
-                self.redirect( e.get_link() )
+                self.redirect( c.get_link() )
             except:
                 self.redirect('/error/503')
         else:

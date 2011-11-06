@@ -74,6 +74,7 @@ class rsscanner:
                     else:
                         nuevo.descripcion = auxiliar[:490] + '...'
                     try:
+                        nuevo.get_tags()
                         nuevo.put()
                         logging.info(str(puntos) + " puntos -> enlace publicado: " + link)
                     except:

@@ -183,7 +183,7 @@ class Detalle_pregunta(Pagina):
             p = None
         # solo el autor de la preguna o un administrador puede modificarla
         if p and self.request.get('titulo') and self.request.get('contenido') and self.request.get('tags') and self.request.get('estado'):
-            if (users.get_current_user() == p.autor) or users.is_current_user_admin():
+            if (users.get_current_user() and users.get_current_user() == p.autor) or users.is_current_user_admin():
                 try:
                     p.titulo = cgi.escape(self.request.get('titulo'), True)
                     p.contenido = cgi.escape(self.request.get('contenido'), True)
@@ -263,11 +263,10 @@ class Modificar_respuesta(webapp.RequestHandler):
         if users.is_current_user_admin():
             try:
                 r = Respuesta.get( self.request.get('id_respuesta') )
-                p = r.get_pregunta()
                 r.contenido = cgi.escape(self.request.get('contenido'), True)
                 r.put()
-                p.borrar_cache()
-                self.redirect( p.get_link() )
+                r.borrar_cache()
+                self.redirect( r.get_link() )
             except:
                 self.redirect('/error/503')
         else:
@@ -278,11 +277,10 @@ class Borrar_respuesta(webapp.RequestHandler):
         if users.is_current_user_admin() and self.request.get('id') and self.request.get('r'):
             try:
                 r = Respuesta.get( self.request.get('r') )
-                p = r.get_pregunta()
                 r.delete()
-                p.borrar_cache()
+                r.borrar_cache()
                 logging.warning('Se ha eliminado la respuesta con id: ' + self.request.get('r'))
-                self.redirect( p.get_link() )
+                self.redirect( r.get_link() )
             except:
                 self.redirect('/error/503')
         else:

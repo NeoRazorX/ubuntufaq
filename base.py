@@ -266,6 +266,10 @@ class Respuesta(db.Model):
         except:
             return None
     
+    def get_link(self):
+        p = self.get_pregunta()
+        return p.get_link() + '#' + str(self.key())
+    
     def borrar_cache(self):
         memcache.delete( self.id_pregunta )
 
@@ -392,14 +396,23 @@ class Comentario(db.Model):
     contenido = db.TextProperty()
     fecha = db.DateTimeProperty(auto_now_add=True)
     id_enlace = db.StringProperty()
+    ips = db.StringListProperty()
     os = db.StringProperty(default="desconocido")
     puntos = db.IntegerProperty(default=0)
+    valoracion = db.IntegerProperty(default=0)
     
     def get_enlace(self):
         try:
             return Enlace.get( self.id_enlace )
         except:
             return None
+    
+    def get_link(self):
+        e = self.get_enlace()
+        return e.get_link() + '#' + str(self.key())
+    
+    def borrar_cache(self):
+        memcache.delete( self.id_enlace )
 
 
 class Notificacion(db.Model):
@@ -436,10 +449,11 @@ class Detector_respuestas():
 
 
 class Busqueda(db.Model):
-    tag = db.StringProperty()
-    url = db.StringProperty()
-    text = db.StringProperty()
     clics = db.IntegerProperty(default=0)
+    fecha = db.DateTimeProperty(auto_now_add=True)
+    tag = db.StringProperty()
+    text = db.StringProperty()
+    url = db.StringProperty()
 
 
 # clase para gestionar el siguimiento de preguntas
@@ -634,6 +648,7 @@ class Pagina(webapp.RequestHandler):
                         busq.url = '/question/' + str(p.key())
                         busq.text = p.titulo
                         busq.clics = p.visitas
+                        busq.fecha = p.fecha
                         busq.tag = query
                         busq.put()
                         logging.info('Añadida la url: ' + busq.url)
@@ -698,7 +713,7 @@ class Pagina(webapp.RequestHandler):
                         if r.text.lower().find(query) != -1:
                             elemento = r
                             break
-                        elif r.clics > elemento.clics:
+                        elif r.fecha > elemento.fecha:
                             elemento = r
                     encontrado = False
                     for m in mix:

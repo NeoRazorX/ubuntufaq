@@ -78,12 +78,14 @@ class Buscar:
                     link = ele.get_link()
                     title = ele.titulo
                     clics = ele.visitas
+                    fecha = ele.fecha
                 else:
                     tags = self.tag2list(ele.tags)
                     link = ele.get_link()
                     title = ele.descripcion
                     clics = ele.clicks
-                self.procesar(tags, link, title, clics)
+                    fecha = ele.fecha
+                self.procesar(tags, link, title, clics, fecha)
             # actualizamos los resultados de las búsquedas
             self.actualizar()
             retorno = True
@@ -110,7 +112,7 @@ class Buscar:
         return retorno
     
     # rellena pendientes con cada elemento, en funcion del tag
-    def procesar(self, tags, link, title, clics):
+    def procesar(self, tags, link, title, clics, fecha):
         for t in tags:
             logging.info('Comprobando el tag: ' + t)
             if t not in self.pendientes:
@@ -129,6 +131,7 @@ class Buscar:
                     if p.text != title or p.clics != clics:
                         p.text = title
                         p.clics = clics
+                        p.fecha = fecha
                         try:
                             p.put()
                             logging.info('Actualizada la url: ' + p.url)
@@ -140,6 +143,7 @@ class Buscar:
                     busq.url = link
                     busq.text = title
                     busq.clics = clics
+                    busq.fecha = fecha
                     busq.tag = t
                     busq.put()
                     self.pendientes[t].append( busq )

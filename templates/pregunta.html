@@ -92,6 +92,7 @@
 {% endif %}
 </td>
 <td valign="top" width="120">
+{% if not modificar %}
     {% if not usuario or usuario != pregunta.autor %}
     {% if es_seguidor %}
         <div class="boton"><a href="/seguir/{{ pregunta.key }}">dejar de seguir</a></div>
@@ -105,6 +106,7 @@
     {% if administrador %}
         <div class="b_rojo"><a href="#" onclick="borrar_pregunta('{{ pregunta.key }}')">borrar</a></div>
     {% endif %}
+{% endif %}
 </td>
 </tr>
 
@@ -122,20 +124,19 @@
     {% endif %}
 {% endif %}
     <td valign="top">
-    <div class="info_respuesta_up">
+        <div class="info_respuesta_up">
         <a name="{{respuesta.key}}"></a>
         <a class="comentario" name="{{ forloop.counter }}"  onclick="citar_comentario('{{ forloop.counter }}', 'respuesta')">@{{ forloop.counter }}</a>
         &nbsp; {{ respuesta.autor|autor }} |
         {{ respuesta.os|muestra_os }} |
         {{ respuesta.fecha|timesince|traducir }}
-    </div>
+        </div>
 {% if respuesta.valoracion >= -1 %}
-    <div class="respuesta">
+        <div class="respuesta">
 {% else %}
-    <div class="respuesta_n">
+        <div class="respuesta_n">
 {% endif %}
-    {% if modificar %}
-    {% if administrador %}
+    {% if modificar and administrador %}
         <form name="respuesta{{ forloop.counter }}" action="/mod_r" method="post">
         <input type="hidden" name="id_pregunta" value="{{ pregunta.key }}"/>
         <input type="hidden" name="id_respuesta" value="{{ respuesta.key }}"/>
@@ -145,24 +146,21 @@
     {% else %}
         {{ respuesta.contenido|safe|linebreaksbr|fuckcode }}
     {% endif %}
+        </div>
+        <div class="info_respuesta_down">
+            Votar:
+            <a class="negativo" title="voto negativo" href="/votar/r/{{respuesta.key}}/0">-1</a>
+            <a class="positivo" title="voto positivo" href="/votar/r/{{respuesta.key}}/1">+1</a>
+        </div>
+    </td>
+    <td valign="top">
+    {% if administrador and not modificar %}
+        <div class="boton"><a href="/question/{{ pregunta.key }}?modificar=ok#{{ forloop.counter }}">modificar</a></div>
+        <div class="b_rojo"><a href="#" onclick="borrar_respuesta('{{pregunta.key}}', '{{respuesta.key}}')">borrar</a></div>
     {% else %}
-        {{ respuesta.contenido|safe|linebreaksbr|fuckcode }}
+        {{ respuesta.autor.email|avatar:40 }}
     {% endif %}
-    </div>
-    <div class="info_respuesta_down">
-        Votar:
-        <a class="negativo" title="voto negativo" href="/votar/{{respuesta.key}}/0">-1</a>
-        <a class="positivo" title="voto positivo" href="/votar/{{respuesta.key}}/1">+1</a>
-    </div>
-</td>
-<td valign="top">
-{% if administrador %}
-    <div class="boton"><a href="/question/{{ pregunta.key }}?modificar=ok#{{ forloop.counter }}">modificar</a></div>
-    <div class="b_rojo"><a href="#" onclick="borrar_respuesta('{{pregunta.key}}', '{{respuesta.key}}')">borrar</a></div>
-{% else %}
-    {{ respuesta.autor.email|avatar:40 }}
-{% endif %}
-</td>
+    </td>
 </tr>
 {% endfor %}
 

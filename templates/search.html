@@ -12,7 +12,7 @@
         <div class="tweet">
             <a href="{{ rel.url }}">{{ rel.text|truncatewords:30|resalta_tag:tag|capfirst }}</a>
             <br/>
-            <span>{{ rel.clics }} clics</span>
+            <span>{{ rel.fecha|timesince }} | {{ rel.clics }} clics</span>
         </div>
     {% empty %}
         <div class="mensaje">Sin resultados.</div>
