@@ -31,11 +31,22 @@ from google.appengine.api import users, memcache
 from base import *
 
 class Detalle_usuario(Pagina):
-    def get_preguntas(self, usuario, num=10):
+    def get_preguntas(self, usuario, num=20):
         preguntas = memcache.get('preguntas_de_' + usuario.nickname())
         if preguntas is None:
             preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 ORDER BY creado DESC", usuario).fetch(num)
-            memcache.add('preguntas_de_' + usuario.nickname(), preguntas, 3600)
+            if preguntas:
+                # añadimos las preguntas de la cache
+                for p in self.sc.get_preguntas():
+                    if p.autor == usuario:
+                        encontrada = False
+                        for p2 in preguntas:
+                            if p2.key() == p.key():
+                                encontrada = True
+                                break
+                        if not encontrada:
+                            preguntas.append(p)
+                memcache.add('preguntas_de_' + usuario.nickname(), preguntas, 3600)
         else:
             logging.info('Leyendo ultimas-preguntas de memcache')
         return preguntas
@@ -44,16 +55,28 @@ class Detalle_usuario(Pagina):
         respuestas = memcache.get('respuestas_de_' + usuario.nickname())
         if respuestas is None:
             respuestas = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(num)
-            memcache.add('respuestas_de_' + usuario.nickname(), respuestas, 3600)
+            if respuestas:
+                memcache.add('respuestas_de_' + usuario.nickname(), respuestas, 3600)
         else:
             logging.info('Leyendo ultimas-respuestas de memcache')
         return respuestas
     
-    def get_enlaces(self, usuario, num=10):
+    def get_enlaces(self, usuario, num=20):
         enlaces = memcache.get('enlaces_de_' + usuario.nickname())
         if enlaces is None:
             enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 ORDER BY creado DESC", usuario).fetch(num)
-            memcache.add('enlaces_de_' + usuario.nickname(), enlaces, 3600)
+            if enlaces:
+                # añadimos los enlaces de la cache
+                for e in self.sc.get_enlaces():
+                    if e.autor == usuario:
+                        encontrado = False
+                        for e2 in enlaces:
+                            if e2.key() == e.key():
+                                encontrado = True
+                                break
+                        if not encontrado:
+                            enlaces.append(e)
+                memcache.add('enlaces_de_' + usuario.nickname(), enlaces, 3600)
         else:
             logging.info('Leyendo ultimos-enlaces de memcache')
         return enlaces
@@ -62,7 +85,8 @@ class Detalle_usuario(Pagina):
         comentarios = memcache.get('comentarios_de_' + usuario.nickname())
         if comentarios is None:
             comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 ORDER BY fecha DESC", usuario).fetch(num)
-            memcache.add('comentarios_de_' + usuario.nickname(), comentarios, 3600)
+            if comentarios:
+                memcache.add('comentarios_de_' + usuario.nickname(), comentarios, 3600)
         else:
             logging.info('Leyendo ultimos-comentarios de memcache')
         return comentarios
@@ -79,9 +103,9 @@ class Detalle_usuario(Pagina):
                                            'respuestas_de_' + tusuario.nickname(),
                                            'enlaces_de_' + tusuario.nickname(),
                                            'comentarios_de_' + tusuario.nickname()])
-                p = self.get_preguntas(tusuario, 20)
+                p = self.get_preguntas(tusuario, 25)
                 r = self.get_respuestas(tusuario, 10)
-                e = self.get_enlaces(tusuario, 10)
+                e = self.get_enlaces(tusuario, 25)
                 c = self.get_comentarios(tusuario, 10)
                 continuar = True
             except:
@@ -105,7 +129,7 @@ class Detalle_usuario(Pagina):
             if tusuario == users.get_current_user():
                 foco = 'usuario'
             else:
-                foco = ''
+                foco = 'buscar'
             template_values = {
                     'titulo': 'Perfil de ' + tusuario.nickname(),
                     'descripcion': 'Resumen del historial del usuario ' + tusuario.nickname() + ' en Ubuntu FAQ',

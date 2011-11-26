@@ -180,7 +180,7 @@ def puntos(puntos=0):
     if puntos <= 0:
         return ''
     else:
-        return mark_safe('<a href="/ayuda#karma">' + str(puntos) + '</a>')
+        return mark_safe('<a class="puntos" href="/ayuda#karma">' + str(puntos) + ' puntos</a>')
 
 @register.filter
 def estado_pregunta(estado=0):
@@ -342,34 +342,46 @@ def tipo_enlace(enlace):
 
 
 @register.filter
+def show_stats(stats):
+    if stats:
+        try:
+            pc_p_cache = int((float(stats['preguntas_cache'])/stats['preguntas'])*100)
+        except:
+            pc_p_cache = 0
+        try:
+            pc_e_cache = int((float(stats['enlaces_cache'])/stats['enlaces'])*100)
+        except:
+            pc_e_cache = 0
+        texto = "<table class='stats'>\n<tr>\n"
+        texto += "<td>\n<ul>\n<li>Preguntas: "+str(stats.get('preguntas',0))+"</li>\n<ul>\n<li>En cache: "+str(stats.get('preguntas_cache',0))+" ("+str(pc_p_cache)+"%)</li>\n<li>Respuestas: "+str(stats.get('respuestas',0))+"</li>\n<li>Respuestas por pregunta: "+str(stats.get('rpp',0))+"</li>\n</ul>\n</ul>\n</td>"
+        texto += "<td>\n<ul>\n<li>Enlaces: "+str(stats.get('enlaces',0))+"</li>\n<ul>\n<li>En cache: "+str(stats.get('enlaces_cache',0))+" ("+str(pc_e_cache)+"%)</li>\n<li>Comentarios: "+str(stats.get('comentarios',0))+"</li>\n<li>Comentarios por enlace: "+str(stats.get('cpe',0))+"</li>\n</ul>\n</ul>\n</td>"
+        texto += "<td>\n<ul>\n<li>Usuarios: "+str(stats.get('usuarios',0))+"</li>\n<ul>\n<li>Usuario m&aacute;s valorado: "+autor(stats.get('top_user', None))+"</li>\n<li>Seguimientos: "+str(stats.get('seguimientos',0))+"</li>\n</ul>\n</ul>\n</td>\n"
+        texto += "<td>\n<ul>\n<li>Tags: "+str(stats.get('tags', 0))+"</li>\n<li>Votos: "+str(stats.get('votos', 0))+"</li>\n</ul>\n</td>"
+        texto += "</tr>\n</table>\n"
+        return mark_safe(texto)
+
+
+@register.filter
 def paginar(datos):
     texto = '<div class="paginacion"><span>' + str(datos[0]) + ' páginas</span>\n'
-    
     # primera
     if datos[1] > 0:
         texto += '<a href="' + datos[2] + '0">&lt;&lt; primera</a>\n'
-    
     # anteriores
     for pag in range(datos[1] - 5, datos[1]):
         if pag >= 0:
             texto += '<a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a>\n'
-    
     # actual
     texto += '<a id="actual" href="' + datos[2] + str(datos[1]) + '">' + str(datos[1]) + '</a>\n'
-    
     # siguientes
     for pag in range(datos[1] + 1, datos[1] + 6):
         if pag < datos[0]:
             texto += '<a href="' + datos[2] + str(pag) + '">' + str(pag) + '</a>\n'
-    
     # ultima
     if datos[1] < (datos[0] - 1):
         texto += '<a href="' + datos[2] + str(datos[0] - 1) + '">última &gt;&gt;</a>\n'
-    
     texto += '</div>'
-    
     if datos[0] > 1:
         return mark_safe(texto)
     else:
-        return mark_safe("")
-
+        return ''

@@ -1,35 +1,34 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>UbuntuFAQ</title>
-        <description>Sitio web de preguntas y respuestas rapidas sobre ubuntu.</description>
-        <link>http://www.ubufaq.com</link>
-{% for enlace in enlaces %}
+        <title>{{ title }}</title>
+        <description>{{ description }}</description>
+        <link>{{ domain }}</link>
+{% for p in portada %}
         <item>
-            <title>{{ enlace.descripcion|safe|truncatewords:10 }}</title>
-            <link>http://www.ubufaq.com/story/{{ enlace.key }}</link>
-            <guid>http://www.ubufaq.com/story/{{ enlace.key }}</guid>
-            <pubDate>{{ enlace.creado|date:"r" }}</pubDate>
+        {% if p.tipo == 'pregunta' %}
+            <title>{{ p.titulo|safe }}</title>
+            <link>{{ domain }}{{ p.link }}</link>
+            <guid>{{ domain }}{{ p.link }}</guid>
+            <pubDate>{{ p.fecha|date:"r" }}</pubDate>
             <description>
-                {{ enlace.descripcion|safe }}
+                Estado: {{ p.estado|estado_pregunta }}.
                 &lt;br/&gt;&lt;br/&gt;
-                {{ enlace.comentarios }} comentarios
+                {{ p.descripcion|safe|truncatewords:50 }}
+                &lt;br/&gt;&lt;br/&gt;
+                {{ p.comentarios }} respuestas
             </description>
-        </item>
-{% endfor %}
-{% for pregunta in preguntas %}
-        <item>
-            <title>{{ pregunta.titulo|safe }}</title>
-            <link>http://www.ubufaq.com/question/{{ pregunta.key }}</link>
-            <guid>http://www.ubufaq.com/question/{{ pregunta.key }}</guid>
-            <pubDate>{{ pregunta.creado|date:"r" }}</pubDate>
+        {% else %}
+            <title>{{ p.descripcion|safe|truncatewords:10 }}</title>
+            <link>{{ domain }}{{ p.link }}</link>
+            <guid>{{ domain }}{{ p.link }}</guid>
+            <pubDate>{{ p.fecha|date:"r" }}</pubDate>
             <description>
-                Estado: {{ pregunta.get_estado }}.
+                {{ p.descripcion|safe }}
                 &lt;br/&gt;&lt;br/&gt;
-                {{ pregunta.contenido|safe|truncatewords:50 }}
-                &lt;br/&gt;&lt;br/&gt;
-                {{ pregunta.respuestas }} respuestas
+                {{ p.comentarios }} comentarios
             </description>
+        {% endif %}
         </item>
 {% endfor %}
     </channel>

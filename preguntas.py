@@ -45,33 +45,21 @@ class Todas_preguntas(Pagina):
             'notis': self.get_notificaciones(),
             'formulario' : self.formulario,
             'error_dominio': self.error_dominio,
-            'stats': memcache.get( 'stats' )
+            'stats': self.sc.get_stats()
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/preguntas.html')
         self.response.out.write( template.render(path, template_values) )
 
 class Sin_solucionar(Pagina):
-    def get_preguntas(self):
-        preguntas = memcache.get('sin-solucionar')
-        if preguntas is None:
-            preguntas = db.GqlQuery("SELECT * FROM Pregunta WHERE estado in :1 ORDER BY estado ASC", [0, 1, 2, 3, 11]).fetch(100)
-            if memcache.add('sin-solucionar', preguntas):
-                logging.info('Almacenando sin-solucionar en memcache')
-            else:
-                logging.warning("Fallo al rellenar memcache con las preguntas de sin-solucionar")
-        else:
-            logging.info('Leyendo sin-solucionar de memcache')
-        return preguntas
-    
     def get(self, p=0):
         Pagina.get(self)
-        preguntas = self.get_preguntas()
+        preguntas = self.sc.get_preguntas_sin_solucionar()
         template_values = {
             'titulo': 'Ubuntu FAQ - sin solucionar',
             'descripcion': 'Listado de preguntas sin solucionar de Ubuntu FAQ. ' + APP_DESCRIPTION,
             'tags': self.get_tags_from_list( preguntas ),
             'preguntas': preguntas,
-            'respuestas': self.get_ultimas_respuestas(),
+            'respuestas': self.sc.get_ultimas_respuestas(),
             'url': self.url,
             'url_linktext': self.url_linktext,
             'mi_perfil': self.mi_perfil,
@@ -89,14 +77,13 @@ class Nueva_pregunta(Pagina):
         p = Pregunta()
         p.titulo = cgi.escape(self.request.get('titulo'), True)
         p.contenido = cgi.escape(self.request.get('contenido'), True)
-        p.get_tags()
+        p.get_tags( self.sc.get_alltags() )
         p.os = self.request.environ['HTTP_USER_AGENT']
         if users.get_current_user() and self.request.get('titulo') and self.request.get('contenido'):
             if self.request.get('anonimo') != 'on':
                 p.autor = users.get_current_user()
             try:
                 p.put()
-                p.borrar_cache()
                 self.redirect( p.get_link() )
             except:
                 self.redirect('/error/503')
@@ -112,7 +99,6 @@ class Nueva_pregunta(Pagina):
             if cResponse.is_valid:
                 try:
                     p.put()
-                    p.borrar_cache()
                     self.redirect( p.get_link() )
                 except:
                     self.redirect('/error/503')
@@ -131,10 +117,7 @@ class Redir_pregunta(Pagina):
 class Detalle_pregunta(Pagina):
     def get(self, id_p=None):
         Pagina.get(self)
-        try:
-            p = Pregunta.get( id_p )
-        except:
-            p = None
+        p = self.sc.get_pregunta(id_p, self.request.remote_addr)
         if p:
             editar = False
             modificar = False
@@ -155,8 +138,8 @@ class Detalle_pregunta(Pagina):
                 'descripcion': p.contenido,
                 'pregunta': p,
                 'tags': 'problema, duda, ayuda, ' + p.tags,
-                'respuestas': p.get_respuestas(self.request.remote_addr),
-                'relacionadas': self.paginas_relacionadas( p.tags ),
+                'respuestas': self.sc.get_respuestas_de(id_p),
+                'relacionadas': self.sc.paginas_relacionadas( p.tags ),
                 'url': self.url,
                 'url_linktext': self.url_linktext,
                 'mi_perfil': self.mi_perfil,
@@ -177,10 +160,7 @@ class Detalle_pregunta(Pagina):
     
     # modifica la pregunta
     def post(self):
-        try:
-            p = Pregunta.get( self.request.get('id') )
-        except:
-            p = None
+        p = self.sc.get_pregunta( self.request.get('id') )
         # solo el autor de la preguna o un administrador puede modificarla
         if p and self.request.get('titulo') and self.request.get('contenido') and self.request.get('tags') and self.request.get('estado'):
             if (users.get_current_user() and users.get_current_user() == p.autor) or users.is_current_user_admin():
@@ -193,10 +173,11 @@ class Detalle_pregunta(Pagina):
                         p.marcar_solucionada()
                     elif n_estado == 11 and p.estado != n_estado:
                         p.marcar_pendiente()
-                    p.estado = n_estado
+                    else:
+                        p.estado = n_estado
                     p.put()
-                    p.borrar_cache()
-                    logging.info("Se ha modificado la pregunta con id: " + self.request.get('id'))
+                    logging.info("Se ha modificado la pregunta: " + p.get_link())
+                    self.sc.borrar_cache_pregunta( self.request.get('id') )
                     self.redirect( p.get_link() )
                 except:
                     self.redirect('/error/503')
@@ -205,19 +186,24 @@ class Detalle_pregunta(Pagina):
         else:
             self.redirect('/error/403')
 
-class Borrar_pregunta(webapp.RequestHandler):
+class Borrar_pregunta(Pagina):
     def get(self):
         if users.is_current_user_admin() and self.request.get('id'):
-            try:
-                Pregunta.get( self.request.get('id') ).borrar_todo()
-                logging.warning('Se ha eliminado la pregunta con id: ' + self.request.get('id'))
-                self.redirect('/')
-            except:
-                self.redirect('/error/503')
+            p = self.sc.get_pregunta( self.request.get('id') )
+            if p:
+                try:
+                    p.borrar_todo()
+                    self.sc.borrar_cache_pregunta( self.request.get('id') )
+                    logging.warning('Se ha eliminado la pregunta con id: ' + self.request.get('id'))
+                    self.redirect('/')
+                except:
+                    self.redirect('/error/503')
+            else:
+                self.redirect('/error/404')
         else:
             self.redirect('/error/403')
 
-class Responder(webapp.RequestHandler):
+class Responder(Pagina):
     def post(self):
         fallo = 0
         r = Respuesta()
@@ -249,13 +235,12 @@ class Responder(webapp.RequestHandler):
         if respuesta.contenido.strip() == '':
             self.redirect('/error/606')
         else:
-            try:
-                respuesta.put()
-                p = respuesta.get_pregunta()
-                p.actualizar( respuesta )
-                self.redirect(p.get_link() + '#' + str(respuesta.key()))
-            except:
-                self.redirect('/error/503')
+            respuesta.put()
+            p = self.sc.get_pregunta(respuesta.id_pregunta)
+            if p:
+                p.actualizar(respuesta)
+                self.sc.borrar_cache_pregunta(respuesta.id_pregunta)
+            self.redirect( respuesta.get_link() )
 
 # solo el autor de la preguna o un administrador puede destacar una respuesta
 class Modificar_respuesta(webapp.RequestHandler):

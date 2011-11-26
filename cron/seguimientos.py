@@ -22,12 +22,14 @@ from google.appengine.ext import db
 from base import *
 
 class Procesar_seguimientos:
+    sc = Super_cache()
+    
     def __init__(self):
         for s in Seguimiento.all():
             self.procesar(s)
     
     def procesar(self, s):
-        p = s.get_pregunta()
+        p = self.sc.get_pregunta( s.id_pregunta )
         if s.respuestas < p.respuestas: # nuevas respuestas
             for u in s.usuarios:
                 n = Notificacion()

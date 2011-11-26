@@ -11,7 +11,7 @@
         <br/>
         {{ karma.puntos|puntos }}
         {% if karma.iterador < 7 %}
-            calculando...
+            <br/>calculando...
         {% endif %}
     </div>
     <br/><br/>
@@ -76,8 +76,8 @@
     {% for pregunta in preguntas %}
         <li>
         <a href="/question/{{ pregunta.key }}">{{ pregunta.creado|timesince|traducir }}</a> -
-        {{ pregunta.titulo|safe }}
-        [<b>{{ pregunta.estado|estado_pregunta }}</b>]
+        {{ pregunta.titulo|safe }} -
+        <b>{{ pregunta.estado|estado_pregunta }}</b>
         </li>
     {% endfor %}
     </ul>

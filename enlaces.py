@@ -29,13 +29,10 @@ class Actualidad(Pagina):
     # muestra los ultimos enlaces
     def get(self, p=0):
         Pagina.get(self)
-        
         enlaces_query = db.GqlQuery("SELECT * FROM Enlace ORDER BY fecha DESC")
-        
         # paginamos
         enlaces, paginas, p_actual = self.paginar(enlaces_query, 20, p)
         datos_paginacion = [paginas, p_actual, '/actualidad/']
-        
         template_values = {
             'titulo': 'Actualidad de Ubuntu FAQ',
             'descripcion': u'Noticias, blogs, vídeos, imágenes y en definitiva toda la actualidad en torno a Ubuntu y Linux en general. Comparte con nosotros!',
@@ -50,7 +47,7 @@ class Actualidad(Pagina):
             'usuario': users.get_current_user(),
             'notis': self.get_notificaciones(),
             'error_dominio': self.error_dominio,
-            'stats': memcache.get( 'stats' ),
+            'stats': self.sc.get_stats(),
             'foco': 'enlace'
         }
         path = os.path.join(os.path.dirname(__file__), 'templates/actualidad.html')
@@ -61,11 +58,11 @@ class Actualidad(Pagina):
         if self.request.get('descripcion'):
             redirigir = False
             # comprobamos que no se haya introducido anteriormente el enlace
-            url = self.request.get('url')
+            url = cgi.escape(self.request.get('url'), True)
             if url != '':
                 enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE url = :1", url).fetch(1)
                 if enlaces:
-                    redirigir = '/story/' + str( enlaces[0].key() )
+                    redirigir = enlaces[0].get_link()
             if redirigir:
                 self.redirect( redirigir )
             else:
@@ -74,14 +71,11 @@ class Actualidad(Pagina):
                 if url != '':
                     enl.url = url
                 enl.os = self.request.environ['HTTP_USER_AGENT']
-                
                 if users.get_current_user():
                     if self.request.get('anonimo') != 'on':
                         enl.autor = users.get_current_user()
                     try:
-                        enl.put()
-                        enl.comprobar()
-                        enl.borrar_cache()
+                        enl.nuevo( self.sc.get_alltags() )
                         self.redirect( enl.get_link() )
                     except:
                         logging.warning('Imposible guardar enlace a: ' + url)
@@ -95,12 +89,9 @@ class Actualidad(Pagina):
                         response,
                         RECAPTCHA_PRIVATE_KEY,
                         remoteip)
-                    
                     if cResponse.is_valid:
                         try:
-                            enl.put()
-                            enl.comprobar()
-                            enl.borrar_cache()
+                            enl.nuevo()
                             self.redirect( enl.get_link() )
                         except:
                             logging.warning('Imposible guardar enlace a: ' + url)
@@ -120,12 +111,7 @@ class Redir_enlace(webapp.RequestHandler):
 class Detalle_enlace(Pagina):
     def get(self, id_enlace=None):
         Pagina.get(self)
-        
-        try:
-            e = Enlace.get( id_enlace )
-        except:
-            e = None
-        
+        e = self.sc.get_enlace(id_enlace, self.request.remote_addr)
         if e:
             editar = False
             modificar = False
@@ -150,9 +136,9 @@ class Detalle_enlace(Pagina):
                 'mi_perfil': self.mi_perfil,
                 'formulario': self.formulario,
                 'enlace': e,
-                'comentarios': e.get_comentarios(self.request.remote_addr),
+                'comentarios': self.sc.get_comentarios_de(id_enlace),
                 'captcha': chtml,
-                'relacionadas': self.paginas_relacionadas( e.tags ),
+                'relacionadas': self.sc.paginas_relacionadas( e.tags ),
                 'administrador': users.is_current_user_admin(),
                 'editar': editar,
                 'modificar': modificar,
@@ -168,14 +154,10 @@ class Detalle_enlace(Pagina):
     
     # modifica el enlace
     def post(self):
-        try:
-            e = Enlace.get( self.request.get('id') )
-        except:
-            e = None
+        e = self.sc.get_enlace( self.request.get('id') )
         if e and ((users.get_current_user() and users.get_current_user() == e.autor) or users.is_current_user_admin()):
             try:
-                e = Enlace.get( self.request.get('id') )
-                e.url = self.request.get('url')
+                e.url = cgi.escape(self.request.get('url'), True)
                 e.descripcion = cgi.escape(self.request.get('descripcion').replace("\n", ' '), True)
                 e.tags = cgi.escape(self.request.get('tags'), True)
                 if self.request.get('tipo_enlace') in ['youtube', 'vimeo', 'vhtml5', 'imagen', 'deb', 'package', 'texto']:
@@ -183,54 +165,59 @@ class Detalle_enlace(Pagina):
                 else:
                     e.tipo_enlace = None
                 e.put()
-                e.borrar_cache()
-                logging.info('Se ha modificado el enlace con id: ' + self.request.get('id'))
+                logging.info('Se ha modificado el enlace: ' + e.get_link())
+                self.sc.borrar_cache_enlace( self.request.get('id') )
                 self.redirect( e.get_link() )
             except:
                 self.redirect('/error/503')
         else:
             self.redirect('/error/403')
 
-class Acceder_enlace(webapp.RequestHandler):
+class Acceder_enlace(Pagina):
     def get(self, id_enlace=None):
         try:
-            e = Enlace.get( id_enlace )
-            e.get_comentarios(self.request.remote_addr) # contabiliza clic
+            e = self.sc.get_enlace(id_enlace, self.request.remote_addr)
             self.redirect( e.url )
         except:
             self.redirect('/error/404')
 
-class Hundir_enlace(webapp.RequestHandler):
+class Hundir_enlace(Pagina):
     def get(self):
         if users.is_current_user_admin() and self.request.get('id'):
-            try:
-                e = Enlace.get( self.request.get('id') )
+            e = self.sc.get_enlace( self.request.get('id') )
+            if e:
                 e.hundir()
-                self.redirect('/actualidad')
-            except:
-                self.redirect('/error/503')
+                self.sc.borrar_cache( self.request.get('id') )
+                self.redirect('/')
+            else:
+                self.redirect('/error/404')
         else:
             self.redirect('/error/403')
 
-class Borrar_enlace(webapp.RequestHandler):
+class Borrar_enlace(Pagina):
     def get(self):
         if users.is_current_user_admin():
-            try:
-                Enlace.get( self.request.get('id') ).borrar_todo()
-                logging.warning('Se ha borrado el enlace con id: ' + self.request.get('id'))
-                self.redirect('/actualidad')
-            except:
-                self.redirect('/error/503')
+            e = self.sc.get_enlace( self.request.get('id') )
+            if e:
+                try:
+                    e.borrar_todo()
+                    self.sc.borrar_cache_enlace( self.request.get('id') )
+                    logging.warning('Se ha borrado el enlace con id: ' + self.request.get('id'))
+                    self.redirect('/')
+                except:
+                    self.redirect('/error/503')
+            else:
+                self.redirect('/error/404')
         else:
             self.redirect('/error/403')
 
-class Comentar(webapp.RequestHandler):
+class Comentar(Pagina):
     def post(self):
         c = Comentario()
         c.contenido = cgi.escape(self.request.get('contenido'), True)
         c.id_enlace = self.request.get('id_enlace')
         c.os = self.request.environ['HTTP_USER_AGENT']
-        
+        c.ips = [self.request.remote_addr]
         if users.get_current_user() and self.request.get('contenido') and self.request.get('id_enlace'):
             if self.request.get('anonimo') != 'on':
                 c.autor = users.get_current_user()
@@ -244,7 +231,6 @@ class Comentar(webapp.RequestHandler):
                 response,
                 RECAPTCHA_PRIVATE_KEY,
                 remoteip)
-            
             if cResponse.is_valid:
                 self.finalizar( c )
             else:
@@ -258,9 +244,11 @@ class Comentar(webapp.RequestHandler):
         else:
             try:
                 comentario.put()
-                e = comentario.get_enlace()
-                e.actualizar()
-                self.redirect(e.get_link() + '#' + str(comentario.key()))
+                e = self.sc.get_enlace(comentario.id_enlace)
+                if e:
+                    e.actualizar()
+                    self.sc.borrar_cache_enlace(comentario.id_enlace)
+                self.redirect( comentario.get_link() )
             except:
                 self.redirect('/error/503')
 

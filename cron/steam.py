@@ -24,6 +24,8 @@ from datetime import datetime
 from base import *
 
 class steam:
+    sc = Super_cache()
+    
     # returns the status code of the http request
     def check_steam_url(self):
         try:
@@ -36,12 +38,8 @@ class steam:
     # only if link is active -> enlace.url != 'http://store.steampowered.com'
     def collect_users(self):
         autores = []
-        try:
-            enlace = Enlace.get( STEAM_ENLACE_KEY )
-            comentarios = enlace.get_comentarios()
-        except:
-            enlace = comentarios = None
-        
+        enlace = self.sc.get_enlace( STEAM_ENLACE_KEY )
+        comentarios = self.sc.get_comentarios_de( STEAM_ENLACE_KEY )
         if enlace.url != 'http://store.steampowered.com':
             if comentarios.count() > 0:
                 # seleccionamos los autores
@@ -84,36 +82,13 @@ class steam:
     # disable link so collect_users returns an empty array
     def disable_link(self):
         try:
-            enlace = Enlace.get( STEAM_ENLACE_KEY )
-            enlace.url = "http://store.steampowered.com"
-            enlace.put()
+            enlace = self.sc.get_enlace( STEAM_ENLACE_KEY )
+            if enlace:
+                enlace.url = "http://store.steampowered.com"
+                enlace.put()
+                self.sc.borrar_cache_enlace( STEAM_ENLACE_KEY )
         except:
             logging.error("Unable to disable link!!!")
-    
-    def clean_garbage(self):
-        comments = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1 ORDER BY fecha DESC", STEAM_ENLACE_KEY).fetch(100)
-        code = ''
-        for co in comments:
-            if co.os == 'steam.py' and co.contenido == code:
-                co.delete()
-            elif co.os == 'steam.py':
-                code = co.contenido
-    
-    def make_a_comment(self, comment):
-        c = Comentario()
-        c.contenido = comment
-        c.id_enlace = STEAM_ENLACE_KEY
-        c.os = 'steam.py'
-        
-        e = Enlace.get( STEAM_ENLACE_KEY )
-        e.comentarios = db.GqlQuery("SELECT * FROM Comentario WHERE id_enlace = :1", STEAM_ENLACE_KEY).count()
-        
-        try:
-            c.put()
-            e.put()
-            e.borrar_cache()
-        except:
-            logging.error('Cant save comment: ' + comment)
     
     def __init__(self):
         if STEAM_ENLACE_KEY != '':
@@ -121,14 +96,10 @@ class steam:
             if code == 200:
                 if self.send_emails( self.collect_users() ):
                     self.disable_link()
-                    self.make_a_comment('STEAM FOR LINUX READY!!!')
             else:
-                logging.info('Steam for Linux not ready yet...')
-                self.clean_garbage()
-                self.make_a_comment('Steam for Linux not ready yet... code: ' + str(code))
+                logging.info('Steam for Linux not ready yet. Code: ' + str(code))
         else:
             logging.info('STEAM_ENLACE_KEY is empty!')
 
 if __name__ == "__main__":
     steam()
-

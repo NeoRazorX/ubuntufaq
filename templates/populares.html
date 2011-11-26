@@ -55,43 +55,7 @@
 <tr><td></td><td><hr/></td></tr>
 <tr>
     <td></td>
-    <td>
-    <table width="100%">
-    <tr>
-        <td>
-        <ul>
-            <li>Preguntas: {{ stats.preguntas }}</li>
-            <ul>
-            <li>Clics en preguntas: {{ stats.clics_p }}</li>
-            <li>Clics por pregunta: {{ stats.clics_pp }}</li>
-            <li>Respuestas: {{ stats.respuestas }}</li>
-            <li>Respuestas por pregunta: {{ stats.rpp }}</li>
-            </ul>
-        </ul>
-        </td>
-        <td>
-        <ul>
-            <li>Enlaces: {{ stats.enlaces }}</li>
-            <ul>
-            <li>Clics en enlaces: {{ stats.clics_e }}</li>
-            <li>Clics por enlace: {{ stats.clics_pe }}</li>
-            <li>Comentarios: {{ stats.comentarios }}</li>
-            <li>Comentarios por enlace: {{ stats.cpe }}</li>
-            </ul>
-        </ul>
-        </td>
-        <td valign="top">
-        <ul>
-            <li>Usuarios: {{ stats.usuarios }}</li>
-            <ul>
-            <li>Usuario más valorado: {{ stats.top_user|autor }}</li>
-            <li>Seguimientos: {{ stats.seguimientos }}</li>
-            </ul>
-        </ul>
-        </td>
-    </tr>
-    </table>
-    </td>
+    <td>{{ stats|show_stats }}</td>
 </tr>
 {% endif %}
 

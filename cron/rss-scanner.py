@@ -24,10 +24,13 @@ import feedparser
 from base import *
 
 class rsscanner:
+    sc = Super_cache()
+    
     def __init__(self):
         if len( RSS_LIST ) == 1:
             self.leer( RSS_LIST[0] )
         elif len( RSS_LIST ) > 1:
+            self.alltags = self.sc.get_alltags()
             self.leer( random.choice(RSS_LIST) )
         else:
             logging.info('Lista de RSSs vacia!')
@@ -74,8 +77,7 @@ class rsscanner:
                     else:
                         nuevo.descripcion = auxiliar[:490] + '...'
                     try:
-                        nuevo.get_tags()
-                        nuevo.put()
+                        nuevo.nuevo(self.alltags)
                         logging.info(str(puntos) + " puntos -> enlace publicado: " + link)
                     except:
                         logging.error('Imposible publicar enlace!')

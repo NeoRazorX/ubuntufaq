@@ -23,27 +23,28 @@ from google.appengine.api import memcache
 from base import *
 
 class stats:
+    sc = Super_cache()
+    
     def __init__(self):
         # leemos de memcache
         continuar = True
         stats = memcache.get( 'stats' )
         if stats is None:
             stats = {'iterador': 0,
-                    'iterador2': 0,
                     'preguntas': 0,
+                    'preguntas_cache': 0,
                     'respuestas': 0,
                     'rpp': 0,
                     'enlaces': 0,
+                    'enlaces_cache': 0,
                     'comentarios': 0,
                     'cpe': 0,
-                    'clics_p': 0,
-                    'clics_pp': 0,
-                    'clics_e': 0,
-                    'clics_pe': 0,
                     'usuarios': 0,
                     'seguimientos': 0,
                     'top_user': None,
-                    'tu_puntos': 0
+                    'tu_puntos': 0,
+                    'tags': 0,
+                    'votos': 0
             }
             if memcache.add('stats', stats):
                 logging.info("Almacenado stats en memcache")
@@ -57,7 +58,6 @@ class stats:
         if stats['iterador'] == 0 and continuar:
             stats['preguntas'] = Pregunta.all(keys_only=True).count(999999)
             stats['iterador'] += 1
-            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a las preguntas")
             continuar = False
@@ -68,7 +68,6 @@ class stats:
             if stats['preguntas'] > 0 and stats['respuestas'] > 0:
                 stats['rpp'] = (float(stats['respuestas']) / stats['preguntas'])
             stats['iterador'] += 1
-            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a las respuestas")
             continuar = False
@@ -77,7 +76,6 @@ class stats:
         if stats['iterador'] == 2 and continuar:
             stats['enlaces'] = Enlace.all(keys_only=True).count(999999)
             stats['iterador'] += 1
-            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los enlaces")
             continuar = False
@@ -88,7 +86,6 @@ class stats:
             if stats['enlaces'] > 0 and stats['comentarios'] > 0:
                 stats['cpe'] = (float(stats['comentarios']) / stats['enlaces'])
             stats['iterador'] += 1
-            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los comentarios")
             continuar = False
@@ -97,7 +94,6 @@ class stats:
         if stats['iterador'] == 4 and continuar:
             stats['usuarios'] = Usuario.all(keys_only=True).count(999999)
             stats['iterador'] += 1
-            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los usuarios")
             continuar = False
@@ -106,78 +102,28 @@ class stats:
         if stats['iterador'] == 5 and continuar:
             stats['seguimientos'] = Seguimiento.all(keys_only=True).count(999999)
             stats['iterador'] += 1
-            stats['iterador2'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base a los seguimientos")
             continuar = False
         
         # actualizamos el top de usuarios
         if stats['iterador'] == 6 and continuar:
-            # probamos con populares
-            populares = memcache.get( 'populares' )
+            # probamos con las preguntas
+            preguntas = self.sc.get_preguntas()
             stats['tu_puntos'] = 0
-            if populares:
-                for p in populares:
-                    if p['puntos'] > stats['tu_puntos']:
-                        stats['top_user'] = p['autor']
-                        stats['tu_puntos'] = p['puntos']
-            else:
-                logging.info("Populares no encontrada")
-            # probamos con la portada
-            portada = memcache.get( 'portada' )
-            if portada:
-                for p in portada:
-                    if p['puntos'] > stats['tu_puntos']:
-                        stats['top_user'] = p['autor']
-                        stats['tu_puntos'] = p['puntos']
-            else:
-                logging.info("Portada no encontrada")
-            stats['iterador'] += 1
-            stats['iterador2'] = 0
+            for p in preguntas:
+                if p.puntos > stats['tu_puntos']:
+                    stats['top_user'] = p.autor
+                    stats['tu_puntos'] = p.puntos
+            # probamos con los enlaces
+            enlaces = self.sc.get_enlaces()
+            for e in enlaces:
+                if e.puntos > stats['tu_puntos']:
+                    stats['top_user'] = e.autor
+                    stats['tu_puntos'] = e.puntos
+            stats['iterador'] = 0
             memcache.replace('stats', stats)
             logging.info("Actualizado stats en base al top_user")
-            continuar = False
-        
-        # actualizamos el numero de clics por pregunta
-        if stats['iterador'] == 7 and continuar:
-            query = db.GqlQuery("SELECT * FROM Pregunta")
-            if stats['iterador2'] == 0:
-                stats['clics_p'] = 0
-                for p in query.fetch(20, stats['iterador2']):
-                    stats['clics_p'] += p.visitas
-                stats['iterador2'] += 20
-            elif stats['iterador2'] >= stats['preguntas']:
-                if stats['preguntas'] > 0 and stats['clics_p'] > 0:
-                    stats['clics_pp'] = (float(stats['clics_p']) / stats['preguntas'])
-                stats['iterador'] += 1
-                stats['iterador2'] = 0
-            else:
-                for p in query.fetch(20, stats['iterador2']):
-                    stats['clics_p'] += p.visitas
-                stats['iterador2'] += 20
-            memcache.replace('stats', stats)
-            logging.info("Actualizado stats en base a los clics por pregunta")
-            continuar = False
-        
-        # actualizamos el numero de clics por enlace
-        if stats['iterador'] == 8 and continuar:
-            query = db.GqlQuery("SELECT * FROM Enlace")
-            if stats['iterador2'] == 0:
-                stats['clics_e'] = 0
-                for e in query.fetch(20, stats['iterador2']):
-                    stats['clics_e'] += e.clicks
-                stats['iterador2'] += 20
-            elif stats['iterador2'] >= stats['enlaces']:
-                if stats['enlaces'] > 0 and stats['clics_e'] > 0:
-                    stats['clics_pe'] = (float(stats['clics_e']) / stats['enlaces'])
-                stats['iterador'] = 0
-                stats['iterador2'] = 0
-            else:
-                for e in query.fetch(20, stats['iterador2']):
-                    stats['clics_e'] += e.clicks
-                stats['iterador2'] += 20
-            memcache.replace('stats', stats)
-            logging.info("Actualizado stats en base a los clics por enlace")
             continuar = False
 
 if __name__ == "__main__":

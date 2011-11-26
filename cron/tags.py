@@ -23,29 +23,11 @@ from google.appengine.api import memcache
 from base import *
 
 class Buscar:
+    sc = Super_cache()
+    pendientes = {}
+    
     def __init__(self):
-        # diccionario que almacena todos los tags
-        self.pendientes = {}
-        # lista general de tags
-        self.alltags = memcache.get('all-tags')
-        if self.alltags is None:
-            self.alltags_memcache = False
-            self.alltags = []
-            for tag in KEYWORD_LIST:
-                self.alltags.append([tag.lower(), 0])
-        else:
-            # eliminamos los tags vacios y los duplicados
-            unicos = []
-            for tag in self.alltags:
-                if tag[0].strip() != '':
-                    found = False
-                    for ntag in unicos:
-                        if tag[0] == ntag[0]:
-                            found = True
-                    if not found:
-                        unicos.append([ tag[0], tag[1] ])
-            self.alltags = unicos
-            self.alltags_memcache = True
+        self.alltags = self.sc.get_alltags()
         # elegimos aleatoriamente una tabla
         for i in range(2):
             if self.seleccionar_tarea( random.randint(0, 1) ):
@@ -70,6 +52,10 @@ class Buscar:
                     try:
                         ele.put()
                         logging.info("Actualizados tags de " + ele.get_link())
+                        if tabla == 0:
+                            self.sc.borrar_cache_pregunta( str(ele.key()) )
+                        else:
+                            self.sc.borrar_cache_enlace( str(ele.key()) )
                     except:
                         logging.warning("Imposible actualizar tags de " + ele.get_link())
                 # agrupamos los datos necesarios
@@ -117,22 +103,17 @@ class Buscar:
             logging.info('Comprobando el tag: ' + t)
             if t not in self.pendientes:
                 logging.info('No hay pendientes para: ' + t)
-                query = db.GqlQuery("SELECT * FROM Busqueda WHERE tag = :1", t)
-                elementos_cache = query.fetch( query.count() )
-                if elementos_cache:
-                    self.pendientes[t] = elementos_cache
-                else:
-                    self.pendientes[t] = []
+                self.pendientes[t] = self.sc.get_busqueda(t)
             logging.info('Hay '+str(len(self.pendientes[t]))+' pendientes para: ' + t)
             encontrado = False
             for p in self.pendientes[t]:
                 if p.url  == link:
                     encontrado = True
-                    if p.text != title or p.clics != clics:
-                        p.text = title
-                        p.clics = clics
-                        p.fecha = fecha
+                    if p.text != title or p.fecha != fecha:
                         try:
+                            p.text = title
+                            p.clics = clics
+                            p.fecha = fecha
                             p.put()
                             logging.info('Actualizada la url: ' + p.url)
                         except:
@@ -147,20 +128,21 @@ class Buscar:
                     busq.tag = t
                     busq.put()
                     self.pendientes[t].append( busq )
-                    logging.info('Añadida la url: ' + busq.url)
+                    logging.info('Anyadida la url: ' + busq.url)
                 except:
                     logging.warning("Imposible guardar en busqueda la url: " + busq.url)
     
     # actualiza los elementos de memcache con los nuevos resultados obtenidos
     def actualizar(self):
-        for tag in self.alltags:
-            nume = len( self.pendientes.get(tag[0], []) )
-            if nume > 0:
-                tag[1] = nume
-        if not self.alltags_memcache:
-            memcache.add('all-tags', self.alltags)
-        else:
-            memcache.replace('all-tags', self.alltags)
+        for t in self.alltags:
+            try:
+                nume = len( self.pendientes.get(t[0], []) )
+                if nume > 0:
+                    t[1] = nume
+                    memcache.delete('busqueda_' + t[0])
+            except:
+                pass
+        memcache.replace('all-tags', self.alltags)
 
 if __name__ == "__main__":
     Buscar()

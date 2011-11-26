@@ -77,6 +77,7 @@
         {{ pregunta.os|muestra_os }} |
         {{ pregunta.creado|date:"d/m/Y H:i" }} |
         {{ pregunta.respuestas }} respuestas |
+        Seguimientos: {{ pregunta.seguimientos }} |
         {{ pregunta.visitas }} clics
     </div>
     <div class="comentario">
@@ -86,9 +87,6 @@
         </div>
         {{ pregunta.contenido|safe|linebreaksbr|fuckcode }}
     </div>
-    <div class="info_respuesta_down">
-        <a class="seguimiento" href="/ayuda#seguimiento">Seguimientos</a>: {{ pregunta.seguimientos }}
-    </div>
 {% endif %}
 </td>
 <td valign="top" width="120">
@@ -97,7 +95,7 @@
     {% if es_seguidor %}
         <div class="boton"><a href="/seguir/{{ pregunta.key }}">dejar de seguir</a></div>
     {% else %}
-        <div class="b_verde"><a href="/seguir/{{ pregunta.key }}">seguir</a></div>
+        <div class="b_verde"><a href="/seguir/{{ pregunta.key }}" title="se te notificarán las nuevas respuestas">seguir</a></div>
     {% endif %}
     {% endif %}
     {% if editar %}
@@ -108,6 +106,27 @@
     {% endif %}
 {% endif %}
 </td>
+</tr>
+
+<tr>
+    <td></td>
+    <td align="center">
+        <script type="text/javascript"><!--
+            google_ad_client = "ca-pub-7967042768660878";
+            /* ubufaq-horizontal */
+            google_ad_slot = "9417145252";
+            google_ad_width = 728;
+            google_ad_height = 90;
+            //-->
+        </script>
+        <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+        </script>
+    </td>
+    <td>
+        <a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a>
+        <br/><br/>
+        <g:plusone size="medium"></g:plusone>
+    </td>
 </tr>
 
 {{ respuestas|respuestas_destacadas }}
@@ -126,8 +145,11 @@
     <td valign="top">
         <div class="info_respuesta_up">
         <a name="{{respuesta.key}}"></a>
-        <a class="comentario" name="{{ forloop.counter }}"  onclick="citar_comentario('{{ forloop.counter }}', 'respuesta')">@{{ forloop.counter }}</a>
+        <a class="comentario" name="{{ forloop.counter }}" href="#nuevo_comentario" onclick="citar_comentario('{{ forloop.counter }}', 'respuesta')">@{{ forloop.counter }}</a>
         &nbsp; {{ respuesta.autor|autor }} |
+        {% if administrador %}
+            {{ respuesta.get_ip }} |
+        {% endif %}
         {{ respuesta.os|muestra_os }} |
         {{ respuesta.fecha|timesince|traducir }}
         </div>
@@ -162,45 +184,53 @@
     {% endif %}
     </td>
 </tr>
+{% empty %}
+<tr>
+    <td></td>
+    <td valign="top">
+        <div class="mensaje">
+            Cada vez que una pregunta se queda sin respuesta, Dios mata un gatito.
+            <br/>
+            Por favor, piensa en los gatitos!
+        </div>
+    </td>
+    <td align="left" valign="top"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
+</tr>
 {% endfor %}
 
 {% if respuestas %}
 <tr>
     <td></td>
-    <td align="center">
-        <div class="mensaje">¿Te pareció útil? No olvides votar las respuestas.</div>
-    </td>
-    <td></td>
-</tr>
-<tr>
-    <td></td>
     <td>
-    <ul class="social">
-        <li><iframe src="http://www.facebook.com/plugins/like.php?href={{ pregunta.get_full_link|urlencode }}&amp;show_faces=false" scrolling="no" frameborder="0" style="height: 40px; width: 400px" allowTransparency="true"></iframe></li>
-        <li><g:plusone size="medium"></g:plusone></li>
-        <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
-    </ul>
+        <div class="mensaje">
+            {% if not es_seguidor and not pregunta.esta_solucionada %}
+                ¿Deseas que te informemos automáticamente de cualquier respuesta a esta pregunta? Pulsa el <b>botón seguir</b>.<br/>
+            {% endif %}
+            ¿Te pareció útil alguna respuesta? No olvides votarla.
+        </div>
     </td>
-</tr>
-{% else %}
-<tr>
-    <td align="right" valign="top"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
-    <td valign="top">
-    <div class="mensaje">
-    Cada vez que una pregunta se queda sin respuesta, Dios mata un gatito.
-    <br/>
-    Por favor, piensa en los gatitos!
-    </div>
-    </td>
+    <td></td>
 </tr>
 {% endif %}
 
 <tr><td></td><td><hr/></td></tr>
 
+{% if pregunta.esta_solucionada %}
 <tr>
-    <td align="right" valign="top"><br/>{{ usuario.email|avatar:40 }}</td>
+    <td></td>
+    <td>
+        <div class="mensaje">
+            Esta pregunta ha sido marcada como <b>{{ pregunta.get_estado }}</b>, y por tanto no se admiten más respuestas.
+            <br/>Si no es una solución para tu problema puedes crear una nueva pregunta,
+            o puedes usar el formulario de contacto para informar del problema.
+        </div>
+        <br/>
+    </td>
+</tr>
+{% else %}
+<tr>
+    <td align="right" valign="top"><a name="nuevo_comentario"></a>{{ usuario.email|avatar:40 }}</td>
     <td valign="top">
-    <div class="formulario">
     <form name="respuesta" action="/add_r" method="post">
     <input type="hidden" name="id_pregunta" value="{{ pregunta.key }}"/>
     <input type="button" name="add_b" value="negrita" onclick="add_negrita('respuesta')"/>
@@ -216,9 +246,10 @@
 {% endif %}
     <input type="button" class="boton" value="responder" onclick="enviar_respuesta()"/>
     </form>
-    </div>
     </td>
 </tr>
+{% endif %}
+
 {% if relacionadas %}
 <tr>
     <td></td>

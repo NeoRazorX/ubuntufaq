@@ -25,10 +25,18 @@ function menu_cabecera(eleccion)
         
         case 'pensamiento':
             document.getElementById('menupensamiento').setAttribute("class", "menusel");
+            document.getElementById('buscar').style.display = 'block';
+            document.publicar.descripcion.focus();
             break;
         
         case 'usuario':
             document.getElementById('menusuario').setAttribute("class", "menusel");
+            document.getElementById('buscar').style.display = 'block';
+            break;
+        
+        case 'ayuda':
+            document.getElementById('menubuscar').setAttribute("class", "menusel");
+            document.getElementById('buscar').style.display = 'block';
             break;
         
         default:
@@ -36,6 +44,12 @@ function menu_cabecera(eleccion)
             document.getElementById('pregunta').style.display = 'block';
             break;
     }
+}
+
+function go_buscar(tag)
+{
+    document.buscar.query.value = tag;
+    document.buscar.submit();
 }
 
 function enviar_pregunta()

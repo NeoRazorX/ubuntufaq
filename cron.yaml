@@ -1,41 +1,33 @@
 cron:
 
 - description: calculo de karma
-  url: /tasks/karma
-  schedule: every 10 minutes
-
-- description: estadisticas
-  url: /tasks/stats
-  schedule: every 10 minutes
-
-- description: gestion de enlaces
-  url: /tasks/enlaces
-  schedule: every 10 minutes
+  url: /cron/karma
+  schedule: every 50 minutes
 
 - description: gestion de tags
-  url: /tasks/tags
-  schedule: every 10 minutes
+  url: /cron/tags
+  schedule: every 50 minutes
 
 - description: gestion de emails
-  url: /tasks/emails
-  schedule: every 10 minutes
+  url: /cron/emails
+  schedule: every 20 minutes
 
 - description: gestion de seguimientos
-  url: /tasks/seguimientos
-  schedule: every 30 minutes
+  url: /cron/seguimientos
+  schedule: every 2 hours
 
-- description: RSS scanner
-  url: /tasks/rss-scanner
-  schedule: every 3 hours
+- description: estadisticas
+  url: /cron/stats
+  schedule: every 6 hours
 
 - description: chequeo de steam para Linux
-  url: /tasks/steam
+  url: /cron/steam
   schedule: every 8 hours
 
 - description: borrado completo de memcache
-  url: /tasks/memcache
-  schedule: every monday 02:00
+  url: /cron/memcache
+  schedule: every monday of month 00:00
 
 - description: marcado de preguntas antiguas
-  url: /tasks/antiguas
+  url: /cron/antiguas
   schedule: every monday of month 01:00

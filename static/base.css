@@ -66,10 +66,6 @@ a.notificacion {
     border-bottom-right-radius: 2px 2px;
 }
 
-a.seguimiento {
-    color: black;
-}
-
 a.negativo, a.positivo {
     color: white;
     padding-left: 3px;
@@ -114,7 +110,7 @@ input.boton, div.boton, div.b_verde, div.b_rojo {
     border: 1px outset #848484;
 }
 
-div.boton a, div.b_verde a, div.b_rojo a {
+div.boton a, div.b_rojo a {
     color: black;
 }
 
@@ -122,10 +118,15 @@ div.boton:hover {
     background-color: #c4c4c4;
 }
 
-input.boton:hover, div.b_verde:hover {
+input.boton, div.b_verde {
     background-color: #36A736;
     border: 1px outset #36A736;
     color: white;
+}
+
+input.boton:hover, div.b_verde:hover {
+    background-color: #3BA13B;
+    border: 1px outset #327532;
 }
 
 div.b_rojo:hover {
@@ -133,7 +134,7 @@ div.b_rojo:hover {
     border: 1px outset #D43723;
 }
 
-div.b_verde:hover a, div.b_rojo:hover a {
+div.b_verde a, div.b_rojo:hover a {
     color: white;
 }
 
@@ -153,12 +154,6 @@ input.titulo {
 img {
     vertical-align: middle;
     border-width: 0;
-}
-
-img.galeria {
-    border: 3px double #333333;
-    max-width: 200px;
-    max-height: 200px;
 }
 
 img.portada {
@@ -191,6 +186,10 @@ table.menucabecera td#right {
 table.menucabecera a {
     color: white;
     padding: 5px;
+    border-top-left-radius: 2px 2px;
+    border-top-right-radius: 2px 2px;
+    border-bottom-left-radius: 2px 2px;
+    border-bottom-right-radius: 2px 2px;
 }
 
 table.menucabecera a.menusel {
@@ -226,7 +225,6 @@ div.formcabecera a:hover {
     border-bottom-left-radius: 3px 3px;
 }
 
-div.formcabecera div#pregunta,
 div.formcabecera div#enlace {
     display: none;
 }
@@ -363,17 +361,6 @@ div.pregunta:hover {
     border: 1px outset #E4E4E4;
 }
 
-div.pregunta div.bottom {
-    margin-top: 5px;
-    font-size: 12px;
-    color: #DD4814;
-}
-
-div.formulario {
-    margin: 10px;
-    padding: 5px;
-}
-
 div.info_respuesta_up {
     font-size: 11px;
     margin-top: 0px;
@@ -477,6 +464,7 @@ div.mensaje {
     margin-bottom: 5px;
     padding: 5px;
     font-size: 15px;
+    text-align: center;
 }
 
 div.titulo {
@@ -548,20 +536,6 @@ div.paginacion a#actual {
     color: white;
 }
 
-ul.social {
-    list-style: none;
-    height: 20px;
-    margin-top: 5px;
-    padding-left: 5px;
-}
-
-ul.social li {
-    float: left;
-    margin-right: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
-}
-
 div.alltags {
     margin-bottom: 5px;
     font-size: 14px;
@@ -592,6 +566,14 @@ div.tweet a u {
 
 div.tweet span {
     color: gray;
+}
+
+table.stats {
+    width: 100%;
+}
+
+table.stats td {
+    vertical-align: top;
 }
 
 div.pie {

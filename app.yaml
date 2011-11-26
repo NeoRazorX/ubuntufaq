@@ -1,85 +1,62 @@
 application: ubuntu-faq
-version: 49
+version: 51
 runtime: python
 api_version: 1
-
-default_expiration: "2d"
+default_expiration: "3d"
 
 handlers:
 - url: /img
   static_dir: img
 
+- url: /static
+  static_dir: static
+
 - url: /favicon.ico
   static_files: img/favicon.ico
   upload: img/favicon.ico
 
-- url: /tasks/antiguas
-  script: tasks/antiguas.py
+- url: /cron/antiguas
+  script: cron/antiguas.py
   login: admin
 
-- url: /tasks/emails
-  script: tasks/emails.py
+- url: /cron/emails
+  script: cron/emails.py
   login: admin
 
-- url: /tasks/enlaces
-  script: tasks/enlaces.py
+- url: /cron/memcache
+  script: cron/memcache.py
   login: admin
 
-- url: /tasks/memcache
-  script: tasks/memcache.py
+- url: /cron/karma
+  script: cron/karma.py
   login: admin
 
-- url: /tasks/karma
-  script: tasks/karma.py
+- url: /cron/rss-scanner
+  script: cron/rss-scanner.py
   login: admin
 
-- url: /tasks/rss-scanner
-  script: tasks/rss-scanner.py
+- url: /cron/seguimientos
+  script: cron/seguimientos.py
   login: admin
 
-- url: /tasks/seguimientos
-  script: tasks/seguimientos.py
+- url: /cron/stats
+  script: cron/stats.py
   login: admin
 
-- url: /tasks/stats
-  script: tasks/stats.py
+- url: /cron/steam
+  script: cron/steam.py
   login: admin
 
-- url: /tasks/steam
-  script: tasks/steam.py
+- url: /cron/tags
+  script: cron/tags.py
   login: admin
-
-- url: /tasks/tags
-  script: tasks/tags.py
-  login: admin
-
-- url: /sitemap
-  script: sitemap.py
-
-- url: /sitemap.xml
-  script: sitemap.py
-
-- url: /rss
-  script: rss.py
-
-- url: /rss-respuestas
-  script: rssr.py
 
 - url: /robots.txt
   script: robots.py
 
-- url: /steam4linux
-  script: steam4linux.py
-
 - url: /stop_emails
   script: stop_emails.py
   login: required
-
-- url: /search/.*
-  script: search.py
-
-- url: /votar/.*
-  script: votar.py
 
 - url: /u/.*
   script: usuarios.py
@@ -94,4 +71,4 @@ handlers:
   login: required
 
 - url: .*
-  script: main.py
+  script: public.py

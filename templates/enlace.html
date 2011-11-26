@@ -52,12 +52,22 @@
 </tr>
 <tr>
     <td></td>
+    <td align="center">
+        <script type="text/javascript"><!--
+            google_ad_client = "ca-pub-7967042768660878";
+            /* ubufaq-horizontal */
+            google_ad_slot = "9417145252";
+            google_ad_width = 728;
+            google_ad_height = 90;
+            //-->
+        </script>
+        <script type="text/javascript" src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+        </script>
+    </td>
     <td>
-        <ul class="social">
-            <li><iframe src="http://www.facebook.com/plugins/like.php?href={{ enlace.get_full_link|urlencode }}&amp;show_faces=false" scrolling="no" frameborder="0" style="height: 40px; width: 400px" allowTransparency="true"></iframe></li>
-            <li><g:plusone size="medium"></g:plusone></li>
-            <li><a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a></li>
-        </ul>
+        <a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-lang="es">Tweet</a>
+        <br/><br/>
+        <g:plusone size="medium"></g:plusone>
     </td>
     <td></td>
 </tr>
@@ -78,8 +88,11 @@
     <td valign="top">
         <div class="info_respuesta_up">
             <a name="{{ coment.key }}"></a>
-            <a class="comentario" name="{{ forloop.counter }}" onclick="citar_comentario('{{ forloop.counter }}', '')">@{{ forloop.counter }}</a>
+            <a class="comentario" name="{{ forloop.counter }}" href="#nuevo_comentario" onclick="citar_comentario('{{ forloop.counter }}', '')">@{{ forloop.counter }}</a>
             &nbsp; {{ coment.autor|autor }} |
+            {% if administrador %}
+                {{ coment.get_ip }} |
+            {% endif %}
             {{ coment.os|muestra_os }} |
             {{ coment.fecha|timesince|traducir }}
         </div>
@@ -116,23 +129,23 @@
 </tr>
 {% empty %}
 <tr>
-<td align="right" valign="top"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
-<td valign="top">
-    <div class="mensaje">
-    Cada vez que una noticia se queda sin comentarios, Dios mata un gatito.
-    <br/>
-    Por favor, piensa en los gatitos!
-    </div>
-</td>
+    <td></td>
+    <td valign="top">
+        <div class="mensaje">
+        Cada vez que una noticia se queda sin comentarios, Dios mata un gatito.
+        <br/>
+        Por favor, piensa en los gatitos!
+        </div>
+    </td>
+    <td align="left" valign="top"><img src="/img/gatito-avatar.png" alt="gatito" /></td>
 </tr>
 {% endfor %}
 
 <tr><td></td><td><hr/></td><td></td></tr>
 
 <tr>
-<td align="right" valign="top"><br/>{{ usuario.email|avatar:40 }}</td>
+<td align="right" valign="top"><a name="#nuevo_comentario"></a>{{ usuario.email|avatar:40 }}</td>
 <td valign="top">
-    <div class="formulario">
     <form name="comentario" action="/add_c" method="post">
     <input type="hidden" name="id_enlace" value="{{ enlace.key }}"/>
     <input type="button" name="add_b" value="negrita" onclick="add_negrita('')"/>
@@ -147,7 +160,6 @@
     <input type="checkbox" name="anonimo"/>An&oacute;nimo
 {% endif %}
     <input type="button" class="boton" value="comentar" onclick="enviar_comentario()"/>
-    </form>
     </div>
 </td>
 </tr>

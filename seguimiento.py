@@ -24,10 +24,10 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from base import *
 
-class Modificar_seguimiento(webapp.RequestHandler):
+class Modificar_seguimiento(Pagina):
     def get(self, keyp=None):
         try:
-            p = Pregunta.get( keyp )
+            p = self.sc.get_pregunta( keyp )
             s = p.get_seguimiento()
             if users.get_current_user() == p.autor: # el autor no puede
                 pass

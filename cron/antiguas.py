@@ -23,6 +23,8 @@ from datetime import datetime, timedelta
 from base import *
 
 class antiguas:
+    sc = Super_cache()
+    
     def __init__(self):
         self.marcar_preguntas()
         self.borrar_enlaces()
@@ -35,9 +37,11 @@ class antiguas:
                 p.estado = 14
                 try:
                     p.put()
-                    logging.info('Marcada como antigua la pregunta: ' + str(p.key()))
+                    p.borrar_cache()
+                    logging.info('Marcada como antigua la pregunta: ' + p.get_link())
+                    self.sc.borrar_cache_pregunta( str(p.key()) )
                 except:
-                    logging.warning('Imposible marcar como antigua la pregunta: ' + str(p.key()))
+                    logging.warning('Imposible marcar como antigua la pregunta: ' + p.get_link())
     
     def borrar_enlaces(self):
         enlaces = db.GqlQuery("SELECT * FROM Enlace WHERE fecha < :1 ORDER BY fecha ASC LIMIT 50",
@@ -46,9 +50,10 @@ class antiguas:
             if e.comentarios == 0:
                 try:
                     e.borrar_todo()
-                    logging.info('Borrado en enlace: ' + str(e.key()) + ' por antiguo.')
+                    logging.info('Borrado en enlace: ' + e.get_link() + ' por antiguo.')
+                    self.sc.borrar_cache_enlace( str(p.key()) )
                 except:
-                    logging.warning('Imposible borrar el enlace: ' + str(e.key()) + ' por antiguo.')
+                    logging.warning('Imposible borrar el enlace: ' + e.get_link() + ' por antiguo.')
 
 if __name__ == "__main__":
     antiguas()

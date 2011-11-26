@@ -23,24 +23,22 @@ from google.appengine.api import users, memcache
 from base import *
 
 class karma:
+    sc = Super_cache()
+    
     def __init__(self):
         self.pending_users = memcache.get('pending-users')
         if self.pending_users is None:
             self.pending_users_memcache = False
             self.pending_users = []
+            # elegimos aleatoriamente una tabla para ir añadiendo usuarios a la lista
+            for i in range(3):
+                if self.seleccionar( random.randint(0, 3) ):
+                    break;
         else:
             self.pending_users_memcache = True
-        # elegimos aleatoriamente una tabla para ir añadiendo usuarios a la lista
-        for i in range(3):
-            if self.seleccionar( random.randint(0, 3) ):
-                break;
-        # si aun así no se encuentran usuarios...
-        if len( self.pending_users ) < 1:
-            self.seleccionar(4)
-        # elegimos y procesamos aleatoriamente  de uno a tres usuarios
+        # elegimos y procesamos aleatoriamente un usuario
         if len( self.pending_users ) > 1:
-            for i in range(3):
-                self.calcular( random.choice(self.pending_users) )
+            self.calcular( random.choice(self.pending_users) )
         elif len( self.pending_users ) == 1:
             self.calcular( self.pending_users[0] )
         else:
@@ -60,21 +58,17 @@ class karma:
             seleccion = db.GqlQuery("SELECT * FROM Comentario WHERE puntos = 0").fetch(20)
         elif tabla == 2:
             seleccion = db.GqlQuery("SELECT * FROM Pregunta WHERE puntos = 0").fetch(20)
-        elif tabla == 3:
-            seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE puntos = 0").fetch(20)
         else:
-            logging.warning('Buscando en todas las respuestas...')
-            query = db.GqlQuery("SELECT * FROM Respuesta")
-            if query.count() > 0:
-                seleccion = query.fetch(20, random.randint(0, max(0, query.count()-1)))
-            else:
-                seleccion = []
+            seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE puntos = 0").fetch(20)
         if len( seleccion ) > 0:
             # marcamos los anonimos y seleccionamos los usuarios
             for usu1 in seleccion:
                 if usu1.autor == None:
-                    usu1.puntos = -1
-                    usu1.put()
+                    try:
+                        usu1.puntos = -1
+                        usu1.put()
+                    except:
+                        logging.warning('Imposible actualizar la puntuacion del elemento!')
                 elif usu1.autor not in self.pending_users:
                     self.pending_users.append( usu1.autor )
         else:
@@ -95,15 +89,15 @@ class karma:
             
             if karma.iterador == 0 and continuar:
                 query = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1", autor)
-                karma.preguntas = query.count()
+                karma.preguntas = query.count(999999)
                 karma.iterador += 1
                 logging.info("Actualizado el karma del usuario " + str(autor) + ' en base a las preguntas')
                 continuar = False
             
             if karma.iterador == 1 and continuar:
                 query = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1", autor)
-                karma.respuestas = query.count()
-                # lo ideal es responder más que preguntas
+                karma.respuestas = query.count(999999)
+                # lo ideal es responder más que preguntar
                 try:
                     karma.puntos = max(0.0, min(10.0, (2 * float(karma.respuestas) / karma.preguntas )))
                 except:
@@ -118,7 +112,7 @@ class karma:
             
             if karma.iterador == 2 and continuar:
                 query = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1", autor)
-                karma.enlaces = query.count()
+                karma.enlaces = query.count(999999)
                 # cuantos más enlaces mejor
                 try:
                     karma.puntos += max(0, min(4, (0.4 * karma.enlaces) ))
@@ -131,7 +125,7 @@ class karma:
             
             if karma.iterador == 3 and continuar:
                 query = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1", autor)
-                karma.comentarios = query.count()
+                karma.comentarios = query.count(999999)
                 # lo ideal es tener más comentarios que enlaces
                 try:
                     karma.puntos += max(0, min(3, ( float(karma.comentarios) / karma.enlaces )))
@@ -143,8 +137,8 @@ class karma:
                 continuar = False
             
             if karma.iterador == 4 and continuar:
-                portada = memcache.get('portada')
-                if portada is None:
+                portada = self.sc.get_portada()
+                if portada is []:
                     logging.info('Portada no encontrada')
                     karma.puntos += 0.5
                 else:
@@ -152,6 +146,7 @@ class karma:
                     for p in portada:
                         if p['autor'] == autor:
                             encontrado = True
+                            break
                     # +1 por estar en portada
                     if encontrado:
                         karma.puntos += 1
@@ -161,7 +156,7 @@ class karma:
                 continuar = False
             
             if karma.iterador == 5 and continuar:
-                resp = memcache.get('ultimas-respuestas')
+                resp = self.sc.get_ultimas_respuestas()
                 if resp is None:
                     logging.info('Ultimas respuestas no encontradas')
                     karma.puntos += 0.5
@@ -170,6 +165,7 @@ class karma:
                     for r in resp:
                         if r.autor == autor:
                             encontrado = True
+                            break
                     # +1 por estar en las últimas respuestas
                     if encontrado:
                         karma.puntos += 1
@@ -179,8 +175,8 @@ class karma:
                 continuar = False
             
             if karma.iterador == 6 and continuar:
-                populares = memcache.get('populares')
-                if populares is None:
+                populares = self.sc.get_populares()
+                if populares is []:
                     logging.info('Populares no encontradas')
                     karma.puntos += 0.5
                 else:
@@ -188,9 +184,12 @@ class karma:
                     for p in populares:
                         if p['autor'] == autor:
                             encontrado = True
+                            break
                     # +1 por estar en populares
                     if encontrado:
                         karma.puntos += 1
+                if karma.puntos > 20:
+                    karma.puntos = 20.0
                 karma.iterador += 1
                 logging.info("Actualizado el karma del usuario " + str(autor) + ' en base a populares')
                 logging.info("Karma: " + str(karma.puntos))
@@ -211,19 +210,28 @@ class karma:
         # elegimos aleatoriamente una tabla
         eleccion = random.randint(0, 3)
         if eleccion == 0:
-            seleccion = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
+            seleccion = db.GqlQuery("SELECT * FROM Enlace WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(10)
         elif eleccion == 1:
-            seleccion = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
+            seleccion = db.GqlQuery("SELECT * FROM Comentario WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(10)
         elif eleccion == 2:
-            seleccion = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
+            seleccion = db.GqlQuery("SELECT * FROM Pregunta WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(10)
         else:
-            seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(20)
+            seleccion = db.GqlQuery("SELECT * FROM Respuesta WHERE autor = :1 AND puntos != :2", autor, puntos).fetch(10)
         try:
             # modificamos cada registro
             if seleccion:
                 for ele in seleccion:
-                    ele.puntos = puntos
-                    ele.put()
+                    try:
+                        ele.puntos = puntos
+                        ele.put()
+                        if eleccion == 0:
+                            self.sc.borrar_cache_enlace( str(ele.key()) )
+                        elif eleccion == 2:
+                            self.sc.borrar_cache_pregunta( str(ele.key()) )
+                        else:
+                            ele.borrar_cache()
+                    except:
+                        logging.warning('Imposible actualizar el karma del usuario para el elemento seleccionado!')
                 logging.info("Actualizado el karma del usuario " + str(autor))
             else:
                 logging.info("No hay registros para actualizar (tabla: " + str(eleccion) + ")")

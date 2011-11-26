@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-        <title>UbuntuFAQ respuestas</title>
-        <description>Sitio web de preguntas y respuestas rapidas sobre ubuntu.</description>
-        <link>http://www.ubufaq.com</link>
+        <title>{{ title }} respuestas</title>
+        <description>{{ description }}</description>
+        <link>{{ domain }}</link>
 {% for respuesta in respuestas %}
         <item>
     {% if respuesta.autor %}
@@ -11,8 +11,8 @@
     {% else %}
             <title>{{ respuesta.fecha|date:"Y-m-d H:i" }} - anonimo responde:</title>
     {% endif %}
-            <link>http://www.ubufaq.com/question/{{ respuesta.id_pregunta }}#{{ respuesta.key }}</link>
-            <guid>http://www.ubufaq.com/question/{{ respuesta.id_pregunta }}#{{ respuesta.key }}</guid>
+            <link>{{ domain }}{{ respuesta.get_link }}</link>
+            <guid>{{ domain }}{{ respuesta.get_link }}</guid>
             <pubDate>{{ respuesta.fecha|date:"r" }}</pubDate>
             <description>{{ respuesta.contenido|safe|truncatewords:50 }}</description>
         </item>
@@ -24,8 +24,8 @@
     {% else %}
             <title>{{ coment.fecha|date:"Y-m-d H:i" }} - anonimo comenta:</title>
     {% endif %}
-            <link>http://www.ubufaq.com/story/{{ coment.id_enlace }}#{{ coment.key }}</link>
-            <guid>http://www.ubufaq.com/story/{{ coment.id_enlace }}#{{ coment.key }}</guid>
+            <link>{{ domain }}{{ coment.get_link }}</link>
+            <guid>{{ domain }}{{ coment.get_link }}</guid>
             <pubDate>{{ coment.fecha|date:"r" }}</pubDate>
             <description>{{ coment.contenido|safe|truncatewords:50 }}</description>
         </item>
